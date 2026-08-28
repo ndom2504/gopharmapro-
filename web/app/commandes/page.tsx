@@ -34,7 +34,10 @@ export default function CommandesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-ink">Mes commandes</h1>
-          <p className="mt-1 text-sm text-muted">{displayName(session)} {isClient(session) ? session.lastName : ''}</p>
+          <p className="mt-1 text-sm text-muted">
+            {displayName(session)} {isClient(session) ? session.lastName : ''}
+            {isClient(session) && (session.provider === 'google' || session.googleId) ? ' · Google' : ''}
+          </p>
         </div>
         <button type="button" className="btn-secondary !h-10 text-sm" onClick={logout}>
           Déconnexion

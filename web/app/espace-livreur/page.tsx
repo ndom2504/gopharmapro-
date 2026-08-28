@@ -61,6 +61,9 @@ function CourierHome() {
           </p>
         ) : null}
         {session.payoutPhone ? <p className="text-sm text-muted">Gains : {session.payoutPhone}</p> : null}
+        {session.provider === 'google' || session.googleId ? (
+          <p className="mt-3 text-sm font-bold text-muted">Connecté avec Google</p>
+        ) : null}
         {session.documents.length ? (
           <p className="mt-3 text-sm text-muted">
             {verifiedDocs}/{required.length} documents vérifiés

@@ -4,7 +4,9 @@ import { Suspense, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
+import { GoogleButton } from '@/components/GoogleButton';
 import { displayName, homeFor, type UserRole } from '@/lib/accounts';
+import type { GoogleProfile } from '@/lib/google';
 
 const roles: { id: UserRole; label: string }[] = [
   { id: 'client', label: 'Client' },
@@ -36,7 +38,7 @@ function parseRole(value: string | null): UserRole {
 }
 
 function ConnexionInner() {
-  const { login, register, registerPharmacy, registerCourier, session, logout } = useShop();
+  const { login, register, registerPharmacy, registerCourier, loginWithGoogle, session, logout } = useShop();
   const router = useRouter();
   const params = useSearchParams();
   const [tab, setTab] = useState<UserRole>(parseRole(params.get('role')));
@@ -70,6 +72,22 @@ function ConnexionInner() {
     router.refresh();
   };
 
+  const onGoogle = (profile: GoogleProfile) => {
+    if (tab !== 'client' && tab !== 'courier') return;
+    const result = loginWithGoogle(profile, tab);
+    if (result === 'conflict') {
+      setError('Cet e-mail Google est déjà utilisé par un autre type de compte.');
+      return;
+    }
+    if (result !== 'ok') {
+      setError('Connexion Google impossible.');
+      return;
+    }
+    go(tab === 'client' ? destination : homeFor(tab));
+  };
+
+  const googleOk = tab === 'client' || tab === 'courier';
+
   if (session) {
         const href = session.role === 'client' ? '/commandes' : homeFor(session.role);
         return (
@@ -79,6 +97,9 @@ function ConnexionInner() {
             </p>
             <h1 className="mt-2 text-3xl font-extrabold text-ink">Bonjour {displayName(session)}</h1>
             <p className="mt-2 text-sm text-muted">{session.email}</p>
+        {(session.role === 'client' || session.role === 'courier') && (session.provider === 'google' || session.googleId) ? (
+          <p className="mt-2 text-sm font-bold text-muted">Connecté avec Google</p>
+        ) : null}
             <div className="mt-8 flex flex-col gap-3">
               <Link href={href} className="btn-primary">
                 {session.role === 'client' ? 'Mes commandes' : 'Ouvrir mon espace'}
@@ -123,6 +144,17 @@ function ConnexionInner() {
           </button>
         ))}
       </div>
+
+      {googleOk && mode === 'register' ? (
+        <div className="mt-8 space-y-4">
+          <GoogleButton
+            label="S’inscrire avec Google"
+            onProfile={onGoogle}
+            onError={(message) => message && setError(message)}
+          />
+          <p className="text-center text-sm font-extrabold text-muted">ou</p>
+        </div>
+      ) : null}
 
       <form
         className="mt-8 space-y-4"
@@ -251,6 +283,12 @@ function ConnexionInner() {
             : 'J’ai déjà un compte'}
         </button>
       </form>
+      {googleOk && mode === 'login' ? (
+        <div className="mt-6 space-y-4">
+          <p className="text-center text-sm font-extrabold text-muted">ou</p>
+          <GoogleButton onProfile={onGoogle} onError={(message) => message && setError(message)} />
+        </div>
+      ) : null}
     </main>
   );
 }

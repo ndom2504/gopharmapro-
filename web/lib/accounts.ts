@@ -11,6 +11,8 @@ export type PartnerDoc = {
   status: DocStatus;
 };
 
+export type AuthProvider = 'password' | 'google';
+
 export type ClientAccount = {
   role: 'client';
   id: string;
@@ -19,6 +21,8 @@ export type ClientAccount = {
   phone: string;
   email: string;
   password: string;
+  provider?: AuthProvider;
+  googleId?: string;
 };
 
 export type PharmacyAccount = {
@@ -56,6 +60,8 @@ export type CourierAccount = {
   payoutPhone: string;
   status: CourierStatus;
   documents: PartnerDoc[];
+  provider?: AuthProvider;
+  googleId?: string;
 };
 
 export type StoredAccount = ClientAccount | PharmacyAccount | CourierAccount;
@@ -84,6 +90,7 @@ export const accountSeed: StoredAccount[] = [
     phone: '+241 77 00 00 00',
     email: 'awa@pharmamarket.ga',
     password: 'demo123',
+    provider: 'password',
   },
   {
     role: 'pharmacy',
@@ -137,6 +144,7 @@ export const accountSeed: StoredAccount[] = [
     payoutPhone: '+241 66 00 00 00',
     status: 'active',
     documents: courierDocs('verified'),
+    provider: 'password',
   },
   {
     role: 'courier',
@@ -154,6 +162,7 @@ export const accountSeed: StoredAccount[] = [
     payoutPhone: '+241 66 11 22 33',
     status: 'pending',
     documents: courierDocs('pending'),
+    provider: 'password',
   },
 ];
 

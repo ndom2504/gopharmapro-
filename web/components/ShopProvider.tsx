@@ -14,6 +14,7 @@ import {
   type StoredAccount,
   type UserRole,
 } from '@/lib/accounts';
+import type { GoogleProfile, GoogleRole } from '@/lib/google';
 
 export type CartLine = { product: Product; offer: Offer; quantity: number };
 
@@ -36,6 +37,7 @@ type ShopCtx = {
   register: (input: { firstName: string; lastName: string; email: string; phone: string; password: string }) => 'ok' | 'exists';
   registerPharmacy: (input: PharmacyRegisterInput) => 'ok' | 'exists';
   registerCourier: (input: CourierRegisterInput) => 'ok' | 'exists';
+  loginWithGoogle: (profile: GoogleProfile, role: GoogleRole) => 'ok' | 'conflict' | 'error';
   logout: () => void;
   add: (product: Product, offer: Offer) => 'added' | 'different-pharmacy' | 'partner';
   change: (offerId: string, delta: number) => void;
@@ -124,6 +126,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         const user = users.find(
           (u) =>
             u.role === role &&
+            !!u.password &&
             u.password === password &&
             (u.email.toLowerCase() === id || (phone.length >= 7 && digits(u.phone) === phone)),
         );
@@ -150,6 +153,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           email,
           phone: input.phone.trim(),
           password: input.password,
+          provider: 'password',
         };
         persistUsers([user, ...users]);
         persistSession(stripPassword(user));
@@ -215,7 +219,66 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           payoutPhone: input.phone.trim(),
           status: 'pending',
           documents: courierDocs('pending', false),
+          provider: 'password',
         };
+        persistUsers([user, ...users]);
+        persistSession(stripPassword(user));
+        return 'ok';
+      },
+      loginWithGoogle: (profile, role) => {
+        if (!profile.email) return 'error';
+        const email = profile.email.toLowerCase();
+        if (users.some((u) => u.email && u.email.toLowerCase() === email && u.role !== role)) return 'conflict';
+        const existing = users.find((u) => {
+          if (u.role !== role) return false;
+          if (u.email.toLowerCase() === email) return true;
+          return (u.role === 'client' || u.role === 'courier') && u.googleId && u.googleId === profile.googleId;
+        });
+        if (existing && (existing.role === 'client' || existing.role === 'courier')) {
+          const updated: StoredAccount = {
+            ...existing,
+            googleId: profile.googleId || existing.googleId,
+            firstName: existing.firstName || profile.firstName,
+            lastName: existing.lastName || profile.lastName,
+            email: existing.email || email,
+            provider: existing.provider || 'google',
+          };
+          persistUsers(users.map((u) => (u.id === existing.id ? updated : u)));
+          persistSession(stripPassword(updated));
+          return 'ok';
+        }
+        const user: StoredAccount =
+          role === 'courier'
+            ? {
+                role: 'courier',
+                id: 'd-google-' + (profile.googleId || Date.now()),
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                phone: '',
+                email,
+                password: '',
+                vehicle: 'moto',
+                plate: '',
+                area: '',
+                city: 'Libreville',
+                province: 'Estuaire',
+                payoutPhone: '',
+                status: 'pending',
+                documents: courierDocs('pending', false),
+                provider: 'google',
+                googleId: profile.googleId,
+              }
+            : {
+                role: 'client',
+                id: 'c-google-' + (profile.googleId || Date.now()),
+                firstName: profile.firstName,
+                lastName: profile.lastName,
+                phone: '',
+                email,
+                password: '',
+                provider: 'google',
+                googleId: profile.googleId,
+              };
         persistUsers([user, ...users]);
         persistSession(stripPassword(user));
         return 'ok';
