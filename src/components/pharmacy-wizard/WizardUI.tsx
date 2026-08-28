@@ -7,21 +7,23 @@ import { Button } from '../UI';
 
 export function StepHeader({
   step,
+  total = 6,
   title,
   subtitle,
 }: {
   step: number;
+  total?: number;
   title: string;
   subtitle: string;
 }) {
   return (
     <View style={{ marginBottom: 18 }}>
       <View style={s.dots}>
-        {[1, 2, 3, 4, 5, 6].map((n) => (
+        {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
           <View key={n} style={[s.dot, n <= step && s.dotOn, n === step && s.dotNow]} />
         ))}
       </View>
-      <Text style={s.stepNo}>0{step} — {step}/6</Text>
+      <Text style={s.stepNo}>0{step} — {step}/{total}</Text>
       <Text style={s.title}>{title}</Text>
       <Text style={s.sub}>{subtitle}</Text>
     </View>

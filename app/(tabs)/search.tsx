@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Badge, Card, SearchBox, ScreenTitle } from '../../src/components/UI';
+import { ProductImage } from '../../src/components/ProductImage';
 import { LocationBar } from '../../src/components/LocationBar';
 import { colors } from '../../src/theme';
 import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
@@ -44,20 +45,25 @@ export default function Search() {
         <Pressable key={o.id} onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id } })}>
           <Card style={{ marginBottom: 12 }}>
             <View style={s.row}>
+              <ProductImage uris={p.imageUris} imageKey={p.imageKey || p.id} category={p.category} size="thumb" />
               <View style={{ flex: 1 }}>
-                <Text style={s.name}>{p.name}</Text>
-                <Text style={s.pharmacy}>{o.pharmacy.name}</Text>
+                <View style={s.row}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.name}>{p.name}</Text>
+                    <Text style={s.pharmacy}>{o.pharmacy.name}</Text>
+                  </View>
+                  {p.requiresPrescription ? <Badge text="Ordonnance" tone="red" /> : <Badge text="Disponible" />}
+                </View>
+                <View style={[s.row, { marginTop: 14 }]}>
+                  <View>
+                    <Text style={s.price}>{o.price.toLocaleString('fr-FR')} FCFA</Text>
+                    <Text style={s.meta}>
+                      Stock {o.stock} · {formatKm(o.pharmacy.distance)}
+                    </Text>
+                  </View>
+                  <Text style={s.command}>Commander ›</Text>
+                </View>
               </View>
-              {p.requiresPrescription ? <Badge text="Ordonnance" tone="red" /> : <Badge text="Disponible" />}
-            </View>
-            <View style={[s.row, { marginTop: 14 }]}>
-              <View>
-                <Text style={s.price}>{o.price.toLocaleString('fr-FR')} FCFA</Text>
-                <Text style={s.meta}>
-                  Stock {o.stock} · {formatKm(o.pharmacy.distance)}
-                </Text>
-              </View>
-              <Text style={s.command}>Commander ›</Text>
             </View>
           </Card>
         </Pressable>
@@ -80,7 +86,7 @@ const s = StyleSheet.create({
   chipText: { color: colors.text, fontWeight: '700' },
   activeText: { color: '#fff', fontWeight: '800' },
   count: { color: colors.muted, marginBottom: 12 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
   name: { fontSize: 16, fontWeight: '800', color: colors.text },
   pharmacy: { marginTop: 5, color: colors.muted },
   price: { fontSize: 18, fontWeight: '900', color: colors.primary },

@@ -1,6 +1,6 @@
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme';
-import { GoogleProfile, isGoogleConfigured } from '../lib/google';
+import { GoogleProfile, getGoogleClientIds, isGoogleConfigured } from '../lib/google';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
 
 function GoogleLook({ busy, label, onPress }: { busy: boolean; label: string; onPress: () => void }) {
@@ -32,7 +32,9 @@ export function GoogleButton({
   onProfile: (profile: GoogleProfile) => void;
   label?: string;
 }) {
-  if (!isGoogleConfigured()) {
+  const ids = getGoogleClientIds();
+  const ready = isGoogleConfigured() && Boolean(ids.webClientId || ids.androidClientId || ids.iosClientId);
+  if (!ready) {
     return (
       <GoogleLook
         busy={false}
@@ -40,7 +42,7 @@ export function GoogleButton({
         onPress={() =>
           Alert.alert(
             'Configurer Google',
-            'Créez un identifiant OAuth de type Web dans Google Cloud Console, copiez le Client ID dans .env (EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID), puis relancez Expo. URI autorisées : pharmarket:// et https://auth.expo.io/@votre-compte/pharmarket-mobile',
+            'Le Client ID Web n’est pas chargé. Arrêtez Expo, relancez npx expo start --clear, puis réessayez.',
           )
         }
       />

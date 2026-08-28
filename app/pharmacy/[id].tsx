@@ -2,6 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { pharmacies } from '../../src/data/mock';
 import { Badge, Card } from '../../src/components/UI';
+import { ProductImage } from '../../src/components/ProductImage';
 import { colors } from '../../src/theme';
 import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
 import { formatKm, locatePharmacy } from '../../src/lib/geo';
@@ -36,7 +37,8 @@ export default function Pharmacy() {
         <Pressable key={o.id} onPress={() => router.push({ pathname: '/product/[id]', params: { id: product.id } })}>
           <Card style={{ marginBottom: 12 }}>
             <View style={s.row}>
-              <View>
+              <ProductImage uris={product.imageUris} imageKey={product.imageKey || product.id} category={product.category} size="thumb" />
+              <View style={{ flex: 1 }}>
                 <Text style={s.name}>{product.name}</Text>
                 <Text style={s.meta}>Stock {o.stock}</Text>
               </View>

@@ -46,10 +46,25 @@ export const paymentMethods: PaymentMethod[] = [
     background: '#E8F4FC',
     hint: 'Validez le paiement Moov Money avec votre code PIN.',
   },
+  {
+    id: 'card',
+    name: 'Carte bancaire',
+    short: 'CB',
+    operator: 'Visa · Mastercard',
+    ussd: '',
+    prefixes: [],
+    color: '#635BFF',
+    background: '#EEF0FF',
+    hint: 'Paiement sécurisé par Stripe. En test, utilisez 4242 4242 4242 4242.',
+  },
 ];
 
-export function getPaymentMethod(id: PaymentMethodId) {
-  return paymentMethods.find((m) => m.id === id)!;
+export function getPaymentMethod(id: string) {
+  return paymentMethods.find((m) => m.id === id) || paymentMethods[0];
+}
+
+export function isCardPayment(id: string) {
+  return id === 'card';
 }
 
 /** Normalise un numéro gabonais vers +241 XX XX XX XX */

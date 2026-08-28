@@ -1,13 +1,11 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../src/theme';
 import { useAuth } from '../../src/store/auth';
-import { GoogleButton } from '../../src/components/GoogleButton';
 
 export default function AuthWelcome() {
   const continueAsGuest = useAuth((s) => s.continueAsGuest);
-  const loginWithGoogle = useAuth((s) => s.loginWithGoogle);
   const browse = () => {
     continueAsGuest();
     router.replace('/(tabs)');
@@ -18,27 +16,10 @@ export default function AuthWelcome() {
         <View style={s.logo}>
           <Text style={{ fontSize: 36 }}>💊</Text>
         </View>
-        <Text style={s.brand}>PharmaMarket</Text>
+        <Text style={s.brand}>Go Pharma Pro</Text>
         <Text style={s.tag}>Médicaments et parapharmacie, livrés au Gabon.</Text>
       </View>
-      <Text style={s.ask}>Comment souhaitez-vous continuer ?</Text>
-      <View style={{ marginBottom: 16 }}>
-        <GoogleButton
-          label="Continuer avec Google"
-          onProfile={(profile) => {
-            const result = loginWithGoogle(profile);
-            if (result === 'pharmacy') {
-              Alert.alert('Compte pharmacie', 'Cet e-mail Google est déjà lié à un compte pharmacie. Connectez-vous avec e-mail et mot de passe.');
-              return;
-            }
-            if (result !== 'ok') {
-              Alert.alert('Google', 'Connexion Google impossible.');
-              return;
-            }
-            router.replace('/(tabs)');
-          }}
-        />
-      </View>
+      <Text style={s.ask}>Quel est votre profil ?</Text>
       <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'client' } })} style={s.card}>
         <View style={s.icon}>
           <Ionicons name="person" size={22} color={colors.primary} />
@@ -46,6 +27,16 @@ export default function AuthWelcome() {
         <View style={{ flex: 1 }}>
           <Text style={s.cardTitle}>Je suis un client</Text>
           <Text style={s.cardMeta}>Commander, comparer les pharmacies et payer en mobile money.</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+      </Pressable>
+      <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'courier' } })} style={s.card}>
+        <View style={s.icon}>
+          <Ionicons name="bicycle" size={22} color={colors.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.cardTitle}>Je suis un livreur</Text>
+          <Text style={s.cardMeta}>Récupérer les commandes et les livrer aux clients.</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.muted} />
       </Pressable>
@@ -59,6 +50,16 @@ export default function AuthWelcome() {
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.muted} />
       </Pressable>
+      <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'admin' } })} style={s.card}>
+        <View style={s.icon}>
+          <Ionicons name="shield-checkmark" size={22} color={colors.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.cardTitle}>Administration</Text>
+          <Text style={s.cardMeta}>Valider les pharmacies, livreurs, produits et virements.</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+      </Pressable>
       <Text onPress={browse} style={s.guest}>
         Continuer en invité
       </Text>
@@ -67,8 +68,8 @@ export default function AuthWelcome() {
 }
 
 const s = StyleSheet.create({
-  page: { flex: 1, padding: 24, paddingTop: 72 },
-  hero: { alignItems: 'center', marginBottom: 36 },
+  page: { flex: 1, padding: 24, paddingTop: 64 },
+  hero: { alignItems: 'center', marginBottom: 28 },
   logo: {
     width: 78,
     height: 78,

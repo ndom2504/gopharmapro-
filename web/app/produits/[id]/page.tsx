@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { formatFcfa, getProduct, products } from '@/lib/catalog';
+import { notFound, redirect } from 'next/navigation';
+import { formatFcfa, getProduct, resolveProductId } from '@/lib/catalog';
 
-export function generateStaticParams() {
-  return products.map((p) => ({ id: p.id }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const canonical = resolveProductId(id);
+  if (canonical !== id) redirect(`/produits/${canonical}`);
   const product = getProduct(id);
   if (!product) notFound();
 
@@ -16,6 +16,9 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
       <Link href="/produits" className="text-sm font-extrabold text-brand">
         ← Produits
       </Link>
+      {product.imageSrc ? (
+        <img src={product.imageSrc} alt="" className="mt-6 h-56 w-full rounded-[18px] object-cover" />
+      ) : null}
       <div className="mt-4 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-ink">{product.name}</h1>

@@ -14,6 +14,7 @@ const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
 export default function TabsLayout() {
   const session = useAuth((s) => s.session);
   if (session?.role === 'pharmacy') return <Redirect href="/pharmacy-home" />;
+  if (session?.role === 'courier') return <Redirect href="/courier-home" />;
   return (
     <Tabs
       screenOptions={({ route }) => ({

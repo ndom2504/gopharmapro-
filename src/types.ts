@@ -27,15 +27,19 @@ export type Product = {
   description: string;
   requiresPrescription: boolean;
   offers: Offer[];
+  imageUris?: string[];
+  imageKey?: string;
 };
 
 export type CartItem = { product: Product; offer: Offer; quantity: number };
 
-export type PaymentMethodId = 'mobicash' | 'airtel-money' | 'moov-money';
+export type PaymentMethodId = 'mobicash' | 'airtel-money' | 'moov-money' | 'card';
 
 export type PaymentStatus = 'pending' | 'paid' | 'failed';
 
-export type OrderStatus = 'paid' | 'preparing' | 'ready' | 'delivered';
+export type OrderStatus = 'paid' | 'preparing' | 'ready' | 'picked_up' | 'delivered';
+
+export type Fulfillment = 'pickup' | 'delivery';
 
 export type OrderPayment = {
   method: PaymentMethodId;
@@ -45,21 +49,50 @@ export type OrderPayment = {
   reference: string;
 };
 
+/** Répartition après encaissement par Go Pharma Pro. */
+export type PaymentSplit = {
+  subtotal: number;
+  deliveryFee: number;
+  pharmacyNet: number;
+  courierNet: number;
+  platformFee: number;
+};
+
 export type Order = {
   id: string;
   items: CartItem[];
+  pharmacyId: string;
+  pharmacyAccountId: string;
   pharmacyName: string;
+  fulfillment: Fulfillment;
+  courierId?: string;
+  pickupCode: string;
+  deliveryCode?: string;
+  pickupAttempts: number;
+  deliveryAttempts: number;
+  pickedUpAt?: string;
+  deliveredAt?: string;
   eta: string;
   subtotal: number;
   fee: number;
   total: number;
+  split: PaymentSplit;
   payment: OrderPayment;
   deliveryAddress: string;
   status: OrderStatus;
   createdAt: string;
 };
 
-export type UserRole = 'client' | 'pharmacy';
+export type UserRole = 'client' | 'pharmacy' | 'courier' | 'admin';
+
+export type AdminAccount = {
+  role: 'admin';
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+};
 
 export type ClientAccount = {
   role: 'client';
@@ -141,5 +174,30 @@ export type PharmacyAccount = {
   visibleOnMarketplace: boolean;
 };
 
-export type Session = ClientAccount | PharmacyAccount;
+export type CourierStatus = 'pending' | 'active' | 'suspended';
+export type CourierVehicle = 'moto' | 'voiture' | 'other';
+
+export type CourierAccount = {
+  role: 'courier';
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  provider: 'password' | 'google';
+  googleId?: string;
+  vehicle: CourierVehicle;
+  vehicleOther: string;
+  plate: string;
+  payoutPhone: string;
+  province: string;
+  city: string;
+  commune: string;
+  area: string;
+  zones: string;
+  documents: PharmacyDocument[];
+  status: CourierStatus;
+};
+
+export type Session = ClientAccount | PharmacyAccount | CourierAccount | AdminAccount;
 

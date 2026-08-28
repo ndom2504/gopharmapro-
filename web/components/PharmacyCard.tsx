@@ -14,9 +14,12 @@ export function PharmacyCard({ pharmacy }: { pharmacy: Pharmacy }) {
         ★ {pharmacy.rating} · {formatKm(pharmacy.distance)} · {pharmacy.eta}
       </p>
       <p className="mt-1 text-sm text-muted">{pharmacy.area}</p>
-      <p className="mt-3 text-sm font-semibold text-brand">
-        {pharmacy.delivery ? 'Livraison disponible' : 'Retrait uniquement'}
-      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {pharmacy.verified ? <span className="badge-green">Vérifiée</span> : null}
+        <p className="text-sm font-semibold text-brand">
+          {pharmacy.delivery ? 'Livraison disponible' : 'Retrait uniquement'}
+        </p>
+      </div>
     </Link>
   );
 }

@@ -19,7 +19,7 @@ export function Field({
   onChange: (v: string) => void;
   placeholder?: string;
   error?: string;
-  keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'url';
+  keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'url' | 'number-pad' | 'decimal-pad';
   secure?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }) {

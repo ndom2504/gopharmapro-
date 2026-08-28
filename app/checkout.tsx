@@ -10,12 +10,14 @@ import {
   View,
 } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Button, Card } from '../src/components/UI';
+import { ProductImage } from '../src/components/ProductImage';
 import { LocationBar } from '../src/components/LocationBar';
 import { useCart } from '../src/store/cart';
 import { colors } from '../src/theme';
-import { PaymentMethodId } from '../src/types';
-import { formatPhoneInput, parseGabonPhone, paymentMethods, suggestPaymentMethod } from '../src/data/payments';
+import { Fulfillment, PaymentMethodId } from '../src/types';
+import { formatPhoneInput, isCardPayment, parseGabonPhone, paymentMethods, suggestPaymentMethod } from '../src/data/payments';
 import { useGeoCatalog } from '../src/hooks/useGeoCatalog';
 import { formatKm, locatePharmacy } from '../src/lib/geo';
 
@@ -24,15 +26,19 @@ export default function Checkout() {
   const change = useCart((s) => s.change);
   const remove = useCart((s) => s.remove);
   const subtotal = items.reduce((a, i) => a + i.offer.price * i.quantity, 0);
-  const fee = items[0]?.offer.pharmacy.fee || 0;
-  const total = subtotal + fee;
   const rx = items.some((i) => i.product.requiresPrescription);
   const [method, setMethod] = useState<PaymentMethodId | null>(null);
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [picked, setPicked] = useState(false);
+  const [fulfillment, setFulfillment] = useState<Fulfillment>('pickup');
   const { status, address, outsideGabon, refresh, coords } = useGeoCatalog();
   const pharmacy = items[0] ? locatePharmacy(items[0].offer.pharmacy, coords) : null;
+  const canPickup = pharmacy?.pickup !== false;
+  const canDelivery = !!pharmacy?.delivery;
+  const mode: Fulfillment = !canPickup && canDelivery ? 'delivery' : !canDelivery ? 'pickup' : fulfillment;
+  const fee = mode === 'delivery' ? items[0]?.offer.pharmacy.fee || 0 : 0;
+  const total = subtotal + fee;
 
   const onPhone = (value: string) => {
     const next = formatPhoneInput(value);
@@ -44,7 +50,14 @@ export default function Checkout() {
 
   const pay = () => {
     if (!method) {
-      setPhoneError('Choisissez MobiCash, Airtel Money ou Moov Money.');
+      setPhoneError('Choisissez un moyen de paiement.');
+      return;
+    }
+    if (isCardPayment(method)) {
+      router.push({
+        pathname: '/pay-card',
+        params: { total: String(total), fulfillment: mode },
+      });
       return;
     }
     const parsed = parseGabonPhone(phone);
@@ -54,7 +67,7 @@ export default function Checkout() {
     }
     router.push({
       pathname: '/pay',
-      params: { method, phone: parsed.display, total: String(total) },
+      params: { method, phone: parsed.display, total: String(total), fulfillment: mode },
     });
   };
 
@@ -79,13 +92,37 @@ export default function Checkout() {
           <LocationBar status={status} address={address} outsideGabon={outsideGabon} onPress={refresh} />
         </View>
         <Card style={{ marginTop: 8 }}>
-          <Text style={s.name}>Livraison</Text>
-          <Text style={s.meta}>{address || 'Activez la localisation pour préremplir l’adresse de livraison.'}</Text>
-          {pharmacy?.area ? <Text style={s.meta}>Pharmacie : {pharmacy.area}</Text> : null}
+          <Text style={s.name}>Mode de réception</Text>
+          <Text style={s.meta}>Le livreur est optionnel. Choisissez le retrait ou la livraison.</Text>
+          <View style={s.modes}>
+            {canPickup ? (
+              <Pressable onPress={() => setFulfillment('pickup')} style={[s.mode, mode === 'pickup' && s.modeOn]}>
+                <Ionicons name="storefront-outline" size={22} color={mode === 'pickup' ? colors.primary : colors.muted} />
+                <Text style={[s.modeTitle, mode === 'pickup' && { color: colors.primary }]}>Retrait</Text>
+                <Text style={s.modeMeta}>Vous venez en pharmacie. Un code au comptoir, sans livreur.</Text>
+              </Pressable>
+            ) : null}
+            {canDelivery ? (
+              <Pressable onPress={() => setFulfillment('delivery')} style={[s.mode, mode === 'delivery' && s.modeOn]}>
+                <Ionicons name="bicycle-outline" size={22} color={mode === 'delivery' ? colors.primary : colors.muted} />
+                <Text style={[s.modeTitle, mode === 'delivery' && { color: colors.primary }]}>Livraison</Text>
+                <Text style={s.modeMeta}>Un livreur ramasse avec un code, puis vous lui donnez le vôtre.</Text>
+              </Pressable>
+            ) : null}
+          </View>
+          {mode === 'delivery' ? (
+            <>
+              <Text style={[s.meta, { marginTop: 10 }]}>{address || 'Activez la localisation pour l’adresse de livraison.'}</Text>
+              {pharmacy?.area ? <Text style={s.meta}>Pharmacie : {pharmacy.area}</Text> : null}
+            </>
+          ) : (
+            <Text style={[s.meta, { marginTop: 10 }]}>Retrait à {pharmacy?.name}{pharmacy?.area ? ' · ' + pharmacy.area : ''}.</Text>
+          )}
         </Card>
         {items.map((i) => (
           <Card key={i.offer.id} style={{ marginTop: 13 }}>
             <View style={s.row}>
+              <ProductImage uris={i.product.imageUris} imageKey={i.product.imageKey || i.product.id} category={i.product.category} size="thumb" />
               <View style={{ flex: 1 }}>
                 <Text style={s.name}>{i.product.name}</Text>
                 <Text style={s.meta}>{i.offer.price.toLocaleString('fr-FR')} FCFA / unité</Text>
@@ -120,7 +157,7 @@ export default function Checkout() {
             <Text>{subtotal.toLocaleString('fr-FR')} FCFA</Text>
           </View>
           <View style={s.row}>
-            <Text>Livraison</Text>
+            <Text>{mode === 'delivery' ? 'Livraison' : 'Retrait'}</Text>
             <Text>{fee.toLocaleString('fr-FR')} FCFA</Text>
           </View>
           <View style={[s.row, { marginTop: 12 }]}>
@@ -128,8 +165,10 @@ export default function Checkout() {
             <Text style={s.total}>{total.toLocaleString('fr-FR')} FCFA</Text>
           </View>
         </Card>
-        <Text style={s.section}>Paiement mobile — Gabon</Text>
-        <Text style={s.meta}>Payez par MobiCash, Airtel Money ou Moov Money. Un message USSD sera envoyé sur votre téléphone pour valider avec votre PIN.</Text>
+        <Text style={s.section}>Paiement</Text>
+        <Text style={s.meta}>
+          Mobile money gabonais, ou carte Visa / Mastercard via Stripe. Le montant est encaissé par Go Pharma Pro.
+        </Text>
         {paymentMethods.map((m) => {
           const selected = method === m.id;
           return (
@@ -138,6 +177,7 @@ export default function Checkout() {
               onPress={() => {
                 setMethod(m.id);
                 setPicked(true);
+                if (m.id === 'card') setPhoneError('');
               }}
               style={[s.payCard, selected && { borderColor: m.color, backgroundColor: m.background }]}
             >
@@ -146,27 +186,37 @@ export default function Checkout() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={s.payName}>{m.name}</Text>
-                <Text style={s.payMeta}>
-                  {m.operator} · {m.ussd}
-                </Text>
+                <Text style={s.payMeta}>{m.ussd ? m.operator + ' · ' + m.ussd : m.operator}</Text>
               </View>
               <View style={[s.radio, selected && { borderColor: m.color, backgroundColor: m.color }]} />
             </Pressable>
           );
         })}
-        <Text style={s.label}>Numéro du compte mobile money</Text>
-        <View style={[s.phoneBox, phoneError ? { borderColor: colors.danger } : null]}>
-          <Text style={s.prefix}>+241</Text>
-          <TextInput
-            value={phone}
-            onChangeText={onPhone}
-            placeholder="77 12 34 56"
-            placeholderTextColor="#89958F"
-            keyboardType="phone-pad"
-            style={s.phoneInput}
-          />
-        </View>
-        {phoneError ? <Text style={s.error}>{phoneError}</Text> : <Text style={s.hint}>Indicatif Gabon +241 déjà inclus. Le 0 local n’est pas nécessaire.</Text>}
+        {method && !isCardPayment(method) ? (
+          <>
+            <Text style={s.label}>Numéro du compte mobile money</Text>
+            <View style={[s.phoneBox, phoneError ? { borderColor: colors.danger } : null]}>
+              <Text style={s.prefix}>+241</Text>
+              <TextInput
+                value={phone}
+                onChangeText={onPhone}
+                placeholder="77 12 34 56"
+                placeholderTextColor="#89958F"
+                keyboardType="phone-pad"
+                style={s.phoneInput}
+              />
+            </View>
+            {phoneError ? (
+              <Text style={s.error}>{phoneError}</Text>
+            ) : (
+              <Text style={s.hint}>Indicatif Gabon +241 déjà inclus. Le 0 local n’est pas nécessaire.</Text>
+            )}
+          </>
+        ) : method === 'card' ? (
+          <Text style={s.hint}>Vous serez redirigé vers Stripe, ou pourrez saisir une carte de test (4242…).</Text>
+        ) : phoneError ? (
+          <Text style={s.error}>{phoneError}</Text>
+        ) : null}
         <View style={{ marginTop: 18 }}>
           <Button
             title={rx ? 'Paiement bloqué - ordonnance à valider' : 'Payer ' + total.toLocaleString('fr-FR') + ' FCFA'}
@@ -226,4 +276,17 @@ const s = StyleSheet.create({
   phoneInput: { flex: 1, fontSize: 16, color: colors.text },
   hint: { color: colors.muted, fontSize: 12, marginTop: 8, lineHeight: 18 },
   error: { color: colors.danger, fontWeight: '700', marginTop: 8, fontSize: 13 },
+  modes: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  mode: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: 16,
+    padding: 12,
+    backgroundColor: '#fff',
+    gap: 6,
+  },
+  modeOn: { borderColor: colors.primary, backgroundColor: colors.mint },
+  modeTitle: { fontWeight: '900', color: colors.text, fontSize: 15 },
+  modeMeta: { color: colors.muted, fontSize: 12, lineHeight: 17 },
 });

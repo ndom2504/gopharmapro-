@@ -160,6 +160,38 @@ export function toPharmacyAccount(form: PharmacyForm, id: string, status: Pharma
   };
 }
 
+export function demoOwendoPharmacy(): PharmacyAccount {
+  const form = emptyPharmacyForm();
+  return toPharmacyAccount(
+    {
+      ...form,
+      pharmacyName: 'Pharmacie des Palmiers',
+      authorizationNumber: 'MS/2024/PH-092',
+      structureIdNumber: 'NIF-241088',
+      phone: '+241 77 22 33 44',
+      email: 'palmiers@pharma.ga',
+      managerFirstName: 'Léa',
+      managerLastName: 'Obiang',
+      managerPhone: '+241 77 22 33 44',
+      managerEmail: 'palmiers@pharma.ga',
+      professionalNumber: 'ONPG-2201',
+      area: 'Owendo',
+      commune: 'Owendo',
+      city: 'Libreville',
+      address: 'Route de la gare d’Owendo',
+      landmark: 'Près du marché',
+      gpsConfirmed: true,
+      documents: emptyDocuments().map((d) => ({
+        ...d,
+        fileName: d.required ? d.key + '.pdf' : undefined,
+        status: 'pending' as const,
+      })),
+    },
+    'ph-palmiers',
+    'pending',
+  );
+}
+
 export function demoCentrePharmacy(): PharmacyAccount {
   const form = emptyPharmacyForm();
   return toPharmacyAccount(

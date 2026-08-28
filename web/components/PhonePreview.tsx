@@ -1,4 +1,4 @@
-import { categories } from '@/lib/catalog';
+import { categories, paymentMethods } from '@/lib/catalog';
 
 export function PhonePreview() {
   return (
@@ -10,10 +10,15 @@ export function PhonePreview() {
       <p className="mt-5 text-sm font-extrabold text-ink">Catégories</p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         {categories.slice(0, 6).map((c) => (
-          <div key={c.name} className="rounded-2xl bg-white p-2 text-center">
-            <div className="text-lg">{c.icon}</div>
-            <p className="mt-1 text-[10px] font-bold leading-tight text-ink">{c.name}</p>
+          <div key={c.name} className="overflow-hidden rounded-2xl bg-white">
+            <img src={c.image} alt="" className="h-12 w-full object-cover" />
+            <p className="px-1 py-1.5 text-center text-[10px] font-bold leading-tight text-ink">{c.name}</p>
           </div>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-1">
+        {paymentMethods.map((m) => (
+          <span key={m.id} className="h-2 flex-1 rounded-full" style={{ background: m.color }} title={m.name} />
         ))}
       </div>
     </div>

@@ -2,6 +2,7 @@
   "expo": {
     "name": "Go Pharma Pro",
     "slug": "pharmarket-mobile",
+    "owner": "ndom2504",
     "scheme": "pharmarket",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -13,29 +14,58 @@
         {
           "locationWhenInUsePermission": "Go Pharma Pro utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Go Pharma Pro utilise vos photos pour illustrer les produits de la pharmacie.",
+          "cameraPermission": "Go Pharma Pro utilise l’appareil photo pour photographier les produits."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#087F5B",
+          "sounds": [
+            "./assets/sounds/payment.wav",
+            "./assets/sounds/payout.wav",
+            "./assets/sounds/catalog.wav"
+          ]
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "ios": {
       "bundleIdentifier": "ga.pharmamarket.app",
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Go Pharma Pro utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
+        "NSLocationWhenInUseUsageDescription": "Go Pharma Pro utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon.",
+        "NSPhotoLibraryUsageDescription": "Go Pharma Pro utilise vos photos pour illustrer les produits de la pharmacie.",
+        "NSCameraUsageDescription": "Go Pharma Pro utilise l’appareil photo pour photographier les produits."
       }
     },
     "android": {
       "package": "ga.pharmamarket.app",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS"
       ]
     },
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "googleWebClientId": "",
-      "googleIosClientId": "",
-      "googleAndroidClientId": ""
+      "googleWebClientId": "1063129391016-g4fcpv8rkm5bvpimhh2mhbbn3gg4sr0q.apps.googleusercontent.com",
+      "googleIosClientId": "1063129391016-ames824nj5ioqreoorne759egusmhidm.apps.googleusercontent.com",
+      "googleAndroidClientId": "1063129391016-u1g48s64uc0sjctrk4h1ijd43ims24jh.apps.googleusercontent.com"
     }
   }
 }

@@ -4,6 +4,7 @@ import { categories, searchProducts } from '@/lib/catalog';
 import Link from 'next/link';
 
 export const metadata = { title: 'Produits' };
+export const dynamic = 'force-dynamic';
 
 export default async function ProductsPage({
   searchParams,
@@ -16,7 +17,7 @@ export default async function ProductsPage({
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <h1 className="text-3xl font-extrabold text-ink">Rechercher un produit</h1>
-      <p className="mt-2 text-muted">Comparez les prix entre pharmacies, comme dans l’application.</p>
+      <p className="mt-2 text-muted">Les prix affichés viennent des pharmacies déjà validées par l’administration.</p>
       <div className="mt-6">
         <SearchForm defaultValue={q} />
       </div>

@@ -52,9 +52,9 @@ export default function RegisterClient() {
         <GoogleButton
           label="S’inscrire avec Google"
           onProfile={(profile) => {
-            const result = loginWithGoogle(profile);
-            if (result === 'pharmacy') {
-              Alert.alert('Compte pharmacie', 'Cet e-mail Google est déjà lié à un compte pharmacie.');
+            const result = loginWithGoogle(profile, 'client');
+            if (result === 'conflict') {
+              Alert.alert('Compte existant', 'Cet e-mail Google est déjà utilisé par une pharmacie ou un livreur.');
               return;
             }
             if (result !== 'ok') {

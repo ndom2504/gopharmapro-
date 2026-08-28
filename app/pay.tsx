@@ -3,16 +3,18 @@ import { ActivityIndicator, Linking, StyleSheet, Text, View } from 'react-native
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button, Card } from '../src/components/UI';
 import { useCart } from '../src/store/cart';
+import { settlePaidOrder } from '../src/lib/settlement';
 import { buildPayment, orderFromCart, useOrders } from '../src/store/orders';
 import { colors } from '../src/theme';
-import { PaymentMethodId } from '../src/types';
+import { Fulfillment, PaymentMethodId } from '../src/types';
 import { getPaymentMethod } from '../src/data/payments';
 import { useLocation } from '../src/store/location';
 
 export default function Pay() {
-  const params = useLocalSearchParams<{ method?: PaymentMethodId; phone?: string; total?: string }>();
+  const params = useLocalSearchParams<{ method?: PaymentMethodId; phone?: string; total?: string; fulfillment?: string }>();
   const method = getPaymentMethod((params.method as PaymentMethodId) || 'airtel-money');
   const phone = params.phone || '';
+  const fulfillment: Fulfillment = params.fulfillment === 'delivery' ? 'delivery' : 'pickup';
   const total = Number(params.total || 0);
   const items = useCart((s) => s.items);
   const clear = useCart((s) => s.clear);
@@ -29,11 +31,11 @@ export default function Pay() {
       if (done.current) return;
       done.current = true;
       const subtotal = items.reduce((a, i) => a + i.offer.price * i.quantity, 0);
-      const fee = items[0]?.offer.pharmacy.fee || 0;
-      const delivery = useLocation.getState().address || 'Adresse à confirmer · Gabon';
+      const address = useLocation.getState().address || 'Adresse à confirmer · Gabon';
       const order = addOrder(
-        orderFromCart(items, buildPayment(method.name, method.id, phone), subtotal, fee, delivery),
+        orderFromCart(items, buildPayment(method.name, method.id, phone), subtotal, address, fulfillment),
       );
+      settlePaidOrder(order);
       clear();
       router.replace({ pathname: '/order/[id]', params: { id: order.id } });
     }, 3400);
@@ -74,7 +76,7 @@ export default function Pay() {
       </Text>
       <Card style={{ marginTop: 22 }}>
         <Text style={s.amount}>{total.toLocaleString('fr-FR')} FCFA</Text>
-        <Text style={s.meta}>Marchand PharmaMarket · Gabon</Text>
+        <Text style={s.meta}>Marchand Go Pharma Pro · Gabon</Text>
         <View style={{ marginTop: 18 }}>
           {steps.map((label, i) => (
             <View key={label} style={s.step}>

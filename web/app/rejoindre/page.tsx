@@ -20,8 +20,11 @@ export default function JoinPage() {
       </p>
       <h1 className="mt-4 text-3xl font-extrabold text-ink">Inscrivez votre pharmacie</h1>
       <p className="mt-3 leading-7 text-muted">
-        Même parcours que l’application {site.name} : six étapes, puis une vérification. L’officine
-        n’apparaît sur la marketplace qu’une fois le dossier validé.
+        Même parcours que l’application {site.name} : six étapes, puis une vérification dans l’espace{' '}
+        <Link href="/admin" className="font-extrabold text-brand">
+          administration
+        </Link>
+        . L’officine n’apparaît sur la marketplace qu’une fois le dossier validé.
       </p>
       <div className="mt-8 grid gap-3">
         {steps.map((s) => (

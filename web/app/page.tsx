@@ -3,10 +3,14 @@ import { PhonePreview } from '@/components/PhonePreview';
 import { PharmacyCard } from '@/components/PharmacyCard';
 import { ProductCard } from '@/components/ProductCard';
 import { SearchForm } from '@/components/SearchForm';
-import { categories, paymentMethods, pharmacies, products } from '@/lib/catalog';
+import { categories, getPublicPharmacies, getPublicProducts, paymentMethods } from '@/lib/catalog';
 import { site } from '@/lib/site';
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
+  const pharmacies = getPublicPharmacies();
+  const products = getPublicProducts();
   return (
     <main>
       <section className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:py-20">
@@ -19,8 +23,8 @@ export default function Home() {
             <span className="text-brand">livrés près de chez vous.</span>
           </h1>
           <p className="mt-4 max-w-lg text-base leading-7 text-muted">
-            Comparez les pharmacies, commandez vos produits et payez en MobiCash, Airtel Money ou
-            Moov Money — comme sur l’application {site.name}.
+            Comparez les pharmacies vérifiées, commandez vos produits et payez en MobiCash, Airtel Money, Moov Money
+            ou par carte bancaire — comme sur l’application {site.name}.
           </p>
           <div className="mt-8">
             <SearchForm />
@@ -44,10 +48,10 @@ export default function Home() {
             <Link
               key={c.name}
               href={`/produits?q=${encodeURIComponent(c.name)}`}
-              className="card flex min-h-[100px] flex-col items-start justify-center gap-2 p-4"
+              className="card overflow-hidden p-0"
             >
-              <span className="text-2xl">{c.icon}</span>
-              <span className="font-extrabold text-ink">{c.name}</span>
+              <img src={c.image} alt="" className="h-24 w-full object-cover" />
+              <span className="block p-3 font-extrabold text-ink">{c.name}</span>
             </Link>
           ))}
         </div>
@@ -55,7 +59,7 @@ export default function Home() {
 
       <section className="mx-auto mt-14 max-w-6xl px-4 sm:px-6">
         <div className="flex items-end justify-between">
-          <h2 className="text-[19px] font-extrabold text-ink">Pharmacies près de vous</h2>
+          <h2 className="text-[19px] font-extrabold text-ink">Pharmacies vérifiées</h2>
           <Link href="/pharmacies" className="text-sm font-extrabold text-brand">
             Voir tout
           </Link>
@@ -77,9 +81,12 @@ export default function Home() {
       </section>
 
       <section className="mx-auto mt-14 mb-20 max-w-6xl px-4 sm:px-6">
-        <h2 className="text-[19px] font-extrabold text-ink">Paiement mobile</h2>
-        <p className="mt-2 text-sm text-muted">MobiCash, Airtel Money et Moov Money sont disponibles au Gabon.</p>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <h2 className="text-[19px] font-extrabold text-ink">Paiement</h2>
+        <p className="mt-2 text-sm text-muted">
+          MobiCash, Airtel Money, Moov Money et carte Visa / Mastercard (Stripe). Encaissement par {site.name}, puis
+          virement à l’officine et au livreur.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {paymentMethods.map((m) => (
             <div key={m.id} className="card flex items-center gap-3 p-5" style={{ background: m.background }}>
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
@@ -87,7 +94,7 @@ export default function Home() {
                 <p className="font-extrabold text-ink">{m.name}</p>
                 <p className="text-sm text-muted">{m.operator}</p>
               </div>
-              <span className="font-bold text-muted">{m.ussd}</span>
+              {m.ussd ? <span className="font-bold text-muted">{m.ussd}</span> : null}
             </div>
           ))}
         </div>

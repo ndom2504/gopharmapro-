@@ -1,6 +1,7 @@
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Badge, Button, Card } from '../../src/components/UI';
+import { ProductImage } from '../../src/components/ProductImage';
 import { useCart } from '../../src/store/cart';
 import { colors } from '../../src/theme';
 import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
@@ -18,11 +19,17 @@ export default function Product() {
       : router.push('/checkout');
   };
   const offers = [...p.offers].sort((a, b) => a.pharmacy.distance - b.pharmacy.distance);
+  const photos = p.imageUris?.filter(Boolean) || [];
   return (
     <ScrollView contentContainerStyle={s.page}>
-      <View style={s.visual}>
-        <Text style={{ fontSize: 68 }}>💊</Text>
-      </View>
+      <ProductImage uris={photos} imageKey={p.imageKey || p.id} category={p.category} size="hero" />
+      {photos.length > 1 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.thumbs}>
+          {photos.map((uri) => (
+            <Image key={uri} source={{ uri }} style={s.thumb} />
+          ))}
+        </ScrollView>
+      ) : null}
       <View style={s.row}>
         <View style={{ flex: 1 }}>
           <Text style={s.title}>{p.name}</Text>
@@ -64,6 +71,8 @@ export default function Product() {
 const s = StyleSheet.create({
   page: { padding: 20, paddingBottom: 50 },
   visual: { height: 180, borderRadius: 24, backgroundColor: colors.mint, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  thumbs: { gap: 8, marginTop: 10, marginBottom: 12 },
+  thumb: { width: 64, height: 64, borderRadius: 14, backgroundColor: colors.mint },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   title: { fontSize: 25, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },

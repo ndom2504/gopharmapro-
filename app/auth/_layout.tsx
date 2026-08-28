@@ -14,6 +14,7 @@ export default function AuthLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: 'Connexion' }} />
       <Stack.Screen name="register-client" options={{ title: 'Compte client' }} />
+      <Stack.Screen name="register-courier" options={{ title: 'Compte livreur' }} />
       <Stack.Screen name="register-pharmacy" options={{ title: 'Compte pharmacie' }} />
     </Stack>
   );

@@ -44,7 +44,7 @@ export default function Profile() {
             ? client.provider === 'google' || client.googleId
               ? 'Connecté avec Google' + (client.email ? ' · ' + client.email : '')
               : (client.phone || '') + (client.email ? (client.phone ? ' · ' : '') + client.email : '')
-            : 'Parcourez PharmaMarket sans compte.'}
+            : 'Parcourez Go Pharma Pro sans compte.'}
         </Text>
         {!client ? (
           <View style={{ marginTop: 16, gap: 10 }}>
@@ -69,14 +69,25 @@ export default function Profile() {
       </Card>
       <Card>
         {rows.map(([icon, label], i) => (
-          <View key={label} style={[s.row, i < rows.length - 1 && s.border]}>
+          <Pressable
+            key={label}
+            onPress={() => {
+              if (label === 'Notifications') router.push('/notifications');
+            }}
+            style={[s.row, i < rows.length - 1 && s.border]}
+          >
             <Ionicons name={icon} size={22} color={colors.primary} />
             <Text style={s.label}>{label}</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.muted} />
-          </View>
+          </Pressable>
         ))}
       </Card>
       <Card style={{ marginTop: 16 }}>
+        <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'courier' } })} style={[s.row, s.border]}>
+          <Ionicons name="bicycle-outline" size={22} color={colors.primary} />
+          <Text style={s.label}>Espace livreur</Text>
+          <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+        </Pressable>
         <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'pharmacy' } })} style={s.row}>
           <Ionicons name="medkit-outline" size={22} color={colors.primary} />
           <Text style={s.label}>Espace pharmacie</Text>

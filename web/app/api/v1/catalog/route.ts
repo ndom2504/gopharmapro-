@@ -1,5 +1,10 @@
-import { pharmacies, products } from '@/lib/catalog';
+import { getPublicPharmacies, getPublicProducts } from '@/lib/catalog';
+
+export const dynamic = 'force-dynamic';
 
 export function GET() {
-  return Response.json({ pharmacies, products });
+  return Response.json({
+    pharmacies: getPublicPharmacies(),
+    products: getPublicProducts(),
+  });
 }

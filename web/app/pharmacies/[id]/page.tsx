@@ -1,13 +1,17 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { formatFcfa, formatKm, getPharmacy, pharmacies, productsForPharmacy } from '@/lib/catalog';
+import { notFound, redirect } from 'next/navigation';
+import { formatFcfa, formatKm, getPharmacy, productsForPharmacy, resolvePharmacyId } from '@/lib/catalog';
 
-export function generateStaticParams() {
-  return pharmacies.map((p) => ({ id: p.id }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function PharmacyDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const canonical = resolvePharmacyId(id);
+  if (canonical !== id) {
+    const live = getPharmacy(canonical);
+    if (live) redirect(`/pharmacies/${canonical}`);
+    notFound();
+  }
   const pharmacy = getPharmacy(id);
   if (!pharmacy) notFound();
   const catalog = productsForPharmacy(pharmacy.id);
@@ -27,17 +31,24 @@ export default async function PharmacyDetail({ params }: { params: Promise<{ id:
         ★ {pharmacy.rating} · {formatKm(pharmacy.distance)} · {pharmacy.eta}
       </p>
       <p className="text-muted">{pharmacy.area}</p>
+      <div className="mt-3">
+        <span className="badge-green">Vérifiée</span>
+      </div>
       <div className="card mt-6 p-5 text-sm leading-6 text-muted">
         <p>{pharmacy.delivery ? `Livraison · frais ${formatFcfa(pharmacy.fee)}` : 'Retrait uniquement'}</p>
         <p>Retrait en officine {pharmacy.pickup ? 'disponible' : 'indisponible'}.</p>
       </div>
       <h2 className="mt-10 text-xl font-extrabold text-ink">Produits en stock</h2>
       <div className="mt-4 grid gap-3">
+        {catalog.length === 0 ? (
+          <p className="text-sm text-muted">Aucun produit publié pour le moment.</p>
+        ) : null}
         {catalog.map((p) => {
           const offer = p.offers.find((o) => o.pharmacy.id === pharmacy.id);
           return (
-            <Link key={p.id} href={`/produits/${p.id}`} className="card flex items-center justify-between p-4">
-              <div>
+            <Link key={p.id} href={`/produits/${p.id}`} className="card flex items-center gap-4 p-4">
+              {p.imageSrc ? <img src={p.imageSrc} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : null}
+              <div className="flex-1">
                 <p className="font-extrabold text-ink">{p.name}</p>
                 <p className="text-sm text-muted">{p.form}</p>
               </div>

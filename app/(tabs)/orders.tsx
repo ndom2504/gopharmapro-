@@ -4,9 +4,7 @@ import { Badge, Card, ScreenTitle, Button } from '../../src/components/UI';
 import { useOrders } from '../../src/store/orders';
 import { colors } from '../../src/theme';
 import { getPaymentMethod } from '../../src/data/payments';
-
-const statusLabel = { paid: 'Payée', preparing: 'Préparation', ready: 'Prête', delivered: 'Livrée' } as const;
-const statusTone = { paid: 'green', preparing: 'orange', ready: 'green', delivered: 'gray' } as const;
+import { orderStatusLabel, orderStatusTone } from '../../src/lib/orderStatus';
 
 export default function Orders() {
   const orders = useOrders((s) => s.orders);
@@ -19,7 +17,7 @@ export default function Orders() {
           <Card key={o.id} style={{ marginBottom: 12 }}>
             <View style={s.row}>
               <Text style={s.name}>Commande #{o.id}</Text>
-              <Badge text={statusLabel[o.status]} tone={statusTone[o.status]} />
+              <Badge text={orderStatusLabel(o)} tone={orderStatusTone(o.status)} />
             </View>
             <Text style={s.meta}>
               {o.pharmacyName} · {o.total.toLocaleString('fr-FR')} FCFA

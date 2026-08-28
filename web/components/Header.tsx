@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { site } from '@/lib/site';
 
 const links = [
@@ -8,6 +11,8 @@ const links = [
 ];
 
 export function Header() {
+  const path = usePathname();
+  if (path?.startsWith('/admin')) return null;
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">

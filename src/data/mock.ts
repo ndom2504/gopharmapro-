@@ -56,6 +56,7 @@ export const products: Product[] = [
     description:
       'Traitement symptomatique de la douleur et de la fièvre. Respectez la notice et les conseils d’un professionnel de santé.',
     requiresPrescription: false,
+    imageKey: 'paracetamol',
     offers: [
       { id: 'o1', pharmacy: pharmacies[0], price: 3500, stock: 20 },
       { id: 'o2', pharmacy: pharmacies[1], price: 3000, stock: 8 },
@@ -72,6 +73,7 @@ export const products: Product[] = [
     description:
       'Antibiotique soumis à prescription. La pharmacie doit valider l’ordonnance avant tout paiement.',
     requiresPrescription: true,
+    imageKey: 'amoxicillin',
     offers: [
       { id: 'o4', pharmacy: pharmacies[0], price: 6200, stock: 12 },
       { id: 'o5', pharmacy: pharmacies[1], price: 6500, stock: 6 },
@@ -86,6 +88,7 @@ export const products: Product[] = [
     category: 'Vitamines',
     description: 'Complément alimentaire en comprimés effervescents.',
     requiresPrescription: false,
+    imageKey: 'vitamin-c',
     offers: [
       { id: 'o6', pharmacy: pharmacies[0], price: 4500, stock: 16 },
       { id: 'o7', pharmacy: pharmacies[1], price: 4100, stock: 10 },
@@ -100,6 +103,7 @@ export const products: Product[] = [
     category: 'Premiers soins',
     description: 'Pansements individuels stériles pour petites plaies.',
     requiresPrescription: false,
+    imageKey: 'bandages',
     offers: [{ id: 'o8', pharmacy: pharmacies[0], price: 2200, stock: 30 }],
   },
 ];

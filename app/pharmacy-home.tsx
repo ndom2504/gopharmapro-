@@ -1,9 +1,15 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Badge, Button, Card } from '../src/components/UI';
+import { NotificationBell } from '../src/components/NotificationBell';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
+import { usePharmacyCatalog } from '../src/store/catalog';
+import { totalsFor, usePayouts } from '../src/store/payouts';
+import { useOrders } from '../src/store/orders';
+import { formatFcfa } from '../src/lib/payouts';
 
 const pipeline = [
   { id: 'signup', label: 'Inscription' },
@@ -24,6 +30,9 @@ function pipelineIndex(status: 'pending' | 'verified' | 'rejected') {
 export default function PharmacyHome() {
   const session = useAuth((s) => s.session);
   const logout = useAuth((s) => s.logout);
+  const items = usePharmacyCatalog((s) => s.items);
+  const payouts = usePayouts((s) => s.items);
+  const orders = useOrders((s) => s.orders);
   if (!session || session.role !== 'pharmacy') return <Redirect href={'/auth' as Href} />;
 
   const leave = () => {
@@ -33,25 +42,87 @@ export default function PharmacyHome() {
 
   const current = pipelineIndex(session.status);
   const pendingDocs = session.documents?.filter((d) => d.fileName && d.status === 'pending').length || 0;
+  const catalog = items.filter((i) => i.pharmacyId === session.id);
+  const verified = session.status === 'verified';
+  const money = totalsFor(
+    payouts.filter((p) => p.beneficiary === 'pharmacy'),
+    session.id,
+  );
+  const jobs = orders.filter((o) => o.pharmacyAccountId === session.id && o.status !== 'delivered');
 
   return (
     <ScrollView contentContainerStyle={s.page}>
-      <Text style={s.kicker}>Espace pharmacie</Text>
-      <Text style={s.title}>{session.pharmacyName}</Text>
-      <View style={{ marginTop: 10 }}>
+      <View style={s.top}>
+        <View style={{ flex: 1 }}>
+          <Text style={s.kicker}>Espace pharmacie</Text>
+          <Text style={s.title}>{session.pharmacyName}</Text>
+        </View>
+        <NotificationBell />
+      </View>
+      <View style={[s.statusBanner, verified ? s.statusOk : session.status === 'rejected' ? s.statusNo : s.statusWait]}>
+        <Ionicons
+          name={verified ? 'checkmark-circle' : session.status === 'rejected' ? 'close-circle' : 'time'}
+          size={22}
+          color={verified ? colors.primary : session.status === 'rejected' ? colors.danger : colors.warning}
+        />
+        <View style={{ flex: 1 }}>
+          <Text style={s.statusTitle}>
+            {verified ? 'Pharmacie vérifiée' : session.status === 'rejected' ? 'Dossier rejeté' : 'Vérification en cours'}
+          </Text>
+          <Text style={s.statusMeta}>
+            {verified
+              ? 'Compte accepté. Vous pouvez ajouter des produits et recevoir des commandes.'
+              : session.status === 'rejected'
+                ? 'La structure n’est pas autorisée à vendre sur Go Pharma Pro.'
+                : 'La pharmacie n’est pas visible tant que l’administration n’a pas validé le dossier.'}
+          </Text>
+        </View>
         <Badge
-          text={session.status === 'verified' ? 'Compte vérifié' : session.status === 'rejected' ? 'Dossier rejeté' : 'Vérification en cours'}
-          tone={session.status === 'verified' ? 'green' : session.status === 'rejected' ? 'red' : 'orange'}
+          text={verified ? 'Vérifié' : session.status === 'rejected' ? 'Rejeté' : 'En attente'}
+          tone={verified ? 'green' : session.status === 'rejected' ? 'red' : 'orange'}
         />
       </View>
-      {session.status === 'pending' ? (
-        <Card style={{ marginTop: 18, backgroundColor: '#FFF4E6', borderColor: '#FFD8A8' }}>
-          <Text style={s.label}>Votre pharmacie</Text>
+
+      {verified ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Paiements</Text>
           <Text style={s.meta}>
-            Votre demande d’inscription a bien été reçue. La pharmacie n’est pas visible sur la marketplace tant que l’administration n’a pas validé la structure.
+            {formatFcfa(money.pending)} en attente de virement · {formatFcfa(money.sent)} déjà versés.
           </Text>
+          <View style={{ marginTop: 14 }}>
+            <Button title="Voir les virements" onPress={() => router.push('/pharmacy-payouts')} />
+          </View>
         </Card>
       ) : null}
+
+      {verified ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Commandes</Text>
+          <Text style={s.meta}>
+            {jobs.length
+              ? jobs.length + ' commande(s) en cours (retrait ou livraison).'
+              : 'Les clients peuvent retirer en pharmacie ou demander un livreur.'}
+          </Text>
+          <View style={{ marginTop: 14 }}>
+            <Button title="Voir les commandes" onPress={() => router.push('/pharmacy-orders')} />
+          </View>
+        </Card>
+      ) : null}
+
+      {verified ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Catalogue</Text>
+          <Text style={s.meta}>{catalog.length} produit(s) dans votre officine.</Text>
+          <View style={{ marginTop: 14 }}>
+            <Button title="Gérer les produits" onPress={() => router.push('/pharmacy-catalog')} />
+          </View>
+        </Card>
+      ) : (
+        <Card style={{ marginTop: 16, backgroundColor: '#FFF4E6', borderColor: '#FFD8A8' }}>
+          <Text style={s.label}>Ajout de produits</Text>
+          <Text style={s.meta}>Disponible uniquement après acceptation du dossier (badge Vérifié).</Text>
+        </Card>
+      )}
 
       <Card style={{ marginTop: 16 }}>
         <Text style={s.label}>Parcours d’activation</Text>
@@ -61,16 +132,6 @@ export default function PharmacyHome() {
             <Text style={[s.flowLabel, i > current && { color: colors.muted }]}>{item.label}</Text>
           </View>
         ))}
-      </Card>
-
-      <Card style={{ marginTop: 16 }}>
-        <Text style={s.label}>Deux niveaux de validation</Text>
-        <Text style={s.value}>1. Validation de la pharmacie</Text>
-        <Text style={s.meta}>L’administration vérifie que la structure est autorisée à utiliser la plateforme.</Text>
-        <Text style={[s.value, { marginTop: 12 }]}>2. Validation des produits</Text>
-        <Text style={s.meta}>
-          Lorsqu’un médicament comme l’Amoxicilline 500 mg est ajouté avec « ordonnance : OUI », il suit le contrôle prévu. Puis : client → ordonnance → pharmacie → validation → paiement.
-        </Text>
       </Card>
 
       <Card style={{ marginTop: 16 }}>
@@ -86,11 +147,6 @@ export default function PharmacyHome() {
           {'\n'}
           {session.area}, {session.commune}, {session.city} ({session.province})
         </Text>
-        {session.gpsConfirmed ? (
-          <Text style={s.meta}>
-            GPS {session.latitude.toFixed(5)}, {session.longitude.toFixed(5)}
-          </Text>
-        ) : null}
         <Text style={[s.label, { marginTop: 14 }]}>Contact</Text>
         <Text style={s.value}>
           {session.phone}
@@ -102,7 +158,7 @@ export default function PharmacyHome() {
       {session.documents?.length ? (
         <Card style={{ marginTop: 16 }}>
           <Text style={s.label}>Documents (privés)</Text>
-          <Text style={s.meta}>{pendingDocs} document(s) en attente de vérification. Ils ne sont jamais affichés publiquement.</Text>
+          <Text style={s.meta}>{pendingDocs} document(s) en attente de vérification.</Text>
           {session.documents.filter((d) => d.fileName).map((d) => (
             <Text key={d.key} style={s.docLine}>
               {d.status === 'verified' ? '🟢' : d.status === 'rejected' ? '🔴' : '🟠'} {d.label}
@@ -120,8 +176,23 @@ export default function PharmacyHome() {
 
 const s = StyleSheet.create({
   page: { padding: 20, paddingTop: 64, paddingBottom: 50 },
+  top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   kicker: { color: colors.primary, fontWeight: '800', marginBottom: 6 },
   title: { fontSize: 28, fontWeight: '900', color: colors.text },
+  statusBanner: {
+    marginTop: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  statusOk: { backgroundColor: '#E7F7F1', borderColor: '#BCE9D8' },
+  statusWait: { backgroundColor: '#FFF4E6', borderColor: '#FFD8A8' },
+  statusNo: { backgroundColor: '#FFF0F0', borderColor: '#F5C2C7' },
+  statusTitle: { fontWeight: '800', color: colors.text },
+  statusMeta: { color: colors.muted, marginTop: 3, lineHeight: 18, fontSize: 13 },
   label: { fontWeight: '800', color: colors.text, fontSize: 13 },
   value: { color: colors.text, marginTop: 4, lineHeight: 22, fontWeight: '700' },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },

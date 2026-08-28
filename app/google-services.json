@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1063129391016",
+    "project_id": "gopharmapro-f8c28",
+    "storage_bucket": "gopharmapro-f8c28.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063129391016:android:567aa28624c8d38bce479d",
+        "android_client_info": {
+          "package_name": "ga.pharmamarket.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1063129391016-u1g48s64uc0sjctrk4h1ijd43ims24jh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ga.pharmamarket.app",
+            "certificate_hash": "64c2fcbccd888865f6eff26c5a37fe003d8295cc"
+          }
+        },
+        {
+          "client_id": "1063129391016-g4fcpv8rkm5bvpimhh2mhbbn3gg4sr0q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPM2WcGDCBfRa0RnFUCKD9HU0LLk85Zd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1063129391016-0l8gsb761ak0sd6ph1kp82etptiuuhtp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1063129391016-ames824nj5ioqreoorne759egusmhidm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ga.pharmamarket.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
