@@ -16,8 +16,10 @@ export default async function ProductsPage({
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-extrabold text-ink">Rechercher un produit</h1>
-      <p className="mt-2 text-muted">Les prix affichés viennent des pharmacies vérifiées.</p>
+      <h1 className="text-3xl font-extrabold text-ink">Rechercher un médicament</h1>
+      <p className="mt-2 text-muted">
+        Comparez les pharmacies disponibles : prix, distance et stock. Puis commandez.
+      </p>
       <div className="mt-6">
         <SearchForm defaultValue={q} />
       </div>

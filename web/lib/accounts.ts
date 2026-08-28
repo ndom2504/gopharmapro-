@@ -184,27 +184,65 @@ export const partnerCatalog: PartnerCatalogItem[] = [
   { id: 'pc-bandage', pharmacyId: 'ph-centre', name: 'Pansements stériles', category: 'Premiers soins', price: 2200, stock: 30, status: 'published', imageKey: 'bandages' },
 ];
 
+export type PartnerOrderItem = { name: string; quantity: number };
+
 export type PartnerOrder = {
   id: string;
   pharmacyAccountId: string;
   pharmacyName: string;
+  pharmacyAddress: string;
   courierId?: string;
   total: number;
-  status: string;
+  fee: number;
+  status: 'ready' | 'accepted' | 'picked_up' | 'arrived' | 'delivered';
   pickupCode: string;
+  deliveryCode: string;
   deliveryAddress: string;
+  items: PartnerOrderItem[];
+  eta: string;
+  pharmacyKm: string;
+  clientKm: string;
+  createdAt: string;
 };
 
 export const partnerOrders: PartnerOrder[] = [
   {
-    id: 'PM-1024',
+    id: 'GP-10482',
     pharmacyAccountId: 'ph-centre',
     pharmacyName: 'Pharmacie du Centre',
+    pharmacyAddress: 'Boulevard de l’Indépendance, Libreville',
     courierId: 'd-jean',
-    total: 5700,
-    status: 'Prête',
+    total: 12500,
+    fee: 2000,
+    status: 'picked_up',
     pickupCode: '482193',
+    deliveryCode: '739204',
     deliveryAddress: 'Libreville, Gabon',
+    items: [
+      { name: 'Paracétamol 500 mg', quantity: 2 },
+      { name: 'Vitamine C', quantity: 1 },
+    ],
+    eta: '15 min',
+    pharmacyKm: '1,4 km',
+    clientKm: '1,8 km',
+    createdAt: '2026-08-28',
+  },
+  {
+    id: 'GP-10490',
+    pharmacyAccountId: 'ph-centre',
+    pharmacyName: 'Pharmacie du Centre',
+    pharmacyAddress: 'Boulevard de l’Indépendance, Libreville',
+    total: 8000,
+    fee: 2000,
+    status: 'ready',
+    pickupCode: '591047',
+    deliveryCode: '418263',
+    deliveryAddress: 'Owendo, Libreville',
+    items: [{ name: 'Vitamine C 1000 mg', quantity: 1 }],
+    eta: '25 min',
+    pharmacyKm: '1,4 km',
+    clientKm: '3,2 km',
+    createdAt: '2026-08-28',
   },
 ];
 
@@ -219,8 +257,9 @@ export type PartnerPayout = {
 };
 
 export const partnerPayouts: PartnerPayout[] = [
-  { id: 'po-ph-1024', orderId: 'PM-1024', accountId: 'ph-centre', beneficiary: 'pharmacy', amount: 4324, status: 'sent', phone: '+241 77 11 22 33' },
-  { id: 'po-d-1024', orderId: 'PM-1024', accountId: 'd-jean', beneficiary: 'courier', amount: 1000, status: 'pending', phone: '+241 66 00 00 00' },
+  { id: 'po-ph-10482', orderId: 'GP-10482', accountId: 'ph-centre', beneficiary: 'pharmacy', amount: 10500, status: 'sent', phone: '+241 77 11 22 33' },
+  { id: 'po-d-10482', orderId: 'GP-10482', accountId: 'd-jean', beneficiary: 'courier', amount: 2000, status: 'pending', phone: '+241 66 00 00 00' },
+  { id: 'po-d-10461', orderId: 'GP-10461', accountId: 'd-jean', beneficiary: 'courier', amount: 1500, status: 'sent', phone: '+241 66 00 00 00' },
 ];
 
 export function stripPassword(user: StoredAccount): ShopSession {
@@ -248,7 +287,7 @@ export function displayName(session: ShopSession) {
 export function homeFor(role: UserRole) {
   if (role === 'pharmacy') return '/espace-pharmacie';
   if (role === 'courier') return '/espace-livreur';
-  return '/produits';
+  return '/';
 }
 
 export function payoutTotals(items: PartnerPayout[], accountId: string) {

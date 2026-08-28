@@ -265,19 +265,19 @@ let state: AdminState = {
   ],
   orders: [
     {
-      id: 'PM-1024',
+      id: 'GP-10482',
       pharmacyName: 'Pharmacie du Centre',
-      total: 5700,
+      total: 12500,
       paymentLabel: 'Airtel Money',
       reference: 'AM-8F2K19',
-      status: 'ready',
+      status: 'picked_up',
       createdAt: new Date().toISOString(),
-      split: { subtotal: 4700, deliveryFee: 1000, pharmacyNet: 4324, courierNet: 1000, platformFee: 376 },
+      split: { subtotal: 11500, deliveryFee: 1000, pharmacyNet: 10500, courierNet: 2000, platformFee: 376 },
     },
   ],
   payouts: [
-    { id: 'po-ph-1024', orderId: 'PM-1024', beneficiary: 'pharmacy', phone: '+241 77 11 22 33', amount: 4324, status: 'sent' },
-    { id: 'po-d-1024', orderId: 'PM-1024', beneficiary: 'courier', phone: '+241 66 00 00 00', amount: 1000, status: 'pending' },
+    { id: 'po-ph-10482', orderId: 'GP-10482', beneficiary: 'pharmacy', phone: '+241 77 11 22 33', amount: 10500, status: 'sent' },
+    { id: 'po-d-10482', orderId: 'GP-10482', beneficiary: 'courier', phone: '+241 66 00 00 00', amount: 2000, status: 'pending' },
   ],
 };
 

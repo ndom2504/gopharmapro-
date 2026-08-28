@@ -1,113 +1,110 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { RequireRole } from '@/components/RequireRole';
+import { RoleSubnav, courierNav } from '@/components/RoleSubnav';
 import { useShop } from '@/components/ShopProvider';
-import { isCourier, partnerOrders, partnerPayouts, payoutTotals } from '@/lib/accounts';
+import { isCourier } from '@/lib/accounts';
 import { formatFcfa } from '@/lib/catalog';
-
-const vehicleLabel: Record<string, string> = { moto: 'Moto', voiture: 'Voiture', other: 'Autre' };
+import { usePartnerJobs } from '@/lib/usePartnerJobs';
 
 function CourierHome() {
-  const { session, logout } = useShop();
+  const { session } = useShop();
   const router = useRouter();
+  const { jobs, available, setAvailable, accept } = usePartnerJobs();
   if (!isCourier(session)) return null;
 
-  const money = payoutTotals(
-    partnerPayouts.filter((p) => p.beneficiary === 'courier'),
-    session.id,
-  );
-  const runs = partnerOrders.filter((o) => o.courierId === session.id);
-  const required = session.documents.filter((d) => d.required);
-  const verifiedDocs = required.filter((d) => d.status === 'verified').length;
-
-  const leave = () => {
-    logout();
-    router.replace('/connexion?role=courier');
-  };
+  const mine = jobs.filter((o) => o.courierId === session.id);
+  const done = mine.filter((o) => o.status === 'delivered');
+  const open = jobs.filter((o) => !o.courierId && o.status === 'ready');
+  const todayGain = mine.reduce((a, o) => a + o.fee, 0);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <p className="text-sm font-extrabold text-muted">Espace livreur</p>
-      <h1 className="mt-1 text-3xl font-extrabold text-ink">
-        {session.firstName} {session.lastName}
-      </h1>
-      <span
-        className={`mt-4 inline-flex ${
-          session.status === 'active' ? 'badge-green' : session.status === 'suspended' ? 'badge-red' : 'badge-orange'
-        }`}
-      >
-        {session.status === 'active' ? 'Compte actif' : session.status === 'suspended' ? 'Compte suspendu' : 'Vérification en cours'}
-      </span>
+    <>
+      <p className="text-lg font-extrabold text-ink">Bonjour {session.firstName} 👋</p>
+      <div className="card mt-4 flex flex-wrap items-center justify-between gap-3 p-5">
+        <div>
+          <p className="text-sm font-extrabold text-ink">Statut</p>
+          <span className={`mt-2 inline-flex ${available ? 'badge-green' : 'badge-orange'}`}>
+            {available ? 'Disponible' : 'Indisponible'}
+          </span>
+        </div>
+        <button type="button" className="btn-secondary !h-10 text-sm" onClick={() => setAvailable(!available)}>
+          {available ? 'Indisponible' : 'Disponible'}
+        </button>
+      </div>
 
-      <section className="card mt-6 p-5">
-        <p className="text-sm font-extrabold text-ink">Gains</p>
-        <p className="mt-2 text-2xl font-extrabold text-ink">{formatFcfa(money.pending)}</p>
-        <p className="mt-1 text-sm text-muted">En attente de virement · {formatFcfa(money.sent)} déjà versés</p>
-      </section>
+      <h2 className="mt-8 text-lg font-extrabold text-ink">Résumé du jour</h2>
+      <div className="mt-3 grid grid-cols-3 gap-3">
+        <div className="card p-4">
+          <p className="text-2xl font-extrabold text-ink">{mine.length}</p>
+          <p className="text-xs font-bold text-muted">Livraisons</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-lg font-extrabold text-ink">{formatFcfa(todayGain)}</p>
+          <p className="text-xs font-bold text-muted">Revenus</p>
+        </div>
+        <div className="card p-4">
+          <p className="text-2xl font-extrabold text-ink">{done.length}</p>
+          <p className="text-xs font-bold text-muted">Terminées</p>
+        </div>
+      </div>
 
-      <section className="card mt-4 p-5">
-        <p className="text-sm font-extrabold text-ink">Profil</p>
-        <p className="mt-2 font-bold text-ink">{session.phone || 'Téléphone à compléter'}</p>
-        <p className="text-sm text-muted">{session.email}</p>
-        <p className="mt-2 text-sm text-muted">
-          Véhicule : {vehicleLabel[session.vehicle] || session.vehicle}
-          {session.plate ? ` · ${session.plate}` : ''}
-        </p>
-        {session.city ? (
-          <p className="text-sm text-muted">
-            Zone : {session.area ? `${session.area}, ` : ''}
-            {session.city} ({session.province})
-          </p>
-        ) : null}
-        {session.payoutPhone ? <p className="text-sm text-muted">Gains : {session.payoutPhone}</p> : null}
-        {session.provider === 'google' || session.googleId ? (
-          <p className="mt-3 text-sm font-bold text-muted">Connecté avec Google</p>
-        ) : null}
-        {session.documents.length ? (
-          <p className="mt-3 text-sm text-muted">
-            {verifiedDocs}/{required.length} documents vérifiés
-          </p>
-        ) : null}
-      </section>
-
-      {runs.length ? (
-        <section className="mt-4 space-y-3">
-          {runs.map((o) => (
+      <h2 className="mt-8 text-lg font-extrabold text-ink">Nouvelles livraisons</h2>
+      {!available ? (
+        <div className="card mt-3 p-5 text-sm text-muted">Passez disponible pour recevoir des missions.</div>
+      ) : open.length === 0 ? (
+        <div className="card mt-3 p-5 text-sm text-muted">Aucune nouvelle course pour le moment.</div>
+      ) : (
+        <div className="mt-3 space-y-3">
+          {open.map((o) => (
             <div key={o.id} className="card p-5">
-              <div className="flex items-start justify-between gap-3">
-                <p className="font-extrabold text-ink">#{o.id}</p>
-                <span className="badge-green">{o.status}</span>
+              <p className="font-extrabold text-ink">Livraison #{o.id}</p>
+              <p className="mt-2 text-sm text-muted">🏥 {o.pharmacyName}</p>
+              <p className="text-sm text-muted">📍 {o.pharmacyKm}</p>
+              <p className="my-1 font-extrabold text-muted">↓</p>
+              <p className="text-sm text-muted">👤 Client</p>
+              <p className="text-sm text-muted">📍 {o.clientKm}</p>
+              <p className="mt-3 font-extrabold text-brand">Gain livraison : {formatFcfa(o.fee)}</p>
+              <p className="text-sm text-muted">⏱️ Estimation : {o.eta}</p>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                <Link href={`/espace-livreur/livraisons/${o.id}`} className="btn-secondary !h-10 text-sm">
+                  Voir la livraison
+                </Link>
+                <button
+                  type="button"
+                  className="btn-primary !h-10 text-sm"
+                  onClick={() => {
+                    accept(o.id, session.id);
+                    router.push(`/espace-livreur/livraisons/${o.id}`);
+                  }}
+                >
+                  Accepter
+                </button>
               </div>
-              <p className="mt-1 text-sm text-muted">
-                {o.pharmacyName} → {o.deliveryAddress}
-              </p>
-              {o.status !== 'Livrée' ? (
-                <p className="mt-2 font-extrabold tracking-widest text-brand">Code ramassage {o.pickupCode}</p>
-              ) : null}
             </div>
           ))}
-        </section>
-      ) : (
-        <section className="card mt-4 border-[#FFD8A8] bg-[#FFF4E6] p-5">
-          <p className="text-sm font-extrabold text-ink">Courses</p>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Aucune course. Dès qu’un client paie une livraison, le code de ramassage apparaît ici.
-          </p>
-        </section>
+        </div>
       )}
-
-      <button type="button" className="btn-secondary mt-8 w-full" onClick={leave}>
-        Se déconnecter
-      </button>
-    </main>
+      <h2 className="mt-8 text-lg font-extrabold text-ink">Notifications</h2>
+      <div className="mt-3 space-y-2 text-sm">
+        <div className="card p-4">🚚 Nouvelle livraison disponible</div>
+        <div className="card p-4">📦 La pharmacie a préparé la commande</div>
+        <div className="card p-4">⚠️ Le client a modifié son adresse</div>
+        <div className="card p-4">✅ Livraison confirmée</div>
+      </div>
+    </>
   );
 }
 
 export default function CourierSpacePage() {
   return (
     <RequireRole role="courier">
-      <CourierHome />
+      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <RoleSubnav items={courierNav} />
+        <CourierHome />
+      </main>
     </RequireRole>
   );
 }

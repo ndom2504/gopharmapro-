@@ -144,10 +144,10 @@ export default function Checkout() {
         ))}
         {rx ? (
           <Card style={s.rx}>
-            <Text style={s.rxTitle}>Ordonnance requise</Text>
-            <Text style={s.meta}>Transmettez votre ordonnance. Aucun paiement ne sera demandé avant son approbation.</Text>
+            <Text style={s.rxTitle}>Ce produit nécessite une ordonnance.</Text>
+            <Text style={s.meta}>Paiement désactivé jusqu’à validation de l’ordonnance.</Text>
             <View style={{ marginTop: 13 }}>
-              <Button title="Téléverser l’ordonnance" kind="secondary" onPress={() => router.push('/prescription')} />
+              <Button title="Ajouter mon ordonnance" kind="secondary" onPress={() => router.push('/prescription')} />
             </View>
           </Card>
         ) : null}
@@ -219,7 +219,7 @@ export default function Checkout() {
         ) : null}
         <View style={{ marginTop: 18 }}>
           <Button
-            title={rx ? 'Paiement bloqué - ordonnance à valider' : 'Payer ' + total.toLocaleString('fr-FR') + ' FCFA'}
+            title={rx ? 'Paiement désactivé jusqu’à validation' : 'Payer ' + total.toLocaleString('fr-FR') + ' FCFA'}
             disabled={rx}
             onPress={pay}
           />

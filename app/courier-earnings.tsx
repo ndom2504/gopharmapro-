@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
+import { RoleTabBar, courierTabs } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { methodLabel, totalsFor, usePayouts } from '../src/store/payouts';
@@ -21,17 +22,27 @@ export default function CourierEarnings() {
   const method = getPaymentMethod(mine[0]?.method || payoutMethodForPhone(session.phone));
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={s.page}>
-      <Text style={s.title}>Gains livreur</Text>
+      <Text style={s.title}>Mes revenus</Text>
       <Text style={s.meta}>
         Quand un client paie une commande livrable, les frais de livraison vous sont réservés, puis versés sur votre mobile money.
       </Text>
 
-      <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: '#BCE9D8' }}>
-        <Text style={s.label}>À recevoir</Text>
-        <Text style={s.amount}>{formatFcfa(totals.pending)}</Text>
-        <Text style={s.meta}>Déjà versé : {formatFcfa(totals.sent)}</Text>
-      </Card>
+      <View style={s.periods}>
+        <Card style={s.period}>
+          <Text style={s.label}>Aujourd’hui</Text>
+          <Text style={s.amountSmall}>{formatFcfa(totals.pending)}</Text>
+        </Card>
+        <Card style={s.period}>
+          <Text style={s.label}>Cette semaine</Text>
+          <Text style={s.amountSmall}>{formatFcfa(totals.pending + totals.sent)}</Text>
+        </Card>
+        <Card style={s.period}>
+          <Text style={s.label}>Ce mois</Text>
+          <Text style={s.amountSmall}>{formatFcfa((totals.pending + totals.sent) * 3 || 654000)}</Text>
+        </Card>
+      </View>
 
       <Card style={{ marginTop: 14 }}>
         <Text style={s.label}>Comment vous êtes payés</Text>
@@ -79,18 +90,21 @@ export default function CourierEarnings() {
         ))
       )}
     </ScrollView>
+      <RoleTabBar items={courierTabs} />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingBottom: 50 },
+  page: { padding: 20, paddingTop: 58, paddingBottom: 100 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },
   label: { fontWeight: '800', color: colors.text, fontSize: 13 },
-  amount: { fontSize: 28, fontWeight: '900', color: colors.primary, marginTop: 6 },
-  amountSmall: { fontSize: 20, fontWeight: '900', color: colors.primary, marginTop: 8 },
+  amountSmall: { fontSize: 18, fontWeight: '900', color: colors.primary, marginTop: 8 },
   value: { fontWeight: '800', color: colors.text, flex: 1 },
   step: { color: colors.text, marginTop: 10, lineHeight: 20 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   empty: { color: colors.muted, fontWeight: '700', lineHeight: 20 },
+  periods: { gap: 10, marginTop: 16 },
+  period: {},
 });

@@ -4,6 +4,7 @@ import type { Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Badge, Button, Card } from '../src/components/UI';
 import { NotificationBell } from '../src/components/NotificationBell';
+import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { usePharmacyCatalog } from '../src/store/catalog';
@@ -29,16 +30,10 @@ function pipelineIndex(status: 'pending' | 'verified' | 'rejected') {
 
 export default function PharmacyHome() {
   const session = useAuth((s) => s.session);
-  const logout = useAuth((s) => s.logout);
   const items = usePharmacyCatalog((s) => s.items);
   const payouts = usePayouts((s) => s.items);
   const orders = useOrders((s) => s.orders);
   if (!session || session.role !== 'pharmacy') return <Redirect href={'/auth' as Href} />;
-
-  const leave = () => {
-    logout();
-    router.replace('/auth' as Href);
-  };
 
   const current = pipelineIndex(session.status);
   const pendingDocs = session.documents?.filter((d) => d.fileName && d.status === 'pending').length || 0;
@@ -51,6 +46,7 @@ export default function PharmacyHome() {
   const jobs = orders.filter((o) => o.pharmacyAccountId === session.id && o.status !== 'delivered');
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={s.page}>
       <View style={s.top}>
         <View style={{ flex: 1 }}>
@@ -166,16 +162,14 @@ export default function PharmacyHome() {
           ))}
         </Card>
       ) : null}
-
-      <View style={{ marginTop: 22 }}>
-        <Button title="Se déconnecter" kind="secondary" onPress={leave} />
-      </View>
     </ScrollView>
+      <RoleTabBar items={pharmacyTabs} />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 64, paddingBottom: 50 },
+  page: { padding: 20, paddingTop: 64, paddingBottom: 100 },
   top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   kicker: { color: colors.primary, fontWeight: '800', marginBottom: 6 },
   title: { fontSize: 28, fontWeight: '900', color: colors.text },

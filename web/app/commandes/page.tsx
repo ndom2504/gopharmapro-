@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa } from '@/lib/catalog';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
+import { OrderTimeline } from '@/components/OrderTimeline';
 
 export default function CommandesPage() {
   const { session, orders, logout, ready } = useShop();
@@ -48,12 +49,16 @@ export default function CommandesPage() {
         {orders.map((o) => (
           <Link key={o.id} href={`/commandes/${o.id}`} className="card block p-5">
             <div className="flex items-start justify-between gap-3">
-              <p className="font-extrabold text-ink">#{o.id}</p>
-              <span className="badge-green">{o.status}</span>
+              <p className="font-extrabold text-ink">Commande #{o.id}</p>
+              <span className="badge-green">Paiement confirmé</span>
             </div>
-            <p className="mt-1 text-sm text-muted">
+            <OrderTimeline status={o.status} fulfillment={o.fulfillment} />
+            <p className="mt-3 text-sm text-muted">
               {formatFcfa(o.total)} · {o.paymentLabel} · {o.fulfillment === 'delivery' ? 'Livraison' : 'Retrait'}
             </p>
+            {o.fulfillment === 'delivery' ? (
+              <p className="mt-3 text-sm font-extrabold text-brand">Suivre ma livraison</p>
+            ) : null}
           </Link>
         ))}
       </div>

@@ -4,12 +4,16 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 const links = [
-  { href: '/admin', label: 'Synthèse' },
-  { href: '/admin/pharmacies', label: 'Officines' },
+  { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/pharmacies', label: 'Pharmacies' },
+  { href: '/admin/clients', label: 'Clients' },
   { href: '/admin/couriers', label: 'Livreurs' },
   { href: '/admin/catalog', label: 'Produits' },
   { href: '/admin/orders', label: 'Commandes' },
-  { href: '/admin/payouts', label: 'Virements' },
+  { href: '/admin/payouts', label: 'Paiements' },
+  { href: '/admin/verifications', label: 'Vérifications' },
+  { href: '/admin/stats', label: 'Statistiques' },
+  { href: '/admin/config', label: 'Configuration' },
 ];
 
 export function AdminNav() {

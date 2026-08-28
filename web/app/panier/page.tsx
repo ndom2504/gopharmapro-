@@ -20,6 +20,9 @@ export default function PanierPage() {
   if (!ready || (session && !isClient(session))) return null;
 
   const subtotal = cart.reduce((a, i) => a + i.offer.price * i.quantity, 0);
+  const rx = cart.some((i) => i.product.requiresPrescription);
+  const fee = cart[0]?.offer.pharmacy.delivery ? cart[0].offer.pharmacy.fee : 0;
+  const total = subtotal + fee;
   if (!cart.length) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 text-center">
@@ -33,7 +36,7 @@ export default function PanierPage() {
   }
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-extrabold text-ink">Panier</h1>
+      <h1 className="text-3xl font-extrabold text-ink">Mon panier</h1>
       <p className="mt-2 text-sm text-muted">{cart[0].offer.pharmacy.name}</p>
       <div className="mt-6 space-y-3">
         {cart.map((i) => (
@@ -41,7 +44,11 @@ export default function PanierPage() {
             <ProductPhoto src={i.product.imageSrc} alt={i.product.name} size="thumb" />
             <div className="min-w-0 flex-1">
               <p className="font-extrabold text-ink">{i.product.name}</p>
-              <p className="text-sm text-muted">{formatFcfa(i.offer.price)}</p>
+              <p className="text-sm text-muted">
+                × {i.quantity}
+                {'                    '}
+                {formatFcfa(i.offer.price * i.quantity)}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button type="button" className="btn-secondary !h-9 !px-3" onClick={() => change(i.offer.id, -1)}>
@@ -58,11 +65,39 @@ export default function PanierPage() {
           </div>
         ))}
       </div>
-      <div className="mt-8 flex items-center justify-between">
-        <p className="text-lg font-extrabold text-ink">{formatFcfa(subtotal)}</p>
-        <Link href="/commande" className="btn-primary">
-          Finaliser la commande
-        </Link>
+      <div className="card mt-8 space-y-2 p-5">
+        <p className="flex justify-between text-sm font-bold text-muted">
+          <span>Sous-total</span>
+          <span>{formatFcfa(subtotal)}</span>
+        </p>
+        <p className="flex justify-between text-sm font-bold text-muted">
+          <span>Livraison</span>
+          <span>{formatFcfa(fee)}</span>
+        </p>
+        <p className="flex justify-between text-lg font-extrabold text-ink">
+          <span>TOTAL</span>
+          <span>{formatFcfa(total)}</span>
+        </p>
+      </div>
+      {rx ? (
+        <div className="card mt-4 border-[#F5C2C7] bg-[#FFF0F0] p-5">
+          <p className="font-extrabold text-danger">Ce produit nécessite une ordonnance.</p>
+          <p className="mt-1 text-sm text-muted">Paiement désactivé jusqu’à validation de l’ordonnance.</p>
+          <Link href="/ordonnances" className="btn-secondary mt-4 inline-flex">
+            Ajouter mon ordonnance
+          </Link>
+        </div>
+      ) : null}
+      <div className="mt-8 flex justify-end">
+        {rx ? (
+          <button type="button" disabled className="btn-primary opacity-40">
+            Paiement bloqué
+          </button>
+        ) : (
+          <Link href="/commande" className="btn-primary">
+            Commander
+          </Link>
+        )}
       </div>
     </main>
   );

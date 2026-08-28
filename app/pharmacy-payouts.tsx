@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
+import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { methodLabel, totalsFor, usePayouts } from '../src/store/payouts';
@@ -23,8 +24,9 @@ export default function PharmacyPayouts() {
   const pct = Math.round(PLATFORM_COMMISSION * 100);
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={s.page}>
-      <Text style={s.title}>Paiements pharmacie</Text>
+      <Text style={s.title}>Ventes</Text>
       <Text style={s.meta}>
         Le client paie Go Pharma Pro par mobile money. Votre part est ensuite versée sur le numéro de l’officine.
       </Text>
@@ -88,11 +90,13 @@ export default function PharmacyPayouts() {
         ))
       )}
     </ScrollView>
+      <RoleTabBar items={pharmacyTabs} />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingBottom: 50 },
+  page: { padding: 20, paddingBottom: 100 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },
   label: { fontWeight: '800', color: colors.text, fontSize: 13 },

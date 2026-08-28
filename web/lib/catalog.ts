@@ -59,11 +59,11 @@ const productAliases: Record<string, string> = {
 
 export const categories = [
   { name: 'Médicaments', icon: '💊', image: '/categories/medicaments.png' },
-  { name: 'Hygiène', icon: '✨', image: '/categories/hygiene.png' },
-  { name: 'Bébé', icon: '👶', image: '/categories/bebe.png' },
   { name: 'Premiers soins', icon: '🩹', image: '/categories/premiers-soins.png' },
-  { name: 'Vitamines', icon: '🍊', image: '/categories/vitamines.png' },
-  { name: 'Parapharmacie', icon: '🌿', image: '/categories/parapharmacie.png' },
+  { name: 'Hygiène', icon: '🧴', image: '/categories/hygiene.png' },
+  { name: 'Bébé', icon: '👶', image: '/categories/bebe.png' },
+  { name: 'Vitamines', icon: '💪', image: '/categories/vitamines.png' },
+  { name: 'Parapharmacie', icon: '🧴', image: '/categories/parapharmacie.png' },
 ];
 
 export const paymentMethods: PaymentMethod[] = [

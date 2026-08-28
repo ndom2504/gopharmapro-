@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
+import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { useOrders } from '../src/store/orders';
@@ -17,6 +18,7 @@ export default function PharmacyOrders() {
   const pending = mine.filter((o) => o.status !== 'delivered');
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={s.page}>
       <Text style={s.title}>Commandes</Text>
       <Text style={s.meta}>
@@ -46,11 +48,13 @@ export default function PharmacyOrders() {
         ))
       )}
     </ScrollView>
+      <RoleTabBar items={pharmacyTabs} />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingBottom: 50 },
+  page: { padding: 20, paddingBottom: 100 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },

@@ -22,7 +22,7 @@ export type ShopOrder = {
   id: string;
   createdAt: string;
   total: number;
-  status: string;
+  status: 'paid' | 'preparing' | 'ready' | 'picked_up' | 'delivered';
   paymentLabel: string;
   fulfillment: 'pickup' | 'delivery';
   items: { name: string; quantity: number; price: number }[];
@@ -50,6 +50,20 @@ const SESSION_KEY = 'gpp-session-v2';
 const USERS_KEY = 'gpp-accounts-v2';
 const CART_KEY = 'gpp-cart';
 const ORDERS_KEY = 'gpp-orders';
+const DEMO_ORDERS: ShopOrder[] = [
+  {
+    id: 'GP-10482',
+    createdAt: '2026-08-28T10:00:00.000Z',
+    total: 12500,
+    status: 'picked_up',
+    paymentLabel: 'Airtel Money',
+    fulfillment: 'delivery',
+    items: [
+      { name: 'Paracétamol 500 mg', quantity: 2, price: 3500 },
+      { name: 'Vitamine C', quantity: 1, price: 4500 },
+    ],
+  },
+];
 
 const ShopContext = createContext<ShopCtx | null>(null);
 
@@ -99,7 +113,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     setUsers(merged);
     setSession(coerceSession(read<unknown>(SESSION_KEY, null)));
     setCart(read<CartLine[]>(CART_KEY, []));
-    setOrders(read<ShopOrder[]>(ORDERS_KEY, []));
+    const storedOrders = read<ShopOrder[]>(ORDERS_KEY, []);
+    setOrders(storedOrders.length ? storedOrders : DEMO_ORDERS);
     setReady(true);
   }, []);
 
@@ -314,10 +329,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       placeOrder: (input) => {
         if (!cart.length || !isClient(session)) return null;
         const order: ShopOrder = {
-          id: 'PM-' + String(1000 + orders.length + 1),
+          id: 'GP-' + String(10490 + orders.length),
           createdAt: new Date().toISOString(),
           total: input.total,
-          status: 'Payée',
+          status: 'paid',
           paymentLabel: input.paymentLabel,
           fulfillment: input.fulfillment,
           items: cart.map((i) => ({ name: i.product.name, quantity: i.quantity, price: i.offer.price })),

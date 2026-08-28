@@ -4,6 +4,7 @@ import type { Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Badge, Button, Card } from '../src/components/UI';
 import { ProductImage } from '../src/components/ProductImage';
+import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { usePharmacyCatalog } from '../src/store/catalog';
@@ -18,6 +19,7 @@ export default function PharmacyCatalog() {
   const catalog = items.filter((i) => i.pharmacyId === session.id);
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={s.page}>
       <Text style={s.title}>Produits de l’officine</Text>
       <Text style={s.meta}>Ajoutez le stock visible pour les clients. Un médicament avec ordonnance passe en contrôle avant publication.</Text>
@@ -64,15 +66,14 @@ export default function PharmacyCatalog() {
           </Card>
         ))
       )}
-      <Pressable onPress={() => router.back()} style={{ marginTop: 20 }}>
-        <Text style={s.back}>Retour à l’espace pharmacie</Text>
-      </Pressable>
     </ScrollView>
+      <RoleTabBar items={pharmacyTabs} />
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 20, paddingBottom: 50 },
+  page: { padding: 20, paddingTop: 20, paddingBottom: 100 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },

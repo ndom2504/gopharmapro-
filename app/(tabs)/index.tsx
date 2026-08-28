@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { categories } from '../../src/data/mock';
-import { Badge, Card, SearchBox } from '../../src/components/UI';
+import { Badge, Button, Card, SearchBox } from '../../src/components/UI';
 import { NotificationBell } from '../../src/components/NotificationBell';
 import { ProductImage } from '../../src/components/ProductImage';
 import { LocationBar } from '../../src/components/LocationBar';
@@ -10,109 +10,143 @@ import { colors } from '../../src/theme';
 import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
 import { formatKm } from '../../src/lib/geo';
 import { categoryPhoto } from '../../src/lib/categoryPhotos';
+import { categoryIcons } from '../../src/lib/dashboard';
+import { useCart } from '../../src/store/cart';
+import { useFavorites } from '../../src/store/favorites';
+import { useAuth } from '../../src/store/auth';
 
 export default function Home() {
   const [q, setQ] = useState('');
   const { nearbyPharmacies, locatedProducts, status, address, outsideGabon, refresh } = useGeoCatalog();
+  const add = useCart((s) => s.add);
+  const togglePharmacy = useFavorites((s) => s.togglePharmacy);
+  const isFav = useFavorites((s) => s.isPharmacy);
+  const session = useAuth((s) => s.session);
+  const hello = session?.role === 'client' ? `Bonjour ${session.firstName} 👋` : 'Bonjour 👋';
   const go = () => router.push({ pathname: '/(tabs)/search', params: { q } });
+
+  const onAdd = (product: (typeof locatedProducts)[0]) => {
+    const offer = product.offers.find((o) => o.stock > 0);
+    if (!offer) return;
+    const r = add(product, offer);
+    if (r === 'different-pharmacy') {
+      Alert.alert('Panier lié à une autre pharmacie', 'Videz le panier pour commander ici.');
+      return;
+    }
+    router.push('/(tabs)/cart');
+  };
+
   return (
     <ScrollView contentContainerStyle={s.page}>
       <View style={s.hero}>
-        <View>
-          <Text style={s.hello}>Bonjour 👋</Text>
-          <Text style={s.title}>Que recherchez-vous ?</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={s.hello}>{hello}</Text>
+          <Text style={s.title}>Que recherchez-vous aujourd’hui ?</Text>
         </View>
         <NotificationBell />
       </View>
-      <LocationBar status={status} address={address} outsideGabon={outsideGabon} onPress={refresh} />
-      <View>
-        <SearchBox value={q} onChange={setQ} />
-        <Pressable onPress={go} style={s.searchButton}>
-          <Text style={{ color: '#fff', fontWeight: '800' }}>Rechercher</Text>
-        </Pressable>
+      <SearchBox value={q} onChange={setQ} />
+      <Pressable onPress={go} style={s.searchButton}>
+        <Text style={{ color: '#fff', fontWeight: '800' }}>Rechercher</Text>
+      </Pressable>
+      <View style={{ marginTop: 14 }}>
+        <LocationBar status={status} address={address} outsideGabon={outsideGabon} onPress={refresh} />
       </View>
       <Text style={s.section}>Catégories</Text>
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
-        data={categories}
+        data={[...categories, 'Pharmacies proches']}
         keyExtractor={(x) => x}
         contentContainerStyle={s.categoryList}
         renderItem={({ item }) => {
+          if (item === 'Pharmacies proches') {
+            return (
+              <Pressable onPress={() => router.push('/(tabs)/pharmacies')} style={s.category}>
+                <View style={[s.catImgWrap, s.catEmoji]}>
+                  <Text style={{ fontSize: 36 }}>🏥</Text>
+                </View>
+                <Text style={s.catText}>Pharmacies proches</Text>
+              </Pressable>
+            );
+          }
           const photo = categoryPhoto(item);
           return (
-            <Pressable
-              onPress={() => router.push({ pathname: '/(tabs)/search', params: { q: item } })}
-              style={s.category}
-            >
+            <Pressable onPress={() => router.push({ pathname: '/(tabs)/search', params: { q: item } })} style={s.category}>
               {photo ? (
                 <View style={s.catImgWrap}>
                   <Image source={photo} style={s.catImg} resizeMode="contain" />
                 </View>
-              ) : null}
-              <Text style={s.catText}>{item}</Text>
+              ) : (
+                <View style={[s.catImgWrap, s.catEmoji]}>
+                  <Text style={{ fontSize: 36 }}>{categoryIcons[item] || '💊'}</Text>
+                </View>
+              )}
+              <Text style={s.catText}>
+                {categoryIcons[item] ? categoryIcons[item] + ' ' : ''}
+                {item}
+              </Text>
             </Pressable>
           );
         }}
       />
       <View style={s.row}>
-        <Text style={s.section}>Pharmacies près de vous</Text>
+        <Text style={s.section}>Pharmacies proches</Text>
         <Text onPress={() => router.push('/(tabs)/pharmacies')} style={s.link}>
           Voir tout
         </Text>
       </View>
       {nearbyPharmacies.slice(0, 2).map((p) => (
-        <Pressable key={p.id} onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })}>
-          <Card style={{ marginBottom: 12 }}>
-            <View style={s.row}>
-              <Text style={s.cardTitle}>{p.name}</Text>
-              <Badge text={p.open ? 'Ouverte' : 'Fermée'} tone={p.open ? 'green' : 'red'} />
-            </View>
-            <Text style={s.meta}>
-              ★ {p.rating}  ·  {formatKm(p.distance)}  ·  {p.eta}
+        <Card key={p.id} style={{ marginBottom: 12 }}>
+          <View style={s.row}>
+            <Text style={s.cardTitle}>{p.name}</Text>
+            <Text onPress={() => togglePharmacy(p.id)} style={s.heart}>
+              {isFav(p.id) ? '❤️' : '♡'}
             </Text>
-            <Text style={s.meta}>{p.area}</Text>
-            <Text style={s.meta}>{p.delivery ? 'Livraison disponible' : 'Retrait uniquement'}</Text>
-          </Card>
-        </Pressable>
+          </View>
+          <Text style={s.meta}>📍 {formatKm(p.distance)} · {p.area}</Text>
+          <View style={[s.row, { marginTop: 8 }]}>
+            <Badge text={p.open ? 'Ouverte' : 'Fermée'} tone={p.open ? 'green' : 'red'} />
+            {p.delivery ? <Badge text="Livraison disponible" /> : <Badge text="Retrait uniquement" tone="gray" />}
+          </View>
+          <View style={{ marginTop: 12 }}>
+            <Button title="Voir la pharmacie" kind="secondary" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
+          </View>
+        </Card>
       ))}
-      <Text style={s.section}>Produits disponibles</Text>
-      {locatedProducts.slice(0, 3).map((p) => (
-        <Pressable key={p.id} onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id } })}>
-          <Card style={{ marginBottom: 12 }}>
-            <View style={s.row}>
+      <Text style={s.section}>Produits disponibles près de vous</Text>
+      {locatedProducts.slice(0, 4).map((p) => {
+        const offer = [...p.offers].filter((o) => o.stock > 0).sort((a, b) => a.pharmacy.distance - b.pharmacy.distance)[0] || p.offers[0];
+        return (
+          <Card key={p.id} style={{ marginBottom: 12 }}>
+            <Pressable onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id } })} style={s.row}>
               <ProductImage uris={p.imageUris} imageKey={p.imageKey || p.id} category={p.category} size="thumb" />
               <View style={{ flex: 1 }}>
-                <View style={s.row}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.cardTitle}>{p.name}</Text>
-                    <Text style={s.meta}>
-                      {p.form} · dès {Math.min(...p.offers.map((o) => o.price)).toLocaleString('fr-FR')} FCFA
-                    </Text>
-                  </View>
-                  {p.requiresPrescription ? <Badge text="Ordonnance" tone="red" /> : <Badge text="Disponible" />}
-                </View>
+                <Text style={s.cardTitle}>{p.name}</Text>
+                <Text style={s.price}>{offer.price.toLocaleString('fr-FR')} FCFA</Text>
+                <Text style={s.meta}>🏥 {offer.pharmacy.name}</Text>
+                <Text style={s.meta}>📍 {formatKm(offer.pharmacy.distance)}</Text>
               </View>
+            </Pressable>
+            <View style={{ marginTop: 12 }}>
+              <Button title="Ajouter" onPress={() => onAdd(p)} disabled={!offer?.stock} />
             </View>
           </Card>
-        </Pressable>
-      ))}
+        );
+      })}
     </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
   page: { padding: 20, paddingTop: 58, paddingBottom: 110 },
-  hero: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  hello: { fontSize: 15, color: colors.muted },
-  title: { fontSize: 27, fontWeight: '800', color: colors.text, marginTop: 4 },
+  hero: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, gap: 12 },
+  hello: { fontSize: 15, color: colors.muted, fontWeight: '700' },
+  title: { fontSize: 26, fontWeight: '800', color: colors.text, marginTop: 4 },
   searchButton: {
-    position: 'absolute',
-    right: 5,
-    top: 5,
-    height: 44,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    marginTop: 10,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -130,6 +164,7 @@ const s = StyleSheet.create({
     flexShrink: 0,
   },
   catImgWrap: { height: 108, backgroundColor: colors.mint, padding: 10 },
+  catEmoji: { alignItems: 'center', justifyContent: 'center' },
   catImg: { width: '100%', height: '100%' },
   catText: {
     fontSize: 13,
@@ -141,6 +176,8 @@ const s = StyleSheet.create({
   },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   link: { color: colors.primary, fontWeight: '700', marginTop: 16 },
-  cardTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
-  meta: { fontSize: 13, color: colors.muted, marginTop: 7 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: colors.text, flex: 1 },
+  meta: { fontSize: 13, color: colors.muted, marginTop: 5 },
+  price: { fontSize: 18, fontWeight: '900', color: colors.primary, marginTop: 4 },
+  heart: { fontSize: 20, padding: 4 },
 });

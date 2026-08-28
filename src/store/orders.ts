@@ -6,7 +6,7 @@ import { codesMatch, makeSecureCode, MAX_CODE_ATTEMPTS } from '../lib/deliveryCo
 import { isDelivery } from '../lib/orderStatus';
 import { useNotifications } from './notifications';
 
-const KEY = 'pharmarket-orders-v3';
+const KEY = 'pharmarket-orders-v4';
 
 export type CodeResult = 'ok' | 'wrong' | 'not_ready' | 'locked' | 'already';
 
@@ -17,27 +17,64 @@ type OrdersStore = {
   add: (order: Omit<Order, 'id' | 'createdAt' | 'status' | 'pickupAttempts' | 'deliveryAttempts'> & { id?: string }) => Order;
   get: (id: string) => Order | undefined;
   setStatus: (id: string, status: OrderStatus) => void;
+  acceptRun: (id: string, courierId: string) => boolean;
   confirmPickup: (id: string, code: string) => CodeResult;
   confirmDelivery: (id: string, code: string) => CodeResult;
 };
 
+const demoItems = [
+  {
+    product: {
+      id: 'paracetamol',
+      name: 'Paracétamol 500 mg',
+      genericName: 'Paracétamol',
+      dosage: '500 mg',
+      form: 'Comprimés',
+      category: 'Médicaments',
+      description: '',
+      requiresPrescription: false,
+      offers: [],
+    },
+    offer: {
+      id: 'o1',
+      pharmacy: {
+        id: 'p1',
+        name: 'Pharmacie du Centre',
+        area: 'Centre-ville',
+        latitude: 0.39,
+        longitude: 9.45,
+        distance: 0.8,
+        rating: 4.8,
+        open: true,
+        delivery: true,
+        pickup: true,
+        fee: 1000,
+        eta: '25 min',
+      },
+      price: 3500,
+      stock: 20,
+    },
+    quantity: 2,
+  },
+];
+
 const demo: Order = {
-  id: 'PM-1024',
-  items: [],
+  id: 'GP-10482',
+  items: demoItems as Order['items'],
   pharmacyId: 'p1',
   pharmacyAccountId: 'ph-centre',
   pharmacyName: 'Pharmacie du Centre',
   fulfillment: 'delivery',
   courierId: DEMO_COURIER_ID,
   pickupCode: '482193',
-  deliveryCode: '719204',
+  deliveryCode: '739204',
   pickupAttempts: 0,
   deliveryAttempts: 0,
-  eta: '25-35 min',
-  subtotal: 4700,
-  fee: 1000,
-  total: 5700,
-  split: splitPayment(4700, 1000),
+  eta: '15 min',
+  subtotal: 7000,
+  fee: 2000,
+  total: 9000,
+  split: splitPayment(7000, 2000),
   payment: {
     method: 'airtel-money',
     methodLabel: 'Airtel Money',
@@ -46,11 +83,23 @@ const demo: Order = {
     reference: 'AM-8F2K19',
   },
   deliveryAddress: 'Libreville, Gabon',
-  status: 'ready',
+  status: 'picked_up',
   createdAt: new Date().toISOString(),
 };
 
-let orders: Order[] = [demo];
+const openJob: Order = {
+  ...demo,
+  id: 'GP-10490',
+  courierId: undefined,
+  status: 'ready',
+  deliveryCode: '5184',
+  pickupCode: '220911',
+  fee: 2000,
+  total: 9000,
+  eta: '25 min',
+};
+
+let orders: Order[] = [demo, openJob];
 
 async function persist() {
   await AsyncStorage.setItem(KEY, JSON.stringify({ orders }));
@@ -96,7 +145,7 @@ function notify(input: Parameters<ReturnType<typeof useNotifications.getState>['
 
 export const useOrders = create<OrdersStore>((set, get) => ({
   hydrated: false,
-  orders: [demo],
+  orders: [demo, openJob],
   hydrate: async () => {
     try {
       const raw = await AsyncStorage.getItem(KEY);
@@ -104,11 +153,11 @@ export const useOrders = create<OrdersStore>((set, get) => ({
         const parsed = JSON.parse(raw) as { orders?: Order[] };
         if (parsed.orders?.length) orders = parsed.orders.map(withSecure);
       } else {
-        orders = [demo];
+        orders = [demo, openJob];
         await persist();
       }
     } catch {
-      orders = [demo];
+      orders = [demo, openJob];
     }
     set({ orders, hydrated: true });
   },
@@ -128,6 +177,21 @@ export const useOrders = create<OrdersStore>((set, get) => ({
     return order;
   },
   get: (id) => get().orders.find((o) => o.id === id),
+  acceptRun: (id, courierId) => {
+    const order = get().get(id);
+    if (!order || order.fulfillment !== 'delivery' || order.courierId) return false;
+    patch(id, { courierId });
+    set({ orders });
+    persist();
+    notify({
+      audience: 'courier',
+      targetId: courierId,
+      type: 'delivery',
+      title: 'Livraison acceptée',
+      body: 'Course ' + id + ' · récupérez le colis à ' + order.pharmacyName + '.',
+    });
+    return true;
+  },
   setStatus: (id, status) => {
     const prev = get().get(id);
     const next = patch(id, { status });
@@ -285,7 +349,7 @@ export function orderFromCart(
     pharmacyAccountId: pharmacyAccountIdFor(pharmacy),
     pharmacyName: pharmacy.name,
     fulfillment,
-    courierId: delivery ? DEMO_COURIER_ID : undefined,
+    courierId: delivery ? undefined : undefined,
     pickupCode: makeSecureCode(),
     deliveryCode: delivery ? makeSecureCode() : undefined,
     eta: delivery ? pharmacy.eta : 'Retrait en pharmacie',

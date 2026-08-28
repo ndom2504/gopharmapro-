@@ -21,18 +21,18 @@ export function LocationBar({
         ? 'Activez la localisation pour des distances réelles'
         : status === 'error'
           ? 'Position indisponible. Touchez pour réessayer.'
-          : address || 'Position trouvée';
+          : address || 'Libreville, Gabon';
   const icon =
     status === 'granted' ? 'navigate' : status === 'loading' ? 'hourglass-outline' : 'location-outline';
   return (
     <Pressable onPress={onPress} style={[s.bar, outsideGabon && s.warn]}>
       <Ionicons name={icon} size={18} color={outsideGabon ? colors.warning : colors.primary} />
       <View style={{ flex: 1 }}>
+        <Text style={s.kicker}>Votre position</Text>
         <Text style={s.label}>{label}</Text>
-        {status === 'granted' && !outsideGabon ? <Text style={s.hint}>Distances calculées depuis votre GPS</Text> : null}
-        {outsideGabon ? <Text style={s.hint}>Livraison PharmaMarket : Gabon uniquement</Text> : null}
+        {outsideGabon ? <Text style={s.hint}>Livraison Go Pharma Pro : Gabon uniquement</Text> : null}
       </View>
-      <Text style={s.action}>{status === 'granted' ? 'Actualiser' : 'Activer'}</Text>
+      <Text style={s.action}>{status === 'granted' ? 'Actualiser' : 'Utiliser ma position'}</Text>
     </Pressable>
   );
 }
@@ -49,6 +49,7 @@ const s = StyleSheet.create({
     marginBottom: 12,
   },
   warn: { backgroundColor: '#FFF4E6' },
+  kicker: { color: colors.muted, fontSize: 11, fontWeight: '700', marginBottom: 2 },
   label: { fontWeight: '800', color: colors.text, fontSize: 13 },
   hint: { color: colors.muted, fontSize: 12, marginTop: 2 },
   action: { color: colors.primary, fontWeight: '800', fontSize: 12 },

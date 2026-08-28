@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Offer, Product } from '@/lib/catalog';
-import { formatFcfa } from '@/lib/catalog';
+import { formatFcfa, formatKm, type Offer, type Product } from '@/lib/catalog';
 import { useShop } from '@/components/ShopProvider';
 import { isClient } from '@/lib/accounts';
 
@@ -37,7 +36,7 @@ export function OfferCart({ product }: { product: Product }) {
           <div>
             <p className="font-extrabold text-ink">{o.pharmacy.name}</p>
             <p className="text-sm text-muted">
-              {o.pharmacy.area} · {o.stock > 0 ? `${o.stock} en stock` : 'Rupture'}
+              {o.pharmacy.area} · 📍 {formatKm(o.pharmacy.distance)} · {o.stock > 0 ? `${o.stock} en stock` : 'Rupture'}
             </p>
           </div>
           <div className="flex items-center gap-3">

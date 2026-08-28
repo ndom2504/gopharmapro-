@@ -1,12 +1,14 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { Badge, Card } from '../../src/components/UI';
+import { Badge, Button, Card } from '../../src/components/UI';
 import { CodeReveal } from '../../src/components/PinEntry';
+import { OrderTimeline } from '../../src/components/OrderTimeline';
+import { DeliveryTrack } from '../../src/components/DeliveryTrack';
 import { useOrders } from '../../src/store/orders';
 import { colors } from '../../src/theme';
 import { getPaymentMethod } from '../../src/data/payments';
 import { formatFcfa } from '../../src/lib/payouts';
-import { isDelivery, orderStatusLabel, orderStatusTone, timelineFor, timelineReached } from '../../src/lib/orderStatus';
+import { isDelivery, orderStatusLabel, orderStatusTone } from '../../src/lib/orderStatus';
 
 export default function Order() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,15 +23,36 @@ export default function Order() {
   }
   const pay = getPaymentMethod(order.payment.method);
   const delivery = isDelivery(order);
-  const doneUntil = timelineReached(order);
-  const steps = timelineFor(order.fulfillment);
+  const inTransit = delivery && order.status !== 'delivered';
+
   return (
     <ScrollView contentContainerStyle={s.page}>
-      <Badge text={orderStatusLabel(order)} tone={orderStatusTone(order.status)} />
+      <Badge text={order.payment.status === 'paid' ? 'Paiement confirmé' : orderStatusLabel(order)} tone={orderStatusTone(order.status)} />
       <Text style={s.title}>Commande #{order.id}</Text>
       <Text style={s.meta}>
         {order.pharmacyName} · {delivery ? 'Livraison estimée ' + order.eta : 'Retrait en pharmacie'}
       </Text>
+
+      <Card style={{ marginTop: 18 }}>
+        <OrderTimeline status={order.status} fulfillment={order.fulfillment} />
+      </Card>
+
+      {inTransit ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Suivi livraison</Text>
+          <DeliveryTrack
+            pharmacyName={order.pharmacyName}
+            courierName="Jean M."
+            eta="15 min"
+            distance="1,8 km"
+            status={order.status === 'picked_up' ? 'En route vers vous' : 'Assigné à votre commande'}
+          />
+          <View style={{ marginTop: 14, gap: 10 }}>
+            <Button title="Appeler le livreur" kind="secondary" onPress={() => Linking.openURL('tel:+24166000000')} />
+            <Button title="Contacter le support" kind="secondary" onPress={() => Linking.openURL('mailto:contact@gopharmapro.com')} />
+          </View>
+        </Card>
+      ) : null}
 
       {order.status !== 'delivered' && delivery && order.deliveryCode ? (
         <View style={{ marginTop: 18 }}>
@@ -45,45 +68,25 @@ export default function Order() {
           <CodeReveal
             label="Votre code de retrait"
             code={order.pickupCode}
-            hint="Présentez ce code au comptoir. Pas de livreur pour cette commande."
+            hint="Présentez ce code au comptoir."
           />
         </View>
       ) : null}
 
-      <Card style={{ marginTop: 18 }}>
-        {steps.map((step, i) => {
-          const done = i < doneUntil;
-          return (
-            <View key={step.label} style={s.step}>
-              <View style={[s.dot, done && s.done]}>{done ? <Text style={{ color: '#fff', fontWeight: '900' }}>✓</Text> : null}</View>
-              <View style={{ flex: 1 }}>
-                <Text style={[s.label, !done && { color: colors.muted }]}>{step.label}</Text>
-              </View>
-            </View>
-          );
-        })}
-      </Card>
       <Card style={{ marginTop: 16 }}>
         <Text style={s.label}>{pay.id === 'card' ? 'Paiement carte' : 'Paiement mobile'}</Text>
         <Text style={s.meta}>
-          {pay.name} ({pay.operator})
+          {pay.name} · {formatFcfa(order.total)}
         </Text>
-        <Text style={s.meta}>{order.payment.phone}</Text>
-        <Text style={s.meta}>
-          Référence {order.payment.reference} · {formatFcfa(order.total)}
-        </Text>
-      </Card>
-      <Card style={{ marginTop: 16 }}>
-        <Text style={s.label}>Répartition</Text>
-        <Text style={s.meta}>Produits : {formatFcfa(order.split?.subtotal || order.subtotal)}</Text>
-        <Text style={s.meta}>Pharmacie (après commission) : {formatFcfa(order.split?.pharmacyNet || 0)}</Text>
-        {delivery ? <Text style={s.meta}>Livreur : {formatFcfa(order.split?.courierNet || order.fee)}</Text> : <Text style={s.meta}>Livreur : non demandé</Text>}
-        <Text style={s.meta}>Go Pharma Pro : {formatFcfa(order.split?.platformFee || 0)}</Text>
+        <Text style={s.meta}>Référence {order.payment.reference}</Text>
       </Card>
       <Card style={{ marginTop: 16 }}>
         <Text style={s.label}>{delivery ? 'Adresse de livraison' : 'Lieu de retrait'}</Text>
         <Text style={s.meta}>{order.deliveryAddress}</Text>
       </Card>
+      <View style={{ marginTop: 16 }}>
+        <Button title="Aide & support" kind="secondary" onPress={() => Alert.alert('Support', 'contact@gopharmapro.com')} />
+      </View>
     </ScrollView>
   );
 }
@@ -91,9 +94,6 @@ export default function Order() {
 const s = StyleSheet.create({
   page: { padding: 20, paddingBottom: 50 },
   title: { fontSize: 27, fontWeight: '900', color: colors.text, marginTop: 12 },
-  meta: { color: colors.muted, marginTop: 5 },
-  step: { flexDirection: 'row', gap: 13, minHeight: 58 },
-  dot: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  done: { backgroundColor: colors.primary, borderColor: colors.primary },
-  label: { fontWeight: '800', color: colors.text, fontSize: 15 },
+  meta: { color: colors.muted, marginTop: 5, lineHeight: 20 },
+  label: { fontWeight: '800', color: colors.text, fontSize: 15, marginBottom: 8 },
 });

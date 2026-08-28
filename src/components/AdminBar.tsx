@@ -5,16 +5,20 @@ import { colors } from '../theme';
 export function AdminBar({ title }: { title: string }) {
   return (
     <View style={s.wrap}>
-      <Text style={s.kicker}>Administration</Text>
+      <Text style={s.kicker}>Console</Text>
       <Text style={s.title}>{title}</Text>
       <View style={s.nav}>
         {[
-          { href: '/admin-home', label: 'Synthèse' },
-          { href: '/admin-pharmacies', label: 'Officines' },
+          { href: '/admin-home', label: 'Dashboard' },
+          { href: '/admin-pharmacies', label: 'Pharmacies' },
+          { href: '/admin-clients', label: 'Clients' },
           { href: '/admin-couriers', label: 'Livreurs' },
           { href: '/admin-catalog', label: 'Produits' },
           { href: '/admin-orders', label: 'Commandes' },
-          { href: '/admin-payouts', label: 'Virements' },
+          { href: '/admin-payouts', label: 'Paiements' },
+          { href: '/admin-verifications', label: 'Vérifications' },
+          { href: '/admin-stats', label: 'Statistiques' },
+          { href: '/admin-config', label: 'Configuration' },
         ].map((l) => (
           <Pressable key={l.href} onPress={() => router.push(l.href as never)} style={s.chip}>
             <Text style={s.chipText}>{l.label}</Text>

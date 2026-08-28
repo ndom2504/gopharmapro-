@@ -89,7 +89,7 @@ function ConnexionInner() {
   const googleOk = tab === 'client' || tab === 'courier';
 
   if (session) {
-        const href = session.role === 'client' ? '/commandes' : homeFor(session.role);
+        const href = homeFor(session.role);
         return (
           <main className="mx-auto max-w-md px-4 py-16">
             <p className="text-sm font-extrabold text-brand">

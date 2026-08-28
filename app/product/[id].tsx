@@ -16,7 +16,7 @@ export default function Product() {
     const r = add(p, o);
     r === 'different-pharmacy'
       ? Alert.alert('Panier lié à une autre pharmacie', 'Créez un nouveau panier pour commander auprès de cette pharmacie.')
-      : router.push('/checkout');
+      : router.push('/(tabs)/cart');
   };
   const offers = [...p.offers].sort((a, b) => a.pharmacy.distance - b.pharmacy.distance);
   const photos = p.imageUris?.filter(Boolean) || [];

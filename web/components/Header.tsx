@@ -6,10 +6,29 @@ import { site } from '@/lib/site';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
 
-const links = [
-  { href: '/produits', label: 'Produits' },
-  { href: '/pharmacies', label: 'Pharmacies' },
-  { href: '/rejoindre', label: 'Espace pharmacie' },
+const clientLinks = [
+  { href: '/', label: 'Accueil' },
+  { href: '/produits', label: 'Rechercher' },
+  { href: '/panier', label: 'Panier' },
+  { href: '/commandes', label: 'Commandes' },
+  { href: '/compte', label: 'Profil' },
+];
+
+const pharmacyLinks = [
+  { href: '/espace-pharmacie', label: 'Dashboard' },
+  { href: '/espace-pharmacie/commandes', label: 'Commandes' },
+  { href: '/espace-pharmacie/produits', label: 'Produits' },
+  { href: '/espace-pharmacie/ordonnances', label: 'Ordonnances' },
+  { href: '/espace-pharmacie/ventes', label: 'Ventes' },
+  { href: '/espace-pharmacie/profil', label: 'Profil' },
+];
+
+const courierLinks = [
+  { href: '/espace-livreur', label: 'Accueil' },
+  { href: '/espace-livreur/livraisons', label: 'Livraisons' },
+  { href: '/espace-livreur/carte', label: 'Carte' },
+  { href: '/espace-livreur/revenus', label: 'Revenus' },
+  { href: '/espace-livreur/profil', label: 'Profil' },
 ];
 
 export function Header() {
@@ -18,7 +37,8 @@ export function Header() {
   if (path?.startsWith('/admin')) return null;
   const count = cart.reduce((a, i) => a + i.quantity, 0);
   const shopper = !session || isClient(session);
-  const accountHref = session ? (isClient(session) ? '/commandes' : homeFor(session.role)) : '/connexion';
+  const links = session?.role === 'pharmacy' ? pharmacyLinks : session?.role === 'courier' ? courierLinks : clientLinks;
+  const accountHref = session ? (isClient(session) ? '/compte' : homeFor(session.role)) : '/connexion';
   const accountLabel = session ? displayName(session) : 'Connexion';
 
   return (

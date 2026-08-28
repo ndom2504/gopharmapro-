@@ -57,6 +57,18 @@ export default function CourierRun() {
       </Text>
       <Text style={s.meta}>{formatFcfa(order.split?.courierNet || order.fee)} de livraison</Text>
 
+      {order.items.length ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Récupération</Text>
+          <Text style={s.meta}>🏥 {order.pharmacyName}</Text>
+          {order.items.map((i) => (
+            <Text key={i.offer.id} style={s.meta}>
+              {i.product.name} × {i.quantity}
+            </Text>
+          ))}
+        </Card>
+      ) : null}
+
       {order.status === 'paid' || order.status === 'preparing' ? (
         <Card style={{ marginTop: 16 }}>
           <Text style={s.label}>En attente pharmacie</Text>
@@ -72,6 +84,13 @@ export default function CourierRun() {
             hint="Dictez ce code uniquement au comptoir de la pharmacie. Sans ce code, le colis ne sort pas."
           />
         </View>
+      ) : null}
+
+      {order.status === 'ready' ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>À la pharmacie</Text>
+          <Text style={s.meta}>Dictez le code de ramassage au comptoir, puis confirmez.</Text>
+        </Card>
       ) : null}
 
       {order.status === 'picked_up' ? (
