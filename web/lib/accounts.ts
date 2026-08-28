@@ -24,6 +24,36 @@ export type ClientAccount = {
   password: string;
   provider?: AuthProvider;
   googleId?: string;
+  photoDataUrl?: string;
+  address?: string;
+  area?: string;
+  city?: string;
+  preferredPayment?: string;
+  notifyOrders?: boolean;
+  notifyOffers?: boolean;
+};
+
+export type AccountPatch = {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  area?: string;
+  city?: string;
+  commune?: string;
+  photoDataUrl?: string;
+  preferredPayment?: string;
+  notifyOrders?: boolean;
+  notifyOffers?: boolean;
+  pharmacyName?: string;
+  pharmacistName?: string;
+  professionalNumber?: string;
+  vehicle?: string;
+  plate?: string;
+  payoutPhone?: string;
+  password?: string;
+  currentPassword?: string;
 };
 
 export type PharmacyAccount = {

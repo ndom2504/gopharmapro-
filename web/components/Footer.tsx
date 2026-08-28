@@ -36,12 +36,19 @@ export function Footer() {
             <Link href="/rejoindre" className="hover:text-brand">
               Inscrire mon officine
             </Link>
+            <Link href="/conditions" className="hover:text-brand">
+              Conditions d’utilisation
+            </Link>
           </div>
         </div>
         <div>
           <p className="text-sm font-extrabold text-white">Gabon</p>
           <p className="mt-3 text-sm leading-6 text-white/65">
-            Libreville · MobiCash, Airtel, Moov et carte (Stripe).
+            Libreville
+            <br />
+            <a href={`mailto:${site.email}`} className="hover:text-brand">
+              {site.email}
+            </a>
           </p>
         </div>
       </div>

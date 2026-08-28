@@ -9,6 +9,7 @@ import {
   isPharmacy,
   pharmacyDocs,
   stripPassword,
+  type AccountPatch,
   type CourierRegisterInput,
   type IdentityStatus,
   type PharmacyRegisterInput,
@@ -42,6 +43,7 @@ type ShopCtx = {
   loginWithGoogle: (profile: GoogleProfile, role: GoogleRole) => 'ok' | 'conflict' | 'error';
   logout: () => void;
   setIdentity: (status: IdentityStatus, sessionId?: string) => void;
+  updateAccount: (patch: AccountPatch) => 'ok' | 'exists' | 'invalid';
   add: (product: Product, offer: Offer) => 'added' | 'different-pharmacy' | 'partner';
   change: (offerId: string, delta: number) => void;
   remove: (offerId: string) => void;
@@ -323,6 +325,40 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           identityStatus: status,
           identitySessionId: sessionId || session.identitySessionId,
         });
+      },
+      updateAccount: (patch) => {
+        if (!session) return 'invalid';
+        const stored = users.find((u) => u.id === session.id);
+        if (!stored) return 'invalid';
+        if (patch.email) {
+          const email = patch.email.trim().toLowerCase();
+          if (users.some((u) => u.id !== stored.id && u.role === stored.role && u.email.toLowerCase() === email)) {
+            return 'exists';
+          }
+        }
+        if (patch.phone && digits(patch.phone).length >= 7) {
+          if (
+            users.some(
+              (u) => u.id !== stored.id && u.role === stored.role && digits(u.phone) === digits(patch.phone || ''),
+            )
+          ) {
+            return 'exists';
+          }
+        }
+        if (patch.password) {
+          if (patch.password.length < 4) return 'invalid';
+          if (stored.password && patch.currentPassword !== stored.password) return 'invalid';
+        }
+        const next = { ...stored } as StoredAccount & Record<string, unknown>;
+        for (const [key, value] of Object.entries(patch)) {
+          if (key === 'currentPassword' || value === undefined) continue;
+          if (key === 'password' && !value) continue;
+          if (key === 'email' && typeof value === 'string') next.email = value.trim().toLowerCase();
+          else next[key] = value;
+        }
+        persistUsers(users.map((u) => (u.id === stored.id ? (next as StoredAccount) : u)));
+        persistSession(stripPassword(next as StoredAccount));
+        return 'ok';
       },
       add: (product, offer) => {
         if (session && !isClient(session)) return 'partner';

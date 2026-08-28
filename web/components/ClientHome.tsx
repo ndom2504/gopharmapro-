@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SearchForm } from '@/components/SearchForm';
 import { ProductNearCard } from '@/components/ProductNearCard';
-import { categories, formatKm, paymentMethods, type Pharmacy, type Product } from '@/lib/catalog';
+import { categories, formatKm, type Pharmacy, type Product } from '@/lib/catalog';
 import { CategoryPhoto } from '@/components/ProductPhoto';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
@@ -103,31 +103,11 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
         </div>
       </section>
 
-      <section className="mx-auto mt-14 max-w-6xl px-4 sm:px-6">
+      <section className="mx-auto mt-14 mb-20 max-w-6xl px-4 sm:px-6">
         <h2 className="text-[19px] font-extrabold text-ink">Produits disponibles près de vous</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {products.slice(0, 4).map((p) => (
             <ProductNearCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto mt-14 mb-20 max-w-6xl px-4 sm:px-6">
-        <h2 className="text-[19px] font-extrabold text-ink">Paiement</h2>
-        <p className="mt-2 text-sm text-muted">
-          MobiCash, Airtel Money, Moov Money et carte. L’ordonnance, si nécessaire, bloque le paiement jusqu’à validation
-          par la pharmacie.
-        </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {paymentMethods.map((m) => (
-            <div key={m.id} className="card flex items-center gap-3 p-5" style={{ background: m.background }}>
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
-              <div className="flex-1">
-                <p className="font-extrabold text-ink">{m.name}</p>
-                <p className="text-sm text-muted">{m.operator}</p>
-              </div>
-              {m.ussd ? <span className="font-bold text-muted">{m.ussd}</span> : null}
-            </div>
           ))}
         </div>
       </section>

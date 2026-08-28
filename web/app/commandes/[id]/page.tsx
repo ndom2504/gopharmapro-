@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa } from '@/lib/catalog';
 import { OrderTimeline } from '@/components/OrderTimeline';
+import { site } from '@/lib/site';
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -50,7 +51,7 @@ export default function OrderDetailPage() {
             <a href="tel:+24166000000" className="btn-secondary">
               Appeler le livreur
             </a>
-            <a href="mailto:contact@gopharmapro.com" className="btn-secondary">
+            <a href={`mailto:${site.email}`} className="btn-secondary">
               Contacter le support
             </a>
           </div>

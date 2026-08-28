@@ -49,7 +49,7 @@ export default function Order() {
           />
           <View style={{ marginTop: 14, gap: 10 }}>
             <Button title="Appeler le livreur" kind="secondary" onPress={() => Linking.openURL('tel:+24166000000')} />
-            <Button title="Contacter le support" kind="secondary" onPress={() => Linking.openURL('mailto:contact@gopharmapro.com')} />
+            <Button title="Contacter le support" kind="secondary" onPress={() => Linking.openURL('mailto:info@misterdil.ca')} />
           </View>
         </Card>
       ) : null}
@@ -85,7 +85,7 @@ export default function Order() {
         <Text style={s.meta}>{order.deliveryAddress}</Text>
       </Card>
       <View style={{ marginTop: 16 }}>
-        <Button title="Aide & support" kind="secondary" onPress={() => Alert.alert('Support', 'contact@gopharmapro.com')} />
+        <Button title="Aide & support" kind="secondary" onPress={() => Alert.alert('Support', 'info@misterdil.ca')} />
       </View>
     </ScrollView>
   );

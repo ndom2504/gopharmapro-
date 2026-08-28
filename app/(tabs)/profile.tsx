@@ -76,7 +76,7 @@ export default function Profile() {
             key={row.label}
             onPress={() => {
               if (row.href) router.push(row.href);
-              else if (row.label === 'Aide & support') Linking.openURL('mailto:contact@gopharmapro.com');
+              else if (row.label === 'Aide & support') Linking.openURL('mailto:info@misterdil.ca');
               else Alert.alert(row.label, 'Disponible dans la version complète du compte.');
             }}
             style={[s.row, i < rows.length - 1 && s.border]}
