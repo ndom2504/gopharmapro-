@@ -6,9 +6,11 @@ import {
   accountSeed,
   courierDocs,
   isClient,
+  isPharmacy,
   pharmacyDocs,
   stripPassword,
   type CourierRegisterInput,
+  type IdentityStatus,
   type PharmacyRegisterInput,
   type ShopSession,
   type StoredAccount,
@@ -39,6 +41,7 @@ type ShopCtx = {
   registerCourier: (input: CourierRegisterInput) => 'ok' | 'exists';
   loginWithGoogle: (profile: GoogleProfile, role: GoogleRole) => 'ok' | 'conflict' | 'error';
   logout: () => void;
+  setIdentity: (status: IdentityStatus, sessionId?: string) => void;
   add: (product: Product, offer: Offer) => 'added' | 'different-pharmacy' | 'partner';
   change: (offerId: string, delta: number) => void;
   remove: (offerId: string) => void;
@@ -88,7 +91,11 @@ function write(key: string, value: unknown) {
 function coerceSession(raw: unknown): ShopSession | null {
   if (!raw || typeof raw !== 'object') return null;
   const s = raw as Partial<ShopSession> & { firstName?: string; pharmacyName?: string };
-  if (s.role === 'pharmacy' || s.role === 'courier' || s.role === 'client') return s as ShopSession;
+  if (s.role === 'pharmacy') {
+    const p = s as Extract<ShopSession, { role: 'pharmacy' }>;
+    return { ...p, identityStatus: p.identityStatus || 'unverified' };
+  }
+  if (s.role === 'courier' || s.role === 'client') return s as ShopSession;
   if (s.pharmacyName) return { ...(s as object), role: 'pharmacy' } as ShopSession;
   if (s.firstName) return { ...(s as object), role: 'client' } as ShopSession;
   return null;
@@ -201,6 +208,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           province: 'Estuaire',
           managerRole: 'titulaire',
           status: 'pending',
+          identityStatus: 'unverified',
           documents: pharmacyDocs('pending', false),
         };
         persistUsers([user, ...users]);
@@ -300,6 +308,21 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       },
       logout: () => {
         persistSession(null);
+      },
+      setIdentity: (status, sessionId) => {
+        if (!isPharmacy(session)) return;
+        persistUsers(
+          users.map((u) =>
+            u.id === session.id && u.role === 'pharmacy'
+              ? { ...u, identityStatus: status, identitySessionId: sessionId || u.identitySessionId }
+              : u,
+          ),
+        );
+        persistSession({
+          ...session,
+          identityStatus: status,
+          identitySessionId: sessionId || session.identitySessionId,
+        });
       },
       add: (product, offer) => {
         if (session && !isClient(session)) return 'partner';

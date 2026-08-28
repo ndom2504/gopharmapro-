@@ -6,10 +6,12 @@ import { useShop } from '@/components/ShopProvider';
 import { isPharmacy, partnerCatalog, partnerOrders, partnerPayouts, payoutTotals } from '@/lib/accounts';
 import { formatFcfa } from '@/lib/catalog';
 import Link from 'next/link';
+import { IdentityVerify } from '@/components/IdentityVerify';
 
 const pipeline = [
   'Inscription',
   'Documents envoyés',
+  'Identité Stripe',
   'Vérification',
   'Approuvé / Rejeté',
   'Pharmacie active',
@@ -17,10 +19,14 @@ const pipeline = [
   'Ouverture aux commandes',
 ];
 
-function pipelineIndex(status: 'pending' | 'verified' | 'rejected') {
-  if (status === 'rejected') return 3;
-  if (status === 'verified') return 6;
-  return 2;
+function pipelineIndex(
+  status: 'pending' | 'verified' | 'rejected',
+  identityStatus: 'unverified' | 'pending' | 'verified' | 'canceled',
+) {
+  if (status === 'rejected') return 4;
+  if (status === 'verified') return 7;
+  if (identityStatus !== 'verified') return 2;
+  return 3;
 }
 
 function PharmacyHome() {
@@ -28,7 +34,7 @@ function PharmacyHome() {
   if (!isPharmacy(session)) return null;
 
   const verified = session.status === 'verified';
-  const current = pipelineIndex(session.status);
+  const current = pipelineIndex(session.status, session.identityStatus || 'unverified');
   const catalog = partnerCatalog.filter((i) => i.pharmacyId === session.id);
   const jobs = partnerOrders.filter((o) => o.pharmacyAccountId === session.id);
   const money = payoutTotals(
@@ -66,6 +72,7 @@ function PharmacyHome() {
           {verified ? 'Vérifié' : session.status === 'rejected' ? 'Rejeté' : 'En attente'}
         </span>
       </div>
+      <IdentityVerify />
 
       {verified ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-3">

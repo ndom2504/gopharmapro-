@@ -42,7 +42,7 @@ export default function CourierRunsPage() {
               type="button"
               onClick={() => setFilter(f.id)}
               className={`rounded-full px-3 py-1.5 text-sm font-extrabold ${
-                filter === f.id ? 'bg-brand text-white' : 'border border-border bg-white text-muted'
+                filter === f.id ? 'bg-brand text-black' : 'border border-border bg-white text-muted'
               }`}
             >
               {f.label}

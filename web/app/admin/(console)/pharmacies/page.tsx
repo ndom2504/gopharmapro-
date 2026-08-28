@@ -19,7 +19,12 @@ export default function AdminPharmaciesPage() {
                 {p.area}, {p.city} · {p.email}
               </p>
             </div>
-            <Status status={p.status} />
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <Status status={p.status} />
+              <span className={p.identityStatus === 'verified' ? 'badge-green' : 'badge-orange'}>
+                {p.identityStatus === 'verified' ? 'Identité Stripe' : 'Identité à confirmer'}
+              </span>
+            </div>
           </Link>
         ))}
       </div>

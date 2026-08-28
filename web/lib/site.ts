@@ -1,18 +1,19 @@
 export const site = {
-  name: process.env.NEXT_PUBLIC_APP_NAME || 'Go Pharma Pro',
+  name: process.env.NEXT_PUBLIC_APP_NAME || 'Gopharmapro',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://gopharmapro.com',
-  tagline: 'Médicaments et parapharmacie, livrés au Gabon.',
+  tagline: 'Commande ton médicament en ligne',
   phone: '+241 77 00 00 00',
 };
 
 export const colors = {
-  primary: '#087F5B',
-  primaryDark: '#056046',
-  mint: '#E7F7F1',
-  background: '#F6F8F7',
-  text: '#17221E',
-  muted: '#64726C',
+  primary: '#1FBF0A',
+  primaryDark: '#159208',
+  blue: '#0B2F8C',
+  mint: '#E9F8D6',
+  background: '#F3F6F1',
+  text: '#0B1220',
+  muted: '#5B6570',
   danger: '#C92A2A',
   warning: '#E67700',
-  border: '#DFE7E3',
+  border: '#D7E0D4',
 };

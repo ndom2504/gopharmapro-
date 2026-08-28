@@ -24,6 +24,26 @@ export async function createStripeCheckout(input: {
   }
 }
 
+export async function startPharmacyIdentity(input: {
+  email: string;
+  pharmacyId: string;
+  pharmacyName: string;
+}): Promise<StripeSessionResult> {
+  if (!API) return { demo: true };
+  try {
+    const res = await fetch(API + '/identity/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const data = (await res.json()) as { url?: string; id?: string; demo?: boolean };
+    if (data?.url && data.id && !data.demo) return { demo: false, url: data.url, id: data.id };
+    return { demo: true };
+  } catch {
+    return { demo: true };
+  }
+}
+
 export function formatCardNumber(input: string) {
   return input.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ').trim();
 }

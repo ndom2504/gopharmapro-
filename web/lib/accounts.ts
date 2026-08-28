@@ -1,6 +1,7 @@
 export type UserRole = 'client' | 'pharmacy' | 'courier';
 export type DocStatus = 'pending' | 'verified' | 'rejected';
 export type PharmacyStatus = 'pending' | 'verified' | 'rejected';
+export type IdentityStatus = 'unverified' | 'pending' | 'verified' | 'canceled';
 export type CourierStatus = 'pending' | 'active' | 'suspended';
 
 export type PartnerDoc = {
@@ -41,6 +42,8 @@ export type PharmacyAccount = {
   province: string;
   managerRole: string;
   status: PharmacyStatus;
+  identityStatus: IdentityStatus;
+  identitySessionId?: string;
   documents: PartnerDoc[];
 };
 
@@ -108,6 +111,7 @@ export const accountSeed: StoredAccount[] = [
     province: 'Estuaire',
     managerRole: 'titulaire',
     status: 'verified',
+    identityStatus: 'verified',
     documents: pharmacyDocs('verified'),
   },
   {
@@ -126,6 +130,7 @@ export const accountSeed: StoredAccount[] = [
     province: 'Estuaire',
     managerRole: 'titulaire',
     status: 'pending',
+    identityStatus: 'unverified',
     documents: pharmacyDocs('pending'),
   },
   {

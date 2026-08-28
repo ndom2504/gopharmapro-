@@ -2,20 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { site } from '@/lib/site';
+import { BrandLogo } from '@/components/BrandLogo';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
 
 const clientLinks = [
   { href: '/', label: 'Accueil' },
   { href: '/produits', label: 'Rechercher' },
-  { href: '/panier', label: 'Panier' },
   { href: '/commandes', label: 'Commandes' },
   { href: '/compte', label: 'Profil' },
 ];
 
 const pharmacyLinks = [
   { href: '/espace-pharmacie', label: 'Dashboard' },
+  { href: '/espace-pharmacie/identite', label: 'Identité' },
   { href: '/espace-pharmacie/commandes', label: 'Commandes' },
   { href: '/espace-pharmacie/produits', label: 'Produits' },
   { href: '/espace-pharmacie/ordonnances', label: 'Ordonnances' },
@@ -39,18 +39,17 @@ export function Header() {
   const shopper = !session || isClient(session);
   const links = session?.role === 'pharmacy' ? pharmacyLinks : session?.role === 'courier' ? courierLinks : clientLinks;
   const accountHref = session ? (isClient(session) ? '/compte' : homeFor(session.role)) : '/connexion';
-  const accountLabel = session ? displayName(session) : 'Connexion';
+  const accountLabel = session ? (isClient(session) ? displayName(session) : 'Mon espace') : 'Connexion';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-mint text-lg">💊</span>
-          <span className="text-[15px] font-extrabold tracking-tight text-ink">{site.name}</span>
+    <header className="sticky top-0 z-40 bg-black">
+      <div className="mx-auto flex h-[76px] max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+        <Link href="/" aria-label="Gopharmapro, accueil" className="shrink-0">
+          <BrandLogo size="md" priority />
         </Link>
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="text-sm font-bold text-muted hover:text-ink">
+            <Link key={l.href} href={l.href} className="text-sm font-bold text-white/70 hover:text-white">
               {l.label}
             </Link>
           ))}
@@ -60,49 +59,27 @@ export function Header() {
             <Link
               href="/panier"
               aria-label={count ? `Panier, ${count} article(s)` : 'Panier'}
-              className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-mint text-brand hover:bg-[#d8f0e6]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-brand hover:bg-white/15"
             >
               <CartIcon />
               {count ? (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-extrabold text-white">
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-extrabold text-black">
                   {count > 9 ? '9+' : count}
                 </span>
               ) : null}
             </Link>
           ) : null}
-          <Link href={accountHref} className="hidden max-w-[10rem] truncate text-sm font-extrabold text-ink sm:inline">
+          <Link href={accountHref} className="btn-primary !h-10 !px-4 text-sm !text-black">
             {accountLabel}
           </Link>
-          {session && !isClient(session) ? (
-            <Link href={homeFor(session.role)} className="btn-primary !h-10 !px-4 text-sm">
-              Mon espace
-            </Link>
-          ) : (
-            <Link href="/produits" className="btn-primary !h-10 !px-4 text-sm">
-              Commander
-            </Link>
-          )}
         </div>
       </div>
-      <nav className="flex gap-5 overflow-x-auto border-t border-border px-4 py-2.5 md:hidden">
+      <nav className="flex gap-5 overflow-x-auto border-t border-white/10 px-4 py-2.5 lg:hidden">
         {links.map((l) => (
-          <Link key={l.href} href={l.href} className="shrink-0 text-sm font-bold text-muted">
+          <Link key={l.href} href={l.href} className="shrink-0 text-sm font-bold text-white/70">
             {l.label}
           </Link>
         ))}
-        {shopper ? (
-          <Link href="/panier" className="relative shrink-0 text-brand" aria-label="Panier">
-            <CartIcon />
-            {count ? (
-              <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[9px] font-extrabold text-white">
-                {count > 9 ? '9+' : count}
-              </span>
-            ) : null}
-          </Link>
-        ) : null}
-        <Link href={accountHref} className="shrink-0 text-sm font-bold text-muted">
-          {session ? 'Compte' : 'Connexion'}
-        </Link>
       </nav>
     </header>
   );

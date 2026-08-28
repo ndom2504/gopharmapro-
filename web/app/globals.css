@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-brand: #087f5b;
-  --color-brand-dark: #056046;
-  --color-mint: #e7f7f1;
-  --color-page: #f6f8f7;
-  --color-ink: #17221e;
-  --color-muted: #64726c;
+  --color-brand: #1fbf0a;
+  --color-brand-dark: #159208;
+  --color-brand-blue: #0b2f8c;
+  --color-mint: #e9f8d6;
+  --color-page: #f3f6f1;
+  --color-ink: #0b1220;
+  --color-muted: #5b6570;
   --color-danger: #c92a2a;
   --color-warning: #e67700;
-  --color-border: #dfe7e3;
+  --color-border: #d7e0d4;
   --font-sans: var(--font-jakarta);
 }
 
@@ -28,7 +29,7 @@ body {
   background: var(--color-brand);
   padding: 0 18px;
   font-weight: 800;
-  color: #fff;
+  color: #061400;
 }
 
 .btn-primary:hover {
@@ -78,4 +79,16 @@ body {
 .badge-orange {
   background: #fff4e6;
   color: var(--color-warning);
+}
+
+.logo-pharma-glow {
+  pointer-events: none;
+  position: absolute;
+  top: 40%;
+  right: 15%;
+  left: 36%;
+  height: 30%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgb(255 255 255 / 0.38) 0%, rgb(255 255 255 / 0.14) 50%, transparent 76%);
+  mix-blend-mode: screen;
 }

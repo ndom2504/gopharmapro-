@@ -2,39 +2,50 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { BrandLogo } from '@/components/BrandLogo';
 import { site } from '@/lib/site';
 
 export function Footer() {
   const path = usePathname();
   if (path?.startsWith('/admin')) return null;
   return (
-    <footer className="mt-auto border-t border-border bg-white">
+    <footer className="mt-auto bg-black">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
-          <p className="flex items-center gap-2 font-extrabold text-ink">
-            <span>💊</span> {site.name}
-          </p>
-          <p className="mt-3 max-w-xs text-sm leading-6 text-muted">{site.tagline}</p>
+          <BrandLogo size="sm" />
+          <p className="mt-4 max-w-xs text-sm leading-6 text-white/65">{site.tagline}</p>
         </div>
         <div>
-          <p className="text-sm font-extrabold text-ink">Découvrir</p>
-          <div className="mt-3 flex flex-col gap-2 text-sm font-semibold text-muted">
-            <Link href="/produits">Comparer les produits</Link>
-            <Link href="/pharmacies">Pharmacies vérifiées</Link>
-            <Link href="/panier">Panier</Link>
-            <Link href="/connexion">Connexion</Link>
-            <Link href="/connexion?role=courier">Espace livreur</Link>
-            <Link href="/rejoindre">Inscrire mon officine</Link>
+          <p className="text-sm font-extrabold text-white">Découvrir</p>
+          <div className="mt-3 flex flex-col gap-2 text-sm font-semibold text-white/65">
+            <Link href="/produits" className="hover:text-brand">
+              Comparer les produits
+            </Link>
+            <Link href="/pharmacies" className="hover:text-brand">
+              Pharmacies vérifiées
+            </Link>
+            <Link href="/panier" className="hover:text-brand">
+              Panier
+            </Link>
+            <Link href="/connexion" className="hover:text-brand">
+              Connexion
+            </Link>
+            <Link href="/connexion?role=courier" className="hover:text-brand">
+              Espace livreur
+            </Link>
+            <Link href="/rejoindre" className="hover:text-brand">
+              Inscrire mon officine
+            </Link>
           </div>
         </div>
         <div>
-          <p className="text-sm font-extrabold text-ink">Gabon</p>
-          <p className="mt-3 text-sm leading-6 text-muted">
+          <p className="text-sm font-extrabold text-white">Gabon</p>
+          <p className="mt-3 text-sm leading-6 text-white/65">
             Libreville · MobiCash, Airtel, Moov et carte (Stripe).
           </p>
         </div>
       </div>
-      <p className="border-t border-border px-4 py-5 text-center text-xs leading-5 text-muted">
+      <p className="border-t border-white/10 px-4 py-5 text-center text-xs leading-5 text-white/45">
         Prototype. {site.name} ne fournit pas de conseil médical. Les médicaments soumis à
         ordonnance ne sont payés qu’après validation par la pharmacie.
       </p>

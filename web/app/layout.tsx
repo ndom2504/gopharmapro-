@@ -19,12 +19,17 @@ export const metadata: Metadata = {
     template: `%s · ${site.name}`,
   },
   description: site.tagline,
+  icons: {
+    icon: '/brand/mark.png',
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     title: site.name,
     description: site.tagline,
     url: site.url,
     locale: 'fr_GA',
     type: 'website',
+    images: [{ url: '/og.png', width: 1022, height: 309, alt: 'Gopharmapro' }],
   },
 };
 

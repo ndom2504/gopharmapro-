@@ -29,6 +29,9 @@ export default async function AdminPharmacyDetailPage({
         >
           {pharmacy.status === 'verified' ? 'Vérifiée' : pharmacy.status === 'rejected' ? 'Rejetée' : 'En attente'}
         </span>
+        <span className={pharmacy.identityStatus === 'verified' ? 'badge-green ml-2' : 'badge-orange ml-2'}>
+          {pharmacy.identityStatus === 'verified' ? 'Identité Stripe' : 'Identité à confirmer'}
+        </span>
       </div>
       <div className="card mt-6 p-5">
         <p className="text-sm font-extrabold text-ink">Responsable</p>

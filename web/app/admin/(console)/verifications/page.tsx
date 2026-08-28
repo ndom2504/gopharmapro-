@@ -21,6 +21,9 @@ export default function AdminVerificationsPage() {
             <Link key={p.id} href={`/admin/pharmacies/${p.id}`} className="card block p-5">
               <p className="font-extrabold text-ink">{p.pharmacyName}</p>
               <span className="badge-orange mt-2 inline-flex">En attente</span>
+              <span className={p.identityStatus === 'verified' ? 'badge-green mt-2 ml-2 inline-flex' : 'badge-orange mt-2 ml-2 inline-flex'}>
+                {p.identityStatus === 'verified' ? 'Identité Stripe' : 'Identité à confirmer'}
+              </span>
             </Link>
           ))}
         </div>

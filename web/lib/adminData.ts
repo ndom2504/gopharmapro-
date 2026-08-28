@@ -34,6 +34,7 @@ export type AdminPharmacy = {
   fee: number;
   eta: string;
   status: PharmacyStatus;
+  identityStatus: 'unverified' | 'pending' | 'verified' | 'canceled';
   documents: AdminDocument[];
 };
 
@@ -141,6 +142,7 @@ let state: AdminState = {
       fee: 1000,
       eta: '25-35 min',
       status: 'verified',
+      identityStatus: 'verified',
       documents: pharmacyDocs('verified', true),
     },
     {
@@ -164,6 +166,7 @@ let state: AdminState = {
       fee: 1500,
       eta: '35-45 min',
       status: 'pending',
+      identityStatus: 'unverified',
       documents: pharmacyDocs('pending', true),
     },
   ],

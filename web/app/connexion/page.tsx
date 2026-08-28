@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { GoogleButton } from '@/components/GoogleButton';
+import { BrandLogo } from '@/components/BrandLogo';
 import { displayName, homeFor, type UserRole } from '@/lib/accounts';
 import type { GoogleProfile } from '@/lib/google';
 
@@ -126,7 +127,8 @@ function ConnexionInner() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-3xl font-extrabold text-ink">Connexion</h1>
+      <BrandLogo framed size="md" priority />
+      <h1 className="mt-6 text-3xl font-extrabold text-ink">Connexion</h1>
       <p className="mt-2 text-sm leading-6 text-muted">{copy.meta}</p>
       <div className="mt-6 grid grid-cols-3 gap-1 rounded-2xl border border-border bg-white p-1">
         {roles.map((r) => (
@@ -138,7 +140,7 @@ function ConnexionInner() {
               setError('');
               setMode('login');
             }}
-            className={`h-10 rounded-xl text-xs font-extrabold ${tab === r.id ? 'bg-brand text-white' : 'text-muted'}`}
+            className={`h-10 rounded-xl text-xs font-extrabold ${tab === r.id ? 'bg-brand text-black' : 'text-muted'}`}
           >
             {r.label}
           </button>

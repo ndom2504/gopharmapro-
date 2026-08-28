@@ -6,7 +6,7 @@ const steps = [
   { n: '2', title: 'Pharmacien responsable', text: 'Titulaire, gérant ou responsable, avec numéro professionnel.' },
   { n: '3', title: 'Localisation', text: 'Province, ville, commune, quartier et GPS confirmé.' },
   { n: '4', title: 'Horaires et services', text: 'Ouverture, livraison, rayon et frais.' },
-  { n: '5', title: 'Documents privés', text: 'Pièces de vérification, hors marketplace public.' },
+  { n: '5', title: 'Identité Stripe', text: 'Le pharmacien responsable confirme sa pièce d’identité et un selfie via Stripe Identity.' },
   { n: '6', title: 'Compte de connexion', text: 'E-mail, mot de passe et conditions.' },
 ];
 

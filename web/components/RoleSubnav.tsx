@@ -21,7 +21,7 @@ export function RoleSubnav({
             key={item.href}
             href={item.href}
             className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-extrabold ${
-              on ? 'bg-brand text-white' : 'border border-border bg-white text-muted'
+              on ? 'bg-brand text-black' : 'border border-border bg-white text-muted'
             }`}
           >
             {item.label}
@@ -42,6 +42,7 @@ export const courierNav = [
 
 export const pharmacyNav = [
   { href: '/espace-pharmacie', label: 'Dashboard' },
+  { href: '/espace-pharmacie/identite', label: 'Identité' },
   { href: '/espace-pharmacie/commandes', label: 'Commandes' },
   { href: '/espace-pharmacie/produits', label: 'Produits' },
   { href: '/espace-pharmacie/ordonnances', label: 'Ordonnances' },

@@ -1,10 +1,12 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { Badge, Button, Card } from '../src/components/UI';
 import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
+import { startPharmacyIdentity } from '../src/lib/stripePay';
 
 export default function PharmacyProfile() {
   const session = useAuth((s) => s.session);
@@ -31,6 +33,32 @@ export default function PharmacyProfile() {
           <Text style={s.meta}>
             {session.address}, {session.area}, {session.city}
           </Text>
+        </Card>
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.name}>Identité Stripe</Text>
+          <Text style={s.meta}>
+            Le pharmacien responsable confirme sa pièce d’identité et un selfie via Stripe Identity.
+          </Text>
+          <View style={{ marginTop: 14 }}>
+            <Button
+              title="Vérifier mon identité"
+              onPress={async () => {
+                const result = await startPharmacyIdentity({
+                  email: session.email,
+                  pharmacyId: session.id,
+                  pharmacyName: session.pharmacyName,
+                });
+                if (!result.demo) {
+                  await WebBrowser.openBrowserAsync(result.url);
+                  return;
+                }
+                Alert.alert(
+                  'Mode démo',
+                  'Ajoutez STRIPE_SECRET_KEY sur le site pour lancer le vrai contrôle Stripe Identity.',
+                );
+              }}
+            />
+          </View>
         </Card>
         <View style={{ marginTop: 18 }}>
           <Button title="Déconnexion" kind="secondary" onPress={leave} />

@@ -171,6 +171,7 @@ export type PharmacyAccount = {
   deliveryEta: string;
   documents: PharmacyDocument[];
   status: PharmacyStatus;
+  identityStatus?: 'unverified' | 'pending' | 'verified' | 'canceled';
   visibleOnMarketplace: boolean;
 };
 

@@ -5,6 +5,7 @@ import { RequireRole } from '@/components/RequireRole';
 import { RoleSubnav, pharmacyNav } from '@/components/RoleSubnav';
 import { useShop } from '@/components/ShopProvider';
 import { isPharmacy } from '@/lib/accounts';
+import { IdentityVerify } from '@/components/IdentityVerify';
 
 export default function PharmacyProfilePage() {
   const { session, logout } = useShop();
@@ -59,6 +60,7 @@ export default function PharmacyProfilePage() {
             </ul>
           </section>
         ) : null}
+        <IdentityVerify />
         <button
           type="button"
           className="btn-secondary mt-8 w-full"
