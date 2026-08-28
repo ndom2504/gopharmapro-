@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PharmaMarket",
+    "name": "Go Pharma Pro",
     "slug": "pharmarket-mobile",
     "scheme": "pharmarket",
     "version": "0.1.0",
@@ -11,7 +11,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "PharmaMarket utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
+          "locationWhenInUsePermission": "Go Pharma Pro utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
         }
       ]
     ],
@@ -19,7 +19,7 @@
       "bundleIdentifier": "ga.pharmamarket.app",
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "PharmaMarket utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
+        "NSLocationWhenInUseUsageDescription": "Go Pharma Pro utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
       }
     },
     "android": {

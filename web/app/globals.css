@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand: #087f5b;
+  --color-brand-dark: #056046;
+  --color-mint: #e7f7f1;
+  --color-page: #f6f8f7;
+  --color-ink: #17221e;
+  --color-muted: #64726c;
+  --color-danger: #c92a2a;
+  --color-warning: #e67700;
+  --color-border: #dfe7e3;
+  --font-sans: var(--font-jakarta);
+}
+
+html,
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+}
+
+.btn-primary {
+  display: inline-flex;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--color-brand);
+  padding: 0 18px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--color-brand-dark);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  padding: 0 18px;
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgb(16 38 29 / 0.06);
+}
+
+.badge-green,
+.badge-red {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.badge-green {
+  background: var(--color-mint);
+  color: var(--color-brand-dark);
+}
+
+.badge-red {
+  background: #fde8e8;
+  color: var(--color-danger);
+}
