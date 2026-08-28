@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa, paymentMethods } from '@/lib/catalog';
+import { homeFor, isClient } from '@/lib/accounts';
 
 function parseGabonPhone(input: string) {
   let digits = input.replace(/\D/g, '');
@@ -19,7 +20,7 @@ function CheckoutForm() {
   const { cart, session, ready } = useShop();
   const router = useRouter();
   const [method, setMethod] = useState<string | null>(null);
-  const [phone, setPhone] = useState(session?.phone.replace('+241 ', '') || '');
+  const [phone, setPhone] = useState(session && isClient(session) ? session.phone.replace('+241 ', '') : '');
   const [fulfillment, setFulfillment] = useState<'pickup' | 'delivery'>('pickup');
   const [error, setError] = useState('');
   const pharmacy = cart[0]?.offer.pharmacy;
@@ -31,6 +32,10 @@ function CheckoutForm() {
 
   useEffect(() => {
     if (!ready) return;
+    if (session && !isClient(session)) {
+      router.replace(homeFor(session.role));
+      return;
+    }
     if (cart.length && !session) router.replace('/connexion?next=/commande');
   }, [ready, cart.length, session, router]);
 
@@ -47,7 +52,7 @@ function CheckoutForm() {
     );
   }
 
-  if (!session) return null;
+  if (!session || !isClient(session)) return null;
 
   const pay = () => {
     setError('');

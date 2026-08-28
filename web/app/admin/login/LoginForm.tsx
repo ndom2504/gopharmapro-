@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@gopharmapro.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,6 @@ export function AdminLoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           type="password"
           autoComplete="current-password"
-          placeholder="demo123"
           className="mt-1 h-12 w-full rounded-2xl border border-border bg-white px-4 font-semibold text-ink outline-none focus:border-brand"
         />
       </label>

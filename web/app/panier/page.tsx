@@ -1,12 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa } from '@/lib/catalog';
 import { ProductPhoto } from '@/components/ProductPhoto';
+import { homeFor, isClient } from '@/lib/accounts';
 
 export default function PanierPage() {
-  const { cart, change, remove } = useShop();
+  const { cart, change, remove, session, ready } = useShop();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!ready) return;
+    if (session && !isClient(session)) router.replace(homeFor(session.role));
+  }, [ready, session, router]);
+
+  if (!ready || (session && !isClient(session))) return null;
+
   const subtotal = cart.reduce((a, i) => a + i.offer.price * i.quantity, 0);
   if (!cart.length) {
     return (

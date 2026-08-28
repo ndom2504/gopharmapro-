@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { adminStats } from '@/lib/adminData';
 import { formatFcfa } from '@/lib/catalog';
 
-export const metadata = { title: 'Administration' };
+export const metadata = { title: 'Console' };
 export const dynamic = 'force-dynamic';
 
 export default function AdminHomePage() {

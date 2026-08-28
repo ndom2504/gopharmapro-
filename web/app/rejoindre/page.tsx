@@ -20,11 +20,8 @@ export default function JoinPage() {
       </p>
       <h1 className="mt-4 text-3xl font-extrabold text-ink">Inscrivez votre pharmacie</h1>
       <p className="mt-3 leading-7 text-muted">
-        Même parcours que l’application {site.name} : six étapes, puis une vérification dans l’espace{' '}
-        <Link href="/admin" className="font-extrabold text-brand">
-          administration
-        </Link>
-        . L’officine n’apparaît sur la marketplace qu’une fois le dossier validé.
+        Même parcours que l’application {site.name} : six étapes, puis une vérification du dossier. L’officine n’apparaît
+        sur la marketplace qu’une fois le compte validé.
       </p>
       <div className="mt-8 grid gap-3">
         {steps.map((s) => (
@@ -40,13 +37,19 @@ export default function JoinPage() {
         ))}
       </div>
       <div className="mt-10 flex flex-wrap gap-3">
-        <Link href="/pharmacies" className="btn-secondary">
-          Voir les pharmacies déjà listées
+        <Link href="/connexion?role=pharmacy&mode=register" className="btn-primary">
+          Créer l’espace pharmacie
         </Link>
-        <a href="mailto:contact@gopharmapro.com" className="btn-primary">
-          contact@gopharmapro.com
-        </a>
+        <Link href="/connexion?role=pharmacy" className="btn-secondary">
+          J’ai déjà un compte
+        </Link>
       </div>
+      <p className="mt-8 text-sm leading-6 text-muted">
+        Vous livrez pour {site.name} ?{' '}
+        <Link href="/connexion?role=courier&mode=register" className="font-extrabold text-brand">
+          Devenir livreur
+        </Link>
+      </p>
     </main>
   );
 }

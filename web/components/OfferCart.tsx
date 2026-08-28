@@ -5,16 +5,25 @@ import { useRouter } from 'next/navigation';
 import type { Offer, Product } from '@/lib/catalog';
 import { formatFcfa } from '@/lib/catalog';
 import { useShop } from '@/components/ShopProvider';
+import { isClient } from '@/lib/accounts';
 
 export function OfferCart({ product }: { product: Product }) {
-  const { add } = useShop();
+  const { add, session } = useShop();
   const router = useRouter();
   const [error, setError] = useState('');
 
   const onAdd = (offer: Offer) => {
+    if (session && !isClient(session)) {
+      setError('Le catalogue se commande avec un compte client.');
+      return;
+    }
     const result = add(product, offer);
     if (result === 'different-pharmacy') {
       setError('Le panier est déjà lié à une autre pharmacie. Videz-le pour commander ici.');
+      return;
+    }
+    if (result === 'partner') {
+      setError('Le catalogue se commande avec un compte client.');
       return;
     }
     router.push('/panier');

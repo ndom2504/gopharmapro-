@@ -25,7 +25,7 @@ export function AdminNav() {
   return (
     <aside className="border-b border-border bg-white md:w-60 md:shrink-0 md:border-b-0 md:border-r">
       <div className="px-5 py-5">
-        <p className="text-xs font-extrabold tracking-wide text-brand uppercase">Administration</p>
+        <p className="text-xs font-extrabold tracking-wide text-brand uppercase">Console</p>
         <p className="mt-1 text-lg font-extrabold text-ink">Go Pharma Pro</p>
       </div>
       <nav className="flex gap-2 overflow-x-auto px-4 pb-4 md:flex-col md:overflow-visible">

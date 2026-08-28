@@ -1,19 +1,24 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import path from 'path';
+import { loadEnvConfig } from '@next/env';
+
+loadEnvConfig(process.cwd());
+loadEnvConfig(path.join(process.cwd(), '..'));
 
 export const ADMIN_COOKIE = 'gpp_admin';
 
 function expectedEmail() {
-  return (process.env.ADMIN_EMAIL || 'admin@gopharmapro.com').trim().toLowerCase();
+  return (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 }
 
 function adminPassword() {
-  return process.env.ADMIN_PASSWORD || 'demo123';
+  return process.env.ADMIN_PASSWORD || '';
 }
 
 export function adminToken() {
-  return createHmac('sha256', adminPassword()).update('gopharmapro-admin-v1').digest('hex');
+  return createHmac('sha256', adminPassword() || 'unset').update('gopharmapro-admin-v1').digest('hex');
 }
 
 function same(a: string, b: string) {
@@ -24,15 +29,19 @@ function same(a: string, b: string) {
 }
 
 export function credentialsOk(email: string, password: string) {
+  const expected = expectedEmail();
+  const secret = adminPassword();
+  if (!expected || !secret) return false;
   const mail = email.trim().toLowerCase();
-  if (!mail || !same(mail, expectedEmail())) return false;
-  return same(password, adminPassword());
+  if (!mail || !password) return false;
+  if (!same(mail, expected)) return false;
+  return same(password, secret);
 }
 
 export async function isAdminSession() {
   const jar = await cookies();
   const value = jar.get(ADMIN_COOKIE)?.value || '';
-  if (!value) return false;
+  if (!value || !adminPassword()) return false;
   return same(value, adminToken());
 }
 

@@ -23,6 +23,7 @@ export function Footer() {
             <Link href="/pharmacies">Pharmacies vérifiées</Link>
             <Link href="/panier">Panier</Link>
             <Link href="/connexion">Connexion</Link>
+            <Link href="/connexion?role=courier">Espace livreur</Link>
             <Link href="/rejoindre">Inscrire mon officine</Link>
           </div>
         </div>

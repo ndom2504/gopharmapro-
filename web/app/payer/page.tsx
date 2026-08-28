@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa, paymentMethods } from '@/lib/catalog';
+import { homeFor, isClient } from '@/lib/accounts';
 
 function PayInner() {
   const params = useSearchParams();
@@ -12,7 +13,7 @@ function PayInner() {
   const phone = params.get('phone') || '';
   const total = Number(params.get('total') || 0);
   const fulfillment = params.get('fulfillment') === 'delivery' ? 'delivery' : 'pickup';
-  const { cart, placeOrder, ready } = useShop();
+  const { cart, placeOrder, ready, session } = useShop();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const done = useRef(false);
@@ -23,6 +24,12 @@ function PayInner() {
 
   useEffect(() => {
     if (!ready) return;
+    if (session && !isClient(session)) router.replace(homeFor(session.role));
+  }, [ready, session, router]);
+
+  useEffect(() => {
+    if (!ready) return;
+    if (session && !isClient(session)) return;
     if (!cartRef.current.length) return;
     const t1 = setTimeout(() => setStep(1), 900);
     const t2 = setTimeout(() => setStep(2), 2200);

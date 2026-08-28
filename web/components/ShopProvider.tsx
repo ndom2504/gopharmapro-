@@ -2,14 +2,18 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Offer, Product } from '@/lib/catalog';
-
-export type ClientSession = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string;
-};
+import {
+  accountSeed,
+  courierDocs,
+  isClient,
+  pharmacyDocs,
+  stripPassword,
+  type CourierRegisterInput,
+  type PharmacyRegisterInput,
+  type ShopSession,
+  type StoredAccount,
+  type UserRole,
+} from '@/lib/accounts';
 
 export type CartLine = { product: Product; offer: Offer; quantity: number };
 
@@ -23,38 +27,27 @@ export type ShopOrder = {
   items: { name: string; quantity: number; price: number }[];
 };
 
-type StoredUser = ClientSession & { password: string };
-
 type ShopCtx = {
   ready: boolean;
-  session: ClientSession | null;
+  session: ShopSession | null;
   cart: CartLine[];
   orders: ShopOrder[];
-  login: (identifier: string, password: string) => 'ok' | 'invalid';
-  register: (input: Omit<StoredUser, 'id'>) => 'ok' | 'exists';
+  login: (identifier: string, password: string, role: UserRole) => 'ok' | 'invalid';
+  register: (input: { firstName: string; lastName: string; email: string; phone: string; password: string }) => 'ok' | 'exists';
+  registerPharmacy: (input: PharmacyRegisterInput) => 'ok' | 'exists';
+  registerCourier: (input: CourierRegisterInput) => 'ok' | 'exists';
   logout: () => void;
-  add: (product: Product, offer: Offer) => 'added' | 'different-pharmacy';
+  add: (product: Product, offer: Offer) => 'added' | 'different-pharmacy' | 'partner';
   change: (offerId: string, delta: number) => void;
   remove: (offerId: string) => void;
   clearCart: () => void;
   placeOrder: (input: { paymentLabel: string; fulfillment: 'pickup' | 'delivery'; total: number }) => ShopOrder | null;
 };
 
-const SESSION_KEY = 'gpp-client';
-const USERS_KEY = 'gpp-users';
+const SESSION_KEY = 'gpp-session-v2';
+const USERS_KEY = 'gpp-accounts-v2';
 const CART_KEY = 'gpp-cart';
 const ORDERS_KEY = 'gpp-orders';
-
-const seed: StoredUser[] = [
-  {
-    id: 'c-awa',
-    firstName: 'Awa',
-    lastName: 'Diop',
-    phone: '+241 77 00 00 00',
-    email: 'awa@pharmamarket.ga',
-    password: 'demo123',
-  },
-];
 
 const ShopContext = createContext<ShopCtx | null>(null);
 
@@ -76,29 +69,47 @@ function write(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+function coerceSession(raw: unknown): ShopSession | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const s = raw as Partial<ShopSession> & { firstName?: string; pharmacyName?: string };
+  if (s.role === 'pharmacy' || s.role === 'courier' || s.role === 'client') return s as ShopSession;
+  if (s.pharmacyName) return { ...(s as object), role: 'pharmacy' } as ShopSession;
+  if (s.firstName) return { ...(s as object), role: 'client' } as ShopSession;
+  return null;
+}
+
+const ShopContextInner = ShopContext;
+
 export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
-  const [users, setUsers] = useState<StoredUser[]>(seed);
-  const [session, setSession] = useState<ClientSession | null>(null);
+  const [users, setUsers] = useState<StoredAccount[]>(accountSeed);
+  const [session, setSession] = useState<ShopSession | null>(null);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [orders, setOrders] = useState<ShopOrder[]>([]);
 
   useEffect(() => {
-    const storedUsers = read<StoredUser[]>(USERS_KEY, []);
-    const merged = [...seed];
+    const storedUsers = read<StoredAccount[]>(USERS_KEY, []);
+    const merged = [...accountSeed];
     for (const u of storedUsers) {
-      if (!merged.some((x) => x.id === u.id || x.email === u.email)) merged.push(u);
+      if (!u?.role || !u.id) continue;
+      if (!merged.some((x) => x.id === u.id || (x.role === u.role && x.email === u.email))) merged.push(u);
     }
     setUsers(merged);
-    setSession(read<ClientSession | null>(SESSION_KEY, null));
+    setSession(coerceSession(read<unknown>(SESSION_KEY, null)));
     setCart(read<CartLine[]>(CART_KEY, []));
     setOrders(read<ShopOrder[]>(ORDERS_KEY, []));
     setReady(true);
   }, []);
 
-  const persistUsers = (next: StoredUser[]) => {
+  const persistUsers = (next: StoredAccount[]) => {
     setUsers(next);
     write(USERS_KEY, next);
+  };
+
+  const persistSession = (next: ShopSession | null) => {
+    setSession(next);
+    if (next) write(SESSION_KEY, next);
+    else localStorage.removeItem(SESSION_KEY);
   };
 
   const value = useMemo<ShopCtx>(
@@ -107,36 +118,113 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       session,
       cart,
       orders,
-      login: (identifier, password) => {
+      login: (identifier, password, role) => {
         const id = identifier.trim().toLowerCase();
         const phone = digits(identifier);
         const user = users.find(
           (u) =>
+            u.role === role &&
             u.password === password &&
             (u.email.toLowerCase() === id || (phone.length >= 7 && digits(u.phone) === phone)),
         );
         if (!user) return 'invalid';
-        const next = { id: user.id, firstName: user.firstName, lastName: user.lastName, phone: user.phone, email: user.email };
-        setSession(next);
-        write(SESSION_KEY, next);
+        persistSession(stripPassword(user));
         return 'ok';
       },
       register: (input) => {
-        if (users.some((u) => u.email.toLowerCase() === input.email.trim().toLowerCase() || digits(u.phone) === digits(input.phone))) {
+        const email = input.email.trim().toLowerCase();
+        if (
+          users.some(
+            (u) =>
+              u.role === 'client' &&
+              (u.email.toLowerCase() === email || digits(u.phone) === digits(input.phone)),
+          )
+        ) {
           return 'exists';
         }
-        const user: StoredUser = { ...input, id: 'c-' + Date.now(), email: input.email.trim().toLowerCase() };
+        const user: StoredAccount = {
+          role: 'client',
+          id: 'c-' + Date.now(),
+          firstName: input.firstName.trim(),
+          lastName: input.lastName.trim(),
+          email,
+          phone: input.phone.trim(),
+          password: input.password,
+        };
         persistUsers([user, ...users]);
-        const next = { id: user.id, firstName: user.firstName, lastName: user.lastName, phone: user.phone, email: user.email };
-        setSession(next);
-        write(SESSION_KEY, next);
+        persistSession(stripPassword(user));
+        return 'ok';
+      },
+      registerPharmacy: (input) => {
+        const email = input.email.trim().toLowerCase();
+        if (
+          users.some(
+            (u) =>
+              u.role === 'pharmacy' &&
+              (u.email.toLowerCase() === email || digits(u.phone) === digits(input.phone)),
+          )
+        ) {
+          return 'exists';
+        }
+        const user: StoredAccount = {
+          role: 'pharmacy',
+          id: 'ph-' + Date.now(),
+          pharmacyName: input.pharmacyName.trim(),
+          pharmacistName: input.pharmacistName.trim(),
+          professionalNumber: input.professionalNumber.trim(),
+          phone: input.phone.trim(),
+          email,
+          password: input.password,
+          address: input.address.trim(),
+          area: input.area.trim() || 'Centre-ville',
+          commune: input.city.trim() || 'Libreville',
+          city: input.city.trim() || 'Libreville',
+          province: 'Estuaire',
+          managerRole: 'titulaire',
+          status: 'pending',
+          documents: pharmacyDocs('pending', false),
+        };
+        persistUsers([user, ...users]);
+        persistSession(stripPassword(user));
+        return 'ok';
+      },
+      registerCourier: (input) => {
+        const email = input.email.trim().toLowerCase();
+        if (
+          users.some(
+            (u) =>
+              u.role === 'courier' &&
+              (u.email.toLowerCase() === email || digits(u.phone) === digits(input.phone)),
+          )
+        ) {
+          return 'exists';
+        }
+        const user: StoredAccount = {
+          role: 'courier',
+          id: 'd-' + Date.now(),
+          firstName: input.firstName.trim(),
+          lastName: input.lastName.trim(),
+          phone: input.phone.trim(),
+          email,
+          password: input.password,
+          vehicle: input.vehicle || 'moto',
+          plate: input.plate.trim().toUpperCase(),
+          area: '',
+          city: input.city.trim() || 'Libreville',
+          province: 'Estuaire',
+          payoutPhone: input.phone.trim(),
+          status: 'pending',
+          documents: courierDocs('pending', false),
+        };
+        persistUsers([user, ...users]);
+        persistSession(stripPassword(user));
         return 'ok';
       },
       logout: () => {
-        setSession(null);
-        localStorage.removeItem(SESSION_KEY);
+        persistSession(null);
       },
       add: (product, offer) => {
+        if (session && !isClient(session)) return 'partner';
         if (cart.length && cart[0].offer.pharmacy.id !== offer.pharmacy.id) return 'different-pharmacy';
         const found = cart.find((i) => i.offer.id === offer.id);
         const next = found
@@ -161,7 +249,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         write(CART_KEY, []);
       },
       placeOrder: (input) => {
-        if (!cart.length) return null;
+        if (!cart.length || !isClient(session)) return null;
         const order: ShopOrder = {
           id: 'PM-' + String(1000 + orders.length + 1),
           createdAt: new Date().toISOString(),
@@ -182,7 +270,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     [ready, session, cart, orders, users],
   );
 
-  return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
+  return <ShopContextInner.Provider value={value}>{children}</ShopContextInner.Provider>;
 }
 
 export function useShop() {
@@ -190,3 +278,5 @@ export function useShop() {
   if (!ctx) throw new Error('useShop');
   return ctx;
 }
+
+export type { ShopSession };

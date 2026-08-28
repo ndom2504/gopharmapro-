@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa } from '@/lib/catalog';
+import { homeFor, isClient } from '@/lib/accounts';
 
 function formatCardNumber(input: string) {
   return input.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ').trim();
@@ -25,7 +26,7 @@ function PayCardInner() {
   const params = useSearchParams();
   const total = Number(params.get('total') || 0);
   const fulfillment = params.get('fulfillment') === 'delivery' ? 'delivery' : 'pickup';
-  const { cart, placeOrder } = useShop();
+  const { cart, placeOrder, session, ready } = useShop();
   const router = useRouter();
   const done = useRef(false);
   const [busy, setBusy] = useState(false);
@@ -33,6 +34,11 @@ function PayCardInner() {
   const [number, setNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
+
+  useEffect(() => {
+    if (!ready) return;
+    if (session && !isClient(session)) router.replace(homeFor(session.role));
+  }, [ready, session, router]);
 
   const finish = (label: string) => {
     if (done.current || !cart.length) return;

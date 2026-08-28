@@ -1,11 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa } from '@/lib/catalog';
+import { displayName, homeFor, isClient } from '@/lib/accounts';
 
 export default function CommandesPage() {
-  const { session, orders, logout } = useShop();
+  const { session, orders, logout, ready } = useShop();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!ready) return;
+    if (session && !isClient(session)) router.replace(homeFor(session.role));
+  }, [ready, session, router]);
+
+  if (!ready || (session && !isClient(session))) return null;
+
   if (!session) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 text-center">
@@ -22,7 +34,7 @@ export default function CommandesPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-ink">Mes commandes</h1>
-          <p className="mt-1 text-sm text-muted">{session.firstName} {session.lastName}</p>
+          <p className="mt-1 text-sm text-muted">{displayName(session)} {isClient(session) ? session.lastName : ''}</p>
         </div>
         <button type="button" className="btn-secondary !h-10 text-sm" onClick={logout}>
           Déconnexion
