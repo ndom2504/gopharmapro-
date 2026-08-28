@@ -1,0 +1,133 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useShop } from '@/components/ShopProvider';
+import { formatFcfa, paymentMethods } from '@/lib/catalog';
+
+function parseGabonPhone(input: string) {
+  let digits = input.replace(/\D/g, '');
+  if (digits.startsWith('241')) digits = digits.slice(3);
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  if (!/^[2-7]\d{6,7}$/.test(digits)) return null;
+  const groups = digits.match(/.{1,2}/g)?.join(' ') || digits;
+  return '+241 ' + groups;
+}
+
+function CheckoutForm() {
+  const { cart, session, ready } = useShop();
+  const router = useRouter();
+  const [method, setMethod] = useState<string | null>(null);
+  const [phone, setPhone] = useState(session?.phone.replace('+241 ', '') || '');
+  const [fulfillment, setFulfillment] = useState<'pickup' | 'delivery'>('pickup');
+  const [error, setError] = useState('');
+  const pharmacy = cart[0]?.offer.pharmacy;
+  const canDelivery = !!pharmacy?.delivery;
+  const mode = !canDelivery ? 'pickup' : fulfillment;
+  const subtotal = cart.reduce((a, i) => a + i.offer.price * i.quantity, 0);
+  const fee = mode === 'delivery' ? pharmacy?.fee || 0 : 0;
+  const total = subtotal + fee;
+
+  useEffect(() => {
+    if (!ready) return;
+    if (cart.length && !session) router.replace('/connexion?next=/commande');
+  }, [ready, cart.length, session, router]);
+
+  if (!ready) return null;
+
+  if (!cart.length) {
+    return (
+      <main className="mx-auto max-w-lg px-4 py-16 text-center">
+        <h1 className="text-3xl font-extrabold text-ink">Panier vide</h1>
+        <Link href="/produits" className="btn-primary mt-8 inline-flex">
+          Voir les produits
+        </Link>
+      </main>
+    );
+  }
+
+  if (!session) return null;
+
+  const pay = () => {
+    setError('');
+    if (!method) {
+      setError('Choisissez un moyen de paiement.');
+      return;
+    }
+    if (method === 'card') {
+      router.push(`/payer/carte?total=${total}&fulfillment=${mode}`);
+      return;
+    }
+    const parsed = parseGabonPhone(phone);
+    if (!parsed) {
+      setError('Entrez un numéro gabonais valide, ex. 77 12 34 56.');
+      return;
+    }
+    router.push(`/payer?method=${method}&phone=${encodeURIComponent(parsed)}&total=${total}&fulfillment=${mode}`);
+  };
+
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <h1 className="text-3xl font-extrabold text-ink">Finaliser la commande</h1>
+      <p className="mt-2 text-sm text-muted">{pharmacy?.name} · {cart.length} article(s)</p>
+      <div className="mt-6 grid gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => setFulfillment('pickup')}
+          className={`card p-4 text-left font-extrabold ${mode === 'pickup' ? 'border-brand' : ''}`}
+        >
+          Retrait
+        </button>
+        <button
+          type="button"
+          disabled={!canDelivery}
+          onClick={() => setFulfillment('delivery')}
+          className={`card p-4 text-left font-extrabold disabled:opacity-40 ${mode === 'delivery' ? 'border-brand' : ''}`}
+        >
+          Livraison {pharmacy?.fee ? `· ${formatFcfa(pharmacy.fee)}` : ''}
+        </button>
+      </div>
+      <h2 className="mt-8 text-lg font-extrabold text-ink">Paiement</h2>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {paymentMethods.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => setMethod(m.id)}
+            className="card flex items-center gap-3 p-4 text-left"
+            style={{ background: m.background, outline: method === m.id ? '2px solid #087f5b' : undefined }}
+          >
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
+            <div>
+              <p className="font-extrabold text-ink">{m.name}</p>
+              <p className="text-sm text-muted">{m.operator}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+      {method && method !== 'card' ? (
+        <label className="mt-6 block">
+          <span className="text-sm font-extrabold text-ink">Numéro mobile money</span>
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="mt-1 h-12 w-full rounded-2xl border border-border px-4 font-semibold outline-none focus:border-brand"
+            placeholder="77 12 34 56"
+          />
+        </label>
+      ) : null}
+      {error ? <p className="mt-3 text-sm font-bold text-danger">{error}</p> : null}
+      <div className="mt-8 flex items-center justify-between">
+        <p className="text-lg font-extrabold text-ink">{formatFcfa(total)}</p>
+        <button type="button" className="btn-primary" onClick={pay}>
+          Payer
+        </button>
+      </div>
+    </main>
+  );
+}
+
+export default function CommandePage() {
+  return <CheckoutForm />;
+}

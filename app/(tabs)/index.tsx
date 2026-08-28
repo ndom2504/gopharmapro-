@@ -45,7 +45,11 @@ export default function Home() {
               onPress={() => router.push({ pathname: '/(tabs)/search', params: { q: item } })}
               style={s.category}
             >
-              {photo ? <Image source={photo} style={s.catImg} resizeMode="cover" /> : null}
+              {photo ? (
+                <View style={s.catImgWrap}>
+                  <Image source={photo} style={s.catImg} resizeMode="contain" />
+                </View>
+              ) : null}
               <Text style={s.catText}>{item}</Text>
             </Pressable>
           );
@@ -125,7 +129,8 @@ const s = StyleSheet.create({
     overflow: 'hidden',
     flexShrink: 0,
   },
-  catImg: { width: '100%', height: 86, backgroundColor: colors.mint },
+  catImgWrap: { height: 108, backgroundColor: colors.mint, padding: 10 },
+  catImg: { width: '100%', height: '100%' },
   catText: {
     fontSize: 13,
     fontWeight: '800',

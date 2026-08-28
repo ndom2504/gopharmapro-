@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { formatFcfa, getProduct, resolveProductId } from '@/lib/catalog';
+import { getProduct, resolveProductId } from '@/lib/catalog';
+import { ProductPhoto } from '@/components/ProductPhoto';
+import { OfferCart } from '@/components/OfferCart';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,9 +18,9 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
       <Link href="/produits" className="text-sm font-extrabold text-brand">
         ← Produits
       </Link>
-      {product.imageSrc ? (
-        <img src={product.imageSrc} alt="" className="mt-6 h-56 w-full rounded-[18px] object-cover" />
-      ) : null}
+      <div className="mt-6">
+        <ProductPhoto src={product.imageSrc} alt={product.name} size="hero" />
+      </div>
       <div className="mt-4 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-ink">{product.name}</h1>
@@ -38,20 +40,8 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
           Paiement bloqué jusqu’à validation de l’ordonnance par la pharmacie.
         </p>
       ) : null}
-      <h2 className="mt-10 text-xl font-extrabold text-ink">Comparer les pharmacies</h2>
-      <div className="mt-4 grid gap-3">
-        {product.offers.map((o) => (
-          <Link key={o.id} href={`/pharmacies/${o.pharmacy.id}`} className="card flex items-center justify-between p-4">
-            <div>
-              <p className="font-extrabold text-ink">{o.pharmacy.name}</p>
-              <p className="text-sm text-muted">
-                {o.pharmacy.area} · {o.stock > 0 ? `${o.stock} en stock` : 'Rupture'}
-              </p>
-            </div>
-            <p className={`font-extrabold ${o.stock > 0 ? 'text-brand' : 'text-muted'}`}>{formatFcfa(o.price)}</p>
-          </Link>
-        ))}
-      </div>
+      <h2 className="mt-10 text-xl font-extrabold text-ink">Choisir une pharmacie</h2>
+      <OfferCart product={product} />
     </main>
   );
 }

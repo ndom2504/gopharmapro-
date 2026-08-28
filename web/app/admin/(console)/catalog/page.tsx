@@ -2,6 +2,7 @@ import { setProductStatus } from '@/app/admin/actions';
 import { getAdminState } from '@/lib/adminData';
 import { formatFcfa } from '@/lib/catalog';
 import { productImageSrc } from '@/lib/photos';
+import { ProductPhoto } from '@/components/ProductPhoto';
 
 export const metadata = { title: 'Catalogue' };
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,7 @@ export default function AdminCatalogPage() {
           return (
             <div key={item.id} className="card flex flex-wrap items-start justify-between gap-4 p-5">
               <div className="flex min-w-0 flex-1 gap-4">
-                {src ? <img src={src} alt="" className="h-16 w-16 rounded-2xl object-cover" /> : null}
+                {src ? <ProductPhoto src={src} alt={item.name} size="thumb" /> : null}
                 <div>
                   <p className="font-extrabold text-ink">{item.name}</p>
                   <p className="mt-1 text-sm text-muted">

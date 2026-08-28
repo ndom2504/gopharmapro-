@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { formatFcfa, formatKm, getPharmacy, productsForPharmacy, resolvePharmacyId } from '@/lib/catalog';
+import { ProductPhoto } from '@/components/ProductPhoto';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,7 @@ export default async function PharmacyDetail({ params }: { params: Promise<{ id:
           const offer = p.offers.find((o) => o.pharmacy.id === pharmacy.id);
           return (
             <Link key={p.id} href={`/produits/${p.id}`} className="card flex items-center gap-4 p-4">
-              {p.imageSrc ? <img src={p.imageSrc} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : null}
+              <ProductPhoto src={p.imageSrc} alt={p.name} size="thumb" />
               <div className="flex-1">
                 <p className="font-extrabold text-ink">{p.name}</p>
                 <p className="text-sm text-muted">{p.form}</p>

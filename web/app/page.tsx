@@ -5,6 +5,7 @@ import { ProductCard } from '@/components/ProductCard';
 import { SearchForm } from '@/components/SearchForm';
 import { categories, getPublicPharmacies, getPublicProducts, paymentMethods } from '@/lib/catalog';
 import { site } from '@/lib/site';
+import { CategoryPhoto } from '@/components/ProductPhoto';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,9 @@ export default function Home() {
             <SearchForm />
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/produits" className="btn-primary">
+              Commander
+            </Link>
             <Link href="/pharmacies" className="btn-secondary">
               Voir les pharmacies
             </Link>
@@ -50,7 +54,7 @@ export default function Home() {
               href={`/produits?q=${encodeURIComponent(c.name)}`}
               className="card overflow-hidden p-0"
             >
-              <img src={c.image} alt="" className="h-24 w-full object-cover" />
+              <CategoryPhoto src={c.image} alt={c.name} />
               <span className="block p-3 font-extrabold text-ink">{c.name}</span>
             </Link>
           ))}

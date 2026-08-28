@@ -23,9 +23,10 @@ export async function POST(req: Request) {
     return Response.json({ demo: true });
   }
 
+  const origin = req.headers.get('origin') || site.url;
   const returnUrl = String(body.returnUrl || '').trim();
   const success =
-    `${site.url}/pay/stripe/success?session_id={CHECKOUT_SESSION_ID}` +
+    `${origin}/pay/stripe/success?session_id={CHECKOUT_SESSION_ID}` +
     (returnUrl ? `&return=${encodeURIComponent(returnUrl)}` : '');
 
   try {
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
         },
       ],
       success_url: success,
-      cancel_url: `${site.url}/pay/stripe/cancel`,
+      cancel_url: `${origin}/pay/stripe/cancel`,
       metadata: { source: 'gopharmapro-mobile' },
     });
     return Response.json({ id: session.id, url: session.url, demo: false });

@@ -21,6 +21,8 @@ export function Footer() {
           <div className="mt-3 flex flex-col gap-2 text-sm font-semibold text-muted">
             <Link href="/produits">Comparer les produits</Link>
             <Link href="/pharmacies">Pharmacies vérifiées</Link>
+            <Link href="/panier">Panier</Link>
+            <Link href="/connexion">Connexion</Link>
             <Link href="/rejoindre">Inscrire mon officine</Link>
           </div>
         </div>
