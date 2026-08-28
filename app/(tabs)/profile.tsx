@@ -1,0 +1,109 @@
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import type { Href } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Button, Card, ScreenTitle } from '../../src/components/UI';
+import { colors } from '../../src/theme';
+import { paymentMethods } from '../../src/data/payments';
+import { LocationBar } from '../../src/components/LocationBar';
+import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
+import { useAuth } from '../../src/store/auth';
+
+const rows = [
+  ['person-outline', 'Informations personnelles'],
+  ['location-outline', 'Adresses'],
+  ['notifications-outline', 'Notifications'],
+  ['shield-checkmark-outline', 'Confidentialité et sécurité'],
+  ['help-circle-outline', 'Aide'],
+] as const;
+
+export default function Profile() {
+  const { status, address, outsideGabon, refresh } = useGeoCatalog();
+  const session = useAuth((s) => s.session);
+  const guest = useAuth((s) => s.guest);
+  const logout = useAuth((s) => s.logout);
+  const client = session?.role === 'client' ? session : null;
+  const initials = client
+    ? (client.firstName[0] + (client.lastName[0] || '')).toUpperCase()
+    : 'IN';
+  const leave = () => {
+    logout();
+    router.replace('/auth' as Href);
+  };
+
+  return (
+    <ScrollView contentContainerStyle={s.page}>
+      <ScreenTitle title="Profil" subtitle="Gérez votre compte." />
+      <Card style={{ marginBottom: 16 }}>
+        <View style={s.avatar}>
+          <Text style={{ fontSize: 24, fontWeight: '900', color: colors.primary }}>{initials}</Text>
+        </View>
+        <Text style={s.name}>{client ? client.firstName + ' ' + client.lastName : 'Invité'}</Text>
+        <Text style={s.meta}>
+          {client
+            ? client.provider === 'google' || client.googleId
+              ? 'Connecté avec Google' + (client.email ? ' · ' + client.email : '')
+              : (client.phone || '') + (client.email ? (client.phone ? ' · ' : '') + client.email : '')
+            : 'Parcourez PharmaMarket sans compte.'}
+        </Text>
+        {!client ? (
+          <View style={{ marginTop: 16, gap: 10 }}>
+            <Button title="Se connecter" onPress={() => router.push({ pathname: '/auth/login', params: { role: 'client' } })} />
+            <Button title="Créer un compte client" kind="secondary" onPress={() => router.push('/auth/register-client')} />
+          </View>
+        ) : null}
+      </Card>
+      <View style={{ marginBottom: 16 }}>
+        <LocationBar status={status} address={address} outsideGabon={outsideGabon} onPress={refresh} />
+      </View>
+      <Card style={{ marginBottom: 16 }}>
+        <Text style={s.payTitle}>Paiement mobile</Text>
+        <Text style={s.meta}>MobiCash, Airtel Money et Moov Money sont disponibles au Gabon.</Text>
+        {paymentMethods.map((m) => (
+          <View key={m.id} style={s.payRow}>
+            <View style={[s.payDot, { backgroundColor: m.color }]} />
+            <Text style={s.label}>{m.name}</Text>
+            <Text style={s.ussd}>{m.ussd}</Text>
+          </View>
+        ))}
+      </Card>
+      <Card>
+        {rows.map(([icon, label], i) => (
+          <View key={label} style={[s.row, i < rows.length - 1 && s.border]}>
+            <Ionicons name={icon} size={22} color={colors.primary} />
+            <Text style={s.label}>{label}</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+          </View>
+        ))}
+      </Card>
+      <Card style={{ marginTop: 16 }}>
+        <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'pharmacy' } })} style={s.row}>
+          <Ionicons name="medkit-outline" size={22} color={colors.primary} />
+          <Text style={s.label}>Espace pharmacie</Text>
+          <Ionicons name="chevron-forward" size={20} color={colors.muted} />
+        </Pressable>
+      </Card>
+      {client || guest ? (
+        <View style={{ marginTop: 18 }}>
+          <Button title={client ? 'Se déconnecter' : 'Quitter le mode invité'} kind="secondary" onPress={leave} />
+        </View>
+      ) : null}
+      <Text style={s.notice}>Cette version est un prototype. Elle ne fournit pas de conseil médical.</Text>
+    </ScrollView>
+  );
+}
+
+const s = StyleSheet.create({
+  page: { padding: 20, paddingTop: 58, paddingBottom: 110 },
+  avatar: { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.mint, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  name: { fontSize: 18, fontWeight: '900', color: colors.text },
+  meta: { color: colors.muted, marginTop: 5, lineHeight: 20 },
+  payTitle: { fontWeight: '800', color: colors.text, fontSize: 16 },
+  payRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 14 },
+  payDot: { width: 10, height: 10, borderRadius: 5 },
+  ussd: { color: colors.muted, fontWeight: '700' },
+  row: { height: 58, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  border: { borderBottomWidth: 1, borderBottomColor: colors.border },
+  label: { flex: 1, fontWeight: '700', color: colors.text },
+  notice: { marginTop: 20, color: colors.muted, fontSize: 12, lineHeight: 18 },
+});

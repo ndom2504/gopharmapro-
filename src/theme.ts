@@ -1,0 +1,1 @@
+export const colors={primary:'#087F5B',primaryDark:'#056046',mint:'#E7F7F1',background:'#F6F8F7',card:'#FFFFFF',text:'#17221E',muted:'#64726C',danger:'#C92A2A',warning:'#E67700',border:'#DFE7E3'}; export const shadow={shadowColor:'#10261D',shadowOpacity:.08,shadowRadius:10,shadowOffset:{width:0,height:4},elevation:2};

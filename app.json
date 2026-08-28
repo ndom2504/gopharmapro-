@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "PharmaMarket",
+    "slug": "pharmarket-mobile",
+    "scheme": "pharmarket",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "PharmaMarket utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
+        }
+      ]
+    ],
+    "ios": {
+      "bundleIdentifier": "ga.pharmamarket.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "PharmaMarket utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon."
+      }
+    },
+    "android": {
+      "package": "ga.pharmamarket.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ]
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "googleWebClientId": "",
+      "googleIosClientId": "",
+      "googleAndroidClientId": ""
+    }
+  }
+}
