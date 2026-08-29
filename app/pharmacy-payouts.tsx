@@ -31,7 +31,7 @@ export default function PharmacyPayouts() {
         Le client paie Go Pharma Pro par mobile money. Votre part est ensuite versée sur le numéro de l’officine.
       </Text>
 
-      <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: '#BCE9D8' }}>
+      <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: colors.mintBorder }}>
         <Text style={s.label}>Solde à recevoir</Text>
         <Text style={s.amount}>{formatFcfa(totals.pending)}</Text>
         <Text style={s.meta}>Déjà versé : {formatFcfa(totals.sent)}</Text>

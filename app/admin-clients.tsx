@@ -10,7 +10,7 @@ import { ClientAccount } from '../src/types';
 export default function AdminClients() {
   const session = useAuth((s) => s.session);
   const directory = useAuth((s) => s.directory);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const clients = directory.filter((a): a is ClientAccount => a.role === 'client');
 
   return (

@@ -12,7 +12,7 @@ export default function AdminCouriers() {
   const directory = useAuth((s) => s.directory);
   const setCourierStatus = useAuth((s) => s.setCourierStatus);
   const setDocumentStatus = useAuth((s) => s.setDocumentStatus);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const list = directory.filter((a): a is CourierAccount => a.role === 'courier');
   return (
     <ScrollView contentContainerStyle={s.page}>

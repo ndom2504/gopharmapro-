@@ -3,8 +3,8 @@ import { CategoryPhoto } from '@/components/ProductPhoto';
 
 export function PhonePreview() {
   return (
-    <div className="mx-auto w-[280px] rounded-[2.2rem] border-[10px] border-[#17221E] bg-[#F6F8F7] p-3 shadow-2xl">
-      <div className="mx-auto mb-3 h-5 w-20 rounded-full bg-[#17221E]" />
+    <div className="mx-auto w-[280px] rounded-[2.2rem] border-[10px] border-ink bg-page p-3 shadow-2xl">
+      <div className="mx-auto mb-3 h-5 w-20 rounded-full bg-ink" />
       <p className="text-sm text-muted">Bonjour 👋</p>
       <p className="mt-1 text-xl font-extrabold text-ink">Que recherchez-vous ?</p>
       <div className="mt-4 h-12 rounded-2xl border border-border bg-white" />

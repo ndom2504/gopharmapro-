@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../src/theme';
 import { useAuth } from '../../src/store/auth';
+import { BrandMark } from '../../src/components/BrandMark';
 
 export default function AuthWelcome() {
   const continueAsGuest = useAuth((s) => s.continueAsGuest);
@@ -13,9 +14,7 @@ export default function AuthWelcome() {
   return (
     <View style={s.page}>
       <View style={s.hero}>
-        <View style={s.logo}>
-          <Text style={{ fontSize: 36 }}>💊</Text>
-        </View>
+        <BrandMark size={118} style={s.logo} />
         <Text style={s.brand}>Go Pharma Pro</Text>
         <Text style={s.tag}>Médicaments et parapharmacie, livrés au Gabon.</Text>
       </View>
@@ -50,16 +49,6 @@ export default function AuthWelcome() {
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.muted} />
       </Pressable>
-      <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'admin' } })} style={s.card}>
-        <View style={s.icon}>
-          <Ionicons name="shield-checkmark" size={22} color={colors.primary} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={s.cardTitle}>Administration</Text>
-          <Text style={s.cardMeta}>Valider les pharmacies, livreurs, produits et virements.</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color={colors.muted} />
-      </Pressable>
       <Text onPress={browse} style={s.guest}>
         Continuer en invité
       </Text>
@@ -70,15 +59,7 @@ export default function AuthWelcome() {
 const s = StyleSheet.create({
   page: { flex: 1, padding: 24, paddingTop: 64 },
   hero: { alignItems: 'center', marginBottom: 28 },
-  logo: {
-    width: 78,
-    height: 78,
-    borderRadius: 24,
-    backgroundColor: colors.mint,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
+  logo: { marginBottom: 16, borderRadius: 59 },
   brand: { fontSize: 30, fontWeight: '900', color: colors.text },
   tag: { marginTop: 8, color: colors.muted, textAlign: 'center', lineHeight: 22, maxWidth: 280 },
   ask: { fontWeight: '800', color: colors.text, fontSize: 16, marginBottom: 14 },

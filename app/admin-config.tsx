@@ -8,7 +8,7 @@ import { useAuth } from '../src/store/auth';
 
 export default function AdminConfig() {
   const session = useAuth((s) => s.session);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   return (
     <ScrollView contentContainerStyle={s.page}>
       <AdminBar title="Configuration" />

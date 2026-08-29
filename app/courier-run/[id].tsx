@@ -105,7 +105,7 @@ export default function CourierRun() {
       ) : null}
 
       {order.status === 'delivered' ? (
-        <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: '#BCE9D8' }}>
+        <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: colors.mintBorder }}>
           <Text style={s.label}>Livrée</Text>
           <Text style={s.meta}>Course clôturée par le code client.</Text>
         </Card>

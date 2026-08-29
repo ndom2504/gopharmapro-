@@ -17,7 +17,7 @@ export default function AdminStats() {
   const catalog = usePharmacyCatalog((s) => s.items);
   const orders = useOrders((s) => s.orders);
   const payouts = usePayouts((s) => s.items);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const pharmacies = directory.filter((a): a is PharmacyAccount => a.role === 'pharmacy');
   const couriers = directory.filter((a): a is CourierAccount => a.role === 'courier');
   const gmv = orders.reduce((a, o) => a + o.total, 0);

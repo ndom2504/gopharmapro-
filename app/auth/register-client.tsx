@@ -74,7 +74,7 @@ export default function RegisterClient() {
             value={phone}
             onChangeText={(v) => setPhone(formatPhoneInput(v))}
             placeholder="77 12 34 56"
-            placeholderTextColor="#89958F"
+            placeholderTextColor={colors.muted}
             keyboardType="phone-pad"
             style={s.phoneInput}
           />

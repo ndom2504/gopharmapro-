@@ -201,7 +201,7 @@ export default function Checkout() {
                 value={phone}
                 onChangeText={onPhone}
                 placeholder="77 12 34 56"
-                placeholderTextColor="#89958F"
+                placeholderTextColor={colors.muted}
                 keyboardType="phone-pad"
                 style={s.phoneInput}
               />

@@ -50,7 +50,7 @@ function PharmacyHome() {
       <div
         className={`card mt-6 flex items-start gap-3 p-5 ${
           verified
-            ? 'border-[#BCE9D8] bg-[#E7F7F1]'
+            ? 'border-brand/30 bg-mint'
             : session.status === 'rejected'
               ? 'border-[#F5C2C7] bg-[#FFF0F0]'
               : 'border-[#FFD8A8] bg-[#FFF4E6]'

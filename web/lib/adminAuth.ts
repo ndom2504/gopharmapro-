@@ -46,7 +46,7 @@ export async function isAdminSession() {
 }
 
 export async function requireAdmin() {
-  if (!(await isAdminSession())) redirect('/admin/login');
+  if (!(await isAdminSession())) redirect('/admin');
 }
 
 export async function setAdminCookie() {

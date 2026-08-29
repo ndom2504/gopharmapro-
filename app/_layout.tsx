@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { View } from 'react-native';
+import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,7 +13,9 @@ import { useFavorites } from '../src/store/favorites';
 import { useOrders } from '../src/store/orders';
 import { setupLocalNotifications } from '../src/lib/notifyLocal';
 import { NotificationToast } from '../src/components/NotificationToast';
+import { BrandSplash } from '../src/components/BrandMark';
 
+SplashScreen.preventAutoHideAsync();
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Root() {
@@ -33,13 +35,10 @@ export default function Root() {
     hydrateFav();
     setupLocalNotifications();
   }, [hydrate, hydrateCatalog, hydrateNotifs, hydratePayouts, hydrateOrders, hydrateFav]);
-  if (!hydrated) {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator color={colors.primary} />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (hydrated) SplashScreen.hideAsync();
+  }, [hydrated]);
+  if (!hydrated) return <BrandSplash />;
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
@@ -75,6 +74,7 @@ export default function Root() {
         <Stack.Screen name="checkout" options={{ title: 'Finaliser la commande' }} />
         <Stack.Screen name="pay" options={{ title: 'Paiement mobile' }} />
         <Stack.Screen name="pay-card" options={{ title: 'Paiement carte' }} />
+        <Stack.Screen name="admin" options={{ headerShown: false }} />
         <Stack.Screen name="admin-home" options={{ headerShown: false }} />
         <Stack.Screen name="admin-pharmacies" options={{ title: 'Pharmacies' }} />
         <Stack.Screen name="admin-pharmacy/[id]" options={{ title: 'Dossier pharmacie' }} />

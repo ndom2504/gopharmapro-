@@ -12,7 +12,7 @@ export default function AdminCatalog() {
   const session = useAuth((s) => s.session);
   const items = usePharmacyCatalog((s) => s.items);
   const setStatus = usePharmacyCatalog((s) => s.setStatus);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const ordered = [...items].sort((a, b) => Number(a.status === 'published') - Number(b.status === 'published'));
   return (
     <ScrollView contentContainerStyle={s.page}>

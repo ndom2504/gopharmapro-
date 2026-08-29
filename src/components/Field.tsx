@@ -32,7 +32,7 @@ export function Field({
           value={value}
           onChangeText={onChange}
           placeholder={placeholder}
-          placeholderTextColor="#89958F"
+          placeholderTextColor={colors.muted}
           keyboardType={keyboardType}
           secureTextEntry={hidden}
           autoCapitalize={autoCapitalize}
@@ -70,7 +70,7 @@ export function PhoneField({
           value={value}
           onChangeText={(v) => onChange(formatPhoneInput(v))}
           placeholder="77 12 34 56"
-          placeholderTextColor="#89958F"
+          placeholderTextColor={colors.muted}
           keyboardType="phone-pad"
           style={s.input}
         />
@@ -123,7 +123,7 @@ export function ToggleRow({
       <Switch
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: colors.border, true: '#8ED1B8' }}
+        trackColor={{ false: colors.border, true: colors.mintBorder }}
         thumbColor={value ? colors.primary : '#f4f4f4'}
       />
     </View>
@@ -164,5 +164,5 @@ const s = StyleSheet.create({
   chip: { paddingHorizontal: 12, paddingVertical: 9, borderRadius: 999, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },
   chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontWeight: '700', color: colors.text, fontSize: 13 },
-  chipOnText: { fontWeight: '800', color: '#fff', fontSize: 13 },
+  chipOnText: { fontWeight: '800', color: colors.onPrimary, fontSize: 13 },
 });

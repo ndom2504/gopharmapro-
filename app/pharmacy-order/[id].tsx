@@ -96,7 +96,7 @@ export default function PharmacyOrder() {
       ) : null}
 
       {order.status === 'picked_up' || order.status === 'delivered' ? (
-        <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: '#BCE9D8' }}>
+        <Card style={{ marginTop: 16, backgroundColor: colors.mint, borderColor: colors.mintBorder }}>
           <Text style={s.label}>
             {order.status === 'delivered' ? (delivery ? 'Livrée au client' : 'Retirée par le client') : 'Remise au livreur'}
           </Text>

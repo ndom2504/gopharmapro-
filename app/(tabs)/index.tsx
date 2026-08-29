@@ -47,7 +47,7 @@ export default function Home() {
       </View>
       <SearchBox value={q} onChange={setQ} />
       <Pressable onPress={go} style={s.searchButton}>
-        <Text style={{ color: '#fff', fontWeight: '800' }}>Rechercher</Text>
+        <Text style={{ color: colors.onPrimary, fontWeight: '800' }}>Rechercher</Text>
       </Pressable>
       <View style={{ marginTop: 14 }}>
         <LocationBar status={status} address={address} outsideGabon={outsideGabon} onPress={refresh} />

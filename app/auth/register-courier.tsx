@@ -259,7 +259,7 @@ export default function RegisterCourier() {
               onChange={(termsAccepted) => patch({ termsAccepted })}
             />
             {errors.terms ? <Text style={s.error}>{errors.terms}</Text> : null}
-            <Card style={{ backgroundColor: colors.mint, borderColor: '#BCE9D8' }}>
+            <Card style={{ backgroundColor: colors.mint, borderColor: colors.mintBorder }}>
               <Text style={s.label}>Après envoi</Text>
               <Text style={s.meta}>Le compte reste en vérification. Les courses apparaissent une fois le dossier accepté.</Text>
             </Card>

@@ -13,7 +13,7 @@ import { orderStatusLabel, orderStatusTone } from '../src/lib/orderStatus';
 export default function AdminOrders() {
   const session = useAuth((s) => s.session);
   const orders = useOrders((s) => s.orders);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   return (
     <ScrollView contentContainerStyle={s.page}>
       <AdminBar title="Commandes" />

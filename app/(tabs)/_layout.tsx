@@ -22,7 +22,7 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#7A8781',
+        tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { height: 72, paddingTop: 7, paddingBottom: 10, borderTopColor: colors.border },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
         tabBarIcon: ({ color, size }) => <Ionicons name={icons[route.name] || 'ellipse'} color={color} size={size} />,
@@ -35,7 +35,7 @@ export default function TabsLayout() {
         options={{
           title: 'Panier',
           tabBarBadge: count || undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.primary, fontSize: 10 },
+          tabBarBadgeStyle: { backgroundColor: colors.primary, color: colors.onPrimary, fontSize: 10 },
         }}
       />
       <Tabs.Screen name="orders" options={{ title: 'Commandes' }} />

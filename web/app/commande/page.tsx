@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
+import { colors } from '@/lib/site';
 import { formatFcfa, paymentMethods } from '@/lib/catalog';
 import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 import { homeFor, isClient } from '@/lib/accounts';
@@ -104,7 +105,7 @@ function CheckoutForm() {
             type="button"
             onClick={() => setMethod(m.id)}
             className="card flex items-center gap-3 p-4 text-left"
-            style={{ background: m.background, outline: method === m.id ? '2px solid #087f5b' : undefined }}
+            style={{ background: m.background, outline: method === m.id ? `2px solid ${colors.primary}` : undefined }}
           >
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
             <div>

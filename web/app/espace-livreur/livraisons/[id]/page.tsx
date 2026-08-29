@@ -99,7 +99,7 @@ export default function CourierRunDetailPage() {
         ) : null}
 
         {job.status === 'delivered' ? (
-          <div className="card mt-6 border-[#BCE9D8] bg-[#E7F7F1] p-5">
+          <div className="card mt-6 border-brand/30 bg-mint p-5">
             <p className="font-extrabold text-ink">✅ Livraison confirmée</p>
           </div>
         ) : null}

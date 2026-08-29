@@ -7,13 +7,16 @@ import { colors } from '../../src/theme';
 import { UserRole } from '../../src/types';
 import { homeFor, useAuth } from '../../src/store/auth';
 import { GoogleButton } from '../../src/components/GoogleButton';
+import { BrandMark } from '../../src/components/BrandMark';
 
-function roleFromParam(value?: string): UserRole {
-  if (value === 'pharmacy' || value === 'courier' || value === 'admin') return value;
+type PublicRole = Exclude<UserRole, 'admin'>;
+
+function roleFromParam(value?: string): PublicRole {
+  if (value === 'pharmacy' || value === 'courier') return value;
   return 'client';
 }
 
-const copy: Record<UserRole, { title: string; meta: string; placeholder: string; hint: string }> = {
+const copy: Record<PublicRole, { title: string; meta: string; placeholder: string; hint: string }> = {
   client: {
     title: 'Espace client',
     meta: 'Connectez-vous pour suivre vos commandes et adresses.',
@@ -32,17 +35,11 @@ const copy: Record<UserRole, { title: string; meta: string; placeholder: string;
     placeholder: 'centre@pharma.ga',
     hint: 'Démo vérifiée : demo123 — centre@pharma.ga · En attente : palmiers@pharma.ga',
   },
-  admin: {
-    title: 'Administration',
-    meta: 'Validez les dossiers pharmacies et livreurs, le catalogue et les virements.',
-    placeholder: 'admin@gopharmapro.com',
-    hint: 'Démo : demo123 — admin@gopharmapro.com',
-  },
 };
 
 export default function Login() {
   const params = useLocalSearchParams<{ role?: string }>();
-  const [role, setRole] = useState<UserRole>(roleFromParam(params.role));
+  const [role, setRole] = useState<PublicRole>(roleFromParam(params.role));
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -67,6 +64,7 @@ export default function Login() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
+        <BrandMark size={84} style={s.logo} />
         <View style={s.switch}>
           <Pressable onPress={() => setRole('client')} style={[s.tab, role === 'client' && s.tabOn]}>
             <Text style={role === 'client' ? s.tabOnText : s.tabText}>Client</Text>
@@ -77,14 +75,11 @@ export default function Login() {
           <Pressable onPress={() => setRole('pharmacy')} style={[s.tab, role === 'pharmacy' && s.tabOn]}>
             <Text style={role === 'pharmacy' ? s.tabOnText : s.tabText}>Pharmacie</Text>
           </Pressable>
-          <Pressable onPress={() => setRole('admin')} style={[s.tab, role === 'admin' && s.tabOn]}>
-            <Text style={role === 'admin' ? s.tabOnText : s.tabText}>Admin</Text>
-          </Pressable>
         </View>
         <Text style={s.title}>{text.title}</Text>
         <Text style={s.meta}>{text.meta}</Text>
         <Field
-          label={role === 'pharmacy' || role === 'admin' ? 'E-mail ou téléphone' : 'Téléphone ou e-mail'}
+          label={role === 'pharmacy' ? 'E-mail ou téléphone' : 'Téléphone ou e-mail'}
           value={identifier}
           onChange={(v) => {
             setIdentifier(v);
@@ -92,7 +87,7 @@ export default function Login() {
           }}
           placeholder={text.placeholder}
           autoCapitalize="none"
-          keyboardType={role === 'pharmacy' || role === 'admin' ? 'email-address' : 'default'}
+          keyboardType={role === 'pharmacy' ? 'email-address' : 'default'}
         />
         <Field
           label="Mot de passe"
@@ -151,11 +146,12 @@ export default function Login() {
 
 const s = StyleSheet.create({
   page: { padding: 20, paddingBottom: 40 },
+  logo: { alignSelf: 'center', marginBottom: 18, borderRadius: 42 },
   switch: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: colors.border, padding: 4, marginBottom: 22 },
   tab: { flex: 1, height: 42, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   tabOn: { backgroundColor: colors.primary },
   tabText: { fontWeight: '800', color: colors.text, fontSize: 11 },
-  tabOnText: { fontWeight: '800', color: '#fff', fontSize: 11 },
+  tabOnText: { fontWeight: '800', color: colors.onPrimary, fontSize: 11 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, marginBottom: 22, lineHeight: 20 },
   hint: { color: colors.muted, fontSize: 12, lineHeight: 18, marginBottom: 10 },

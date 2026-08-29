@@ -7,14 +7,17 @@ export const site = {
 };
 
 export const colors = {
-  primary: '#1FBF0A',
-  primaryDark: '#159208',
-  blue: '#0B2F8C',
-  mint: '#E9F8D6',
-  background: '#F3F6F1',
-  text: '#0B1220',
-  muted: '#5B6570',
+  primary: '#00B428',
+  primaryDark: '#008C1E',
+  blue: '#0050D0',
+  cyan: '#00B4F0',
+  mint: '#E8FBE9',
+  mintBorder: '#A8E8B0',
+  background: '#F3F7F4',
+  text: '#071428',
+  muted: '#5A6578',
   danger: '#C92A2A',
   warning: '#E67700',
-  border: '#D7E0D4',
+  border: '#D4DDD8',
+  onPrimary: '#04200A',
 };

@@ -13,7 +13,7 @@ export default function AdminPharmacyDetail() {
   const directory = useAuth((s) => s.directory);
   const setPharmacyStatus = useAuth((s) => s.setPharmacyStatus);
   const setDocumentStatus = useAuth((s) => s.setDocumentStatus);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const pharmacy = directory.find((a): a is PharmacyAccount => a.role === 'pharmacy' && a.id === id);
   if (!pharmacy) {
     return (

@@ -84,7 +84,7 @@ const s = StyleSheet.create({
   chip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },
   active: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { color: colors.text, fontWeight: '700' },
-  activeText: { color: '#fff', fontWeight: '800' },
+  activeText: { color: colors.onPrimary, fontWeight: '800' },
   count: { color: colors.muted, marginBottom: 12 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
   name: { fontSize: 16, fontWeight: '800', color: colors.text },

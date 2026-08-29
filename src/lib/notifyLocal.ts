@@ -37,7 +37,7 @@ export async function setupLocalNotifications() {
         vibrationPattern: [0, 240, 80, 240, 80, 320],
         sound: 'payment.wav',
         enableVibrate: true,
-        lightColor: '#087F5B',
+        lightColor: '#00B428',
       });
       await Notifications.setNotificationChannelAsync('catalog', {
         name: 'Médicaments',
@@ -45,7 +45,7 @@ export async function setupLocalNotifications() {
         vibrationPattern: [0, 160, 90, 160],
         sound: 'catalog.wav',
         enableVibrate: true,
-        lightColor: '#1C7ED6',
+        lightColor: '#0050D0',
       });
     }
   } catch {

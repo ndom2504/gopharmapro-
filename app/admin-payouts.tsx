@@ -12,7 +12,7 @@ export default function AdminPayouts() {
   const session = useAuth((s) => s.session);
   const items = usePayouts((s) => s.items);
   const markSent = usePayouts((s) => s.markSent);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   return (
     <ScrollView contentContainerStyle={s.page}>
       <AdminBar title="Virements" />

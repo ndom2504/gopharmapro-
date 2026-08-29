@@ -70,7 +70,7 @@ const s = StyleSheet.create({
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },
   chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontWeight: '700', color: colors.text },
-  chipOnText: { fontWeight: '800', color: '#fff' },
+  chipOnText: { fontWeight: '800', color: colors.onPrimary },
   row: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
   name: { fontWeight: '800', color: colors.text, fontSize: 16 },
   meta: { color: colors.muted, marginTop: 6 },

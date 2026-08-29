@@ -10,7 +10,7 @@ import { PharmacyAccount } from '../src/types';
 export default function AdminPharmacies() {
   const session = useAuth((s) => s.session);
   const directory = useAuth((s) => s.directory);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const list = directory.filter((a): a is PharmacyAccount => a.role === 'pharmacy');
   return (
     <ScrollView contentContainerStyle={s.page}>

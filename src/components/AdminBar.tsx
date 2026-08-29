@@ -40,7 +40,7 @@ const s = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: colors.mint,
     borderWidth: 1,
-    borderColor: '#BCE9D8',
+    borderColor: colors.mintBorder,
   },
   chipText: { fontWeight: '800', color: colors.primary, fontSize: 12 },
 });

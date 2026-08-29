@@ -74,7 +74,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.mint,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#BCE9D8',
+    borderColor: colors.mintBorder,
     padding: 16,
     alignItems: 'center',
   },

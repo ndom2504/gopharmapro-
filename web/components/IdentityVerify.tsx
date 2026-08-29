@@ -58,7 +58,7 @@ export function IdentityVerify() {
   return (
     <section
       className={`card mt-4 p-5 ${
-        done ? 'border-[#BCE9D8] bg-[#E7F7F1]' : 'border-[#FFD8A8] bg-[#FFF4E6]'
+        done ? 'border-brand/30 bg-mint' : 'border-[#FFD8A8] bg-[#FFF4E6]'
       }`}
     >
       <p className="font-extrabold text-ink">Vérification d’identité Stripe</p>

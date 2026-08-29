@@ -328,7 +328,7 @@ export default function RegisterPharmacy() {
               <DocRow key={d.key} label={d.label} required={d.required} fileName={d.fileName} status={d.status} onPick={() => attach(d.key)} />
             ))}
             {errors.documents ? <Text style={s.error}>{errors.documents}</Text> : null}
-            <Card style={{ backgroundColor: colors.mint, borderColor: '#BCE9D8' }}>
+            <Card style={{ backgroundColor: colors.mint, borderColor: colors.mintBorder }}>
               <Text style={s.noteTitle}>Statuts</Text>
               <Text style={s.note}>🟠 En attente · 🟢 Vérifié · 🔴 Rejeté — après contrôle de l’administration PharmaMarket.</Text>
             </Card>

@@ -129,7 +129,7 @@ export function DocRow({
         </Text>
         <Text style={s.docFile}>{fileName || 'PDF, JPG ou PNG — non public'}</Text>
       </View>
-      <View style={[s.docBadge, { backgroundColor: status === 'verified' ? '#E7F7F1' : status === 'rejected' ? '#FFF0F0' : '#FFF4E6' }]}>
+      <View style={[s.docBadge, { backgroundColor: status === 'verified' ? colors.mint : status === 'rejected' ? '#FFF0F0' : '#FFF4E6' }]}>
         <Text style={{ color: tone, fontWeight: '800', fontSize: 11 }}>{tag}</Text>
       </View>
     </Pressable>
@@ -139,7 +139,7 @@ export function DocRow({
 const s = StyleSheet.create({
   dots: { flexDirection: 'row', gap: 6, marginBottom: 12 },
   dot: { flex: 1, height: 4, borderRadius: 99, backgroundColor: colors.border },
-  dotOn: { backgroundColor: '#8ED1B8' },
+  dotOn: { backgroundColor: colors.mintBorder },
   dotNow: { backgroundColor: colors.primary },
   stepNo: { color: colors.primary, fontWeight: '800', marginBottom: 6 },
   title: { fontSize: 24, fontWeight: '900', color: colors.text },

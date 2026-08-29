@@ -12,7 +12,7 @@ export default function AdminVerifications() {
   const session = useAuth((s) => s.session);
   const directory = useAuth((s) => s.directory);
   const catalog = usePharmacyCatalog((s) => s.items);
-  if (!session || session.role !== 'admin') return <Redirect href={'/auth' as Href} />;
+  if (!session || session.role !== 'admin') return <Redirect href={'/admin' as Href} />;
   const pharmacies = directory.filter((a): a is PharmacyAccount => a.role === 'pharmacy' && a.status === 'pending');
   const couriers = directory.filter((a): a is CourierAccount => a.role === 'courier' && a.status === 'pending');
   const review = catalog.filter((i) => i.status === 'review');

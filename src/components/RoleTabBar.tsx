@@ -31,7 +31,7 @@ export function RoleTabBar({ items }: { items: RoleTab[] }) {
         const on = path === item.match || path.startsWith(item.match + '/');
         return (
           <Pressable key={item.match} onPress={() => router.replace(item.href)} style={s.item}>
-            <Ionicons name={item.icon} size={22} color={on ? colors.primary : '#7A8781'} />
+            <Ionicons name={item.icon} size={22} color={on ? colors.primary : colors.muted} />
             <Text style={[s.label, on && s.on]} numberOfLines={1}>
               {item.label}
             </Text>
@@ -58,6 +58,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 4,
   },
   item: { flex: 1, alignItems: 'center', gap: 3 },
-  label: { fontSize: 10, fontWeight: '700', color: '#7A8781' },
+  label: { fontSize: 10, fontWeight: '700', color: colors.muted },
   on: { color: colors.primary },
 });
