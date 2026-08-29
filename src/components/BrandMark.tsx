@@ -1,6 +1,24 @@
-import { Image, StyleProp, View, ViewStyle } from 'react-native';
+import { Image, ImageStyle, StyleProp, View, ViewStyle } from 'react-native';
 
 const mark = require('../../assets/mark.png');
+const wordmark = require('../../assets/logo-auth.png');
+
+export function BrandWordmark({
+  width = 220,
+  style,
+}: {
+  width?: number;
+  style?: StyleProp<ImageStyle>;
+}) {
+  return (
+    <Image
+      source={wordmark}
+      accessibilityLabel="Go Pharma Pro"
+      style={[{ width, height: width }, style]}
+      resizeMode="contain"
+    />
+  );
+}
 
 export function BrandMark({ size = 112, style }: { size?: number; style?: StyleProp<ViewStyle> }) {
   return (
@@ -9,20 +27,20 @@ export function BrandMark({ size = 112, style }: { size?: number; style?: StyleP
         {
           width: size,
           height: size,
-          borderRadius: size / 2,
-          overflow: 'hidden',
+          alignItems: 'center',
+          justifyContent: 'center',
           backgroundColor: '#fff',
-          borderWidth: 1,
-          borderColor: '#E4EBE6',
+          borderRadius: 16, // Arrondi léger au lieu d'un cercle
+          overflow: 'hidden',
         },
         style,
       ]}
     >
       <Image
         source={mark}
-        accessibilityLabel="Gopharmapro"
-        style={{ width: size, height: size }}
-        resizeMode="cover"
+        accessibilityLabel="Go Pharma Pro"
+        style={{ width: '90%', height: '90%' }}
+        resizeMode="contain"
       />
     </View>
   );
@@ -30,8 +48,8 @@ export function BrandMark({ size = 112, style }: { size?: number; style?: StyleP
 
 export function BrandSplash() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' }}>
-      <BrandMark size={200} />
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>
+      <BrandWordmark width={240} />
     </View>
   );
 }

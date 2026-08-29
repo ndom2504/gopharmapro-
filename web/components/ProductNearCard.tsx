@@ -31,21 +31,26 @@ export function ProductNearCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="card flex items-center gap-4 p-4">
-      <ProductPhoto src={product.imageSrc} alt={product.name} size="thumb" />
-      <div className="min-w-0 flex-1">
-        <p className="font-extrabold text-ink">{product.name}</p>
-        <p className="mt-1 text-sm font-extrabold text-brand">{formatFcfa(offer.price)}</p>
-        <p className="mt-1 text-sm text-muted">
-          🏥 {offer.pharmacy.name} · 📍 {formatKm(offer.pharmacy.distance)}
-        </p>
-        {error ? <p className="mt-1 text-xs font-bold text-danger">{error}</p> : null}
+    <div className="card flex min-w-0 flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <ProductPhoto src={product.imageSrc} alt={product.name} size="thumb" />
+        <div className="min-w-0 flex-1">
+          <p className="font-extrabold text-ink">{product.name}</p>
+          <p className="mt-1 text-sm font-extrabold text-ink">{formatFcfa(offer.price)}</p>
+          <p className="mt-1 text-sm text-muted">
+            {offer.pharmacy.name} · {formatKm(offer.pharmacy.distance)}
+          </p>
+          {error ? <p className="mt-1 text-xs font-bold text-danger">{error}</p> : null}
+        </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <button type="button" className="btn-primary !h-10 !px-4 text-sm" onClick={onAdd}>
+      <div className="flex shrink-0 flex-col gap-2 sm:w-[148px]">
+        <Link href={`/pharmacies/${offer.pharmacy.id}`} className="btn-primary !h-10 !px-3 text-center text-sm">
+          Voir pharmacie
+        </Link>
+        <button type="button" className="btn-secondary !h-10 !px-3 text-sm" onClick={onAdd}>
           Ajouter
         </button>
-        <Link href={`/produits/${product.id}`} className="text-center text-xs font-extrabold text-brand">
+        <Link href={`/produits/${product.id}`} className="text-center text-xs font-extrabold text-ink">
           Comparer
         </Link>
       </div>

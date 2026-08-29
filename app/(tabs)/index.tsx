@@ -73,7 +73,7 @@ export default function Home() {
             <Pressable onPress={() => router.push({ pathname: '/(tabs)/search', params: { q: item } })} style={s.category}>
               {photo ? (
                 <View style={s.catImgWrap}>
-                  <Image source={photo} style={s.catImg} resizeMode="contain" />
+                  <Image source={photo} style={s.catImg} resizeMode="cover" />
                 </View>
               ) : (
                 <View style={[s.catImgWrap, s.catEmoji]}>
@@ -97,11 +97,11 @@ export default function Home() {
           <Text style={s.meta}>📍 {formatKm(p.distance)} · {p.area}</Text>
           <View style={[s.row, { marginTop: 8 }]}>
             <Badge text={p.open ? 'Ouverte' : 'Fermée'} tone={p.open ? 'green' : 'red'} />
-            {p.delivery ? <Badge text="Livraison disponible" /> : <Badge text="Retrait uniquement" tone="gray" />}
+            {p.delivery ? <Badge text="Livraison disponible" tone="gray" /> : <Badge text="Retrait uniquement" tone="gray" />}
           </View>
           <PharmacyFeedback pharmacyId={p.id} name={p.name} baseRating={p.rating} reviewCount={p.reviewCount} />
           <View style={{ marginTop: 12 }}>
-            <Button title="Voir la pharmacie" kind="secondary" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
+            <Button title="Voir pharmacie" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
           </View>
         </Card>
       ))}
@@ -115,12 +115,12 @@ export default function Home() {
               <View style={{ flex: 1 }}>
                 <Text style={s.cardTitle}>{p.name}</Text>
                 <Text style={s.price}>{offer.price.toLocaleString('fr-FR')} FCFA</Text>
-                <Text style={s.meta}>🏥 {offer.pharmacy.name}</Text>
-                <Text style={s.meta}>📍 {formatKm(offer.pharmacy.distance)}</Text>
+                <Text style={s.meta}>{offer.pharmacy.name} · {formatKm(offer.pharmacy.distance)}</Text>
               </View>
             </Pressable>
-            <View style={{ marginTop: 12 }}>
-              <Button title="Ajouter" onPress={() => onAdd(p)} disabled={!offer?.stock} />
+            <View style={{ marginTop: 12, gap: 8 }}>
+              <Button title="Voir pharmacie" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: offer.pharmacy.id } })} />
+              <Button title="Ajouter" kind="ink" onPress={() => onAdd(p)} disabled={!offer?.stock} />
             </View>
           </Card>
         );
@@ -145,7 +145,7 @@ const s = StyleSheet.create({
   section: { fontSize: 19, fontWeight: '800', color: colors.text, marginTop: 25, marginBottom: 13 },
   categoryList: { alignItems: 'stretch', paddingRight: 4 },
   category: {
-    width: 132,
+    width: 148,
     backgroundColor: '#fff',
     borderRadius: 18,
     marginRight: 11,
@@ -154,20 +154,22 @@ const s = StyleSheet.create({
     overflow: 'hidden',
     flexShrink: 0,
   },
-  catImgWrap: { height: 108, backgroundColor: colors.mint, padding: 10 },
+  catImgWrap: { width: '100%', aspectRatio: 1, backgroundColor: '#F3F7F4', padding: 0 },
   catEmoji: { alignItems: 'center', justifyContent: 'center' },
   catImg: { width: '100%', height: '100%' },
   catText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
     color: colors.text,
-    lineHeight: 17,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    lineHeight: 15,
+    textAlign: 'center',
+    backgroundColor: colors.mint,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  link: { color: colors.primary, fontWeight: '700', marginTop: 16 },
+  link: { color: colors.text, fontWeight: '700', marginTop: 16 },
   cardTitle: { fontSize: 16, fontWeight: '800', color: colors.text, flex: 1 },
   meta: { fontSize: 13, color: colors.muted, marginTop: 5 },
-  price: { fontSize: 18, fontWeight: '900', color: colors.primary, marginTop: 4 },
+  price: { fontSize: 18, fontWeight: '900', color: colors.text, marginTop: 4 },
 });

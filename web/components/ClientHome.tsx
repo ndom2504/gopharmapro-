@@ -7,7 +7,7 @@ import { SearchForm } from '@/components/SearchForm';
 import { ProductNearCard } from '@/components/ProductNearCard';
 import { PharmacyCard } from '@/components/PharmacyCard';
 import { categories, type Pharmacy, type Product } from '@/lib/catalog';
-import { CategoryPhoto } from '@/components/ProductPhoto';
+import { CategoryTile } from '@/components/ProductPhoto';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
 
@@ -62,24 +62,18 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
 
       <section className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 className="text-[19px] font-extrabold text-ink">Catégories</h2>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {categories.map((c) => (
-            <Link key={c.name} href={`/produits?cat=${encodeURIComponent(c.name)}`} className="card overflow-hidden p-0">
-              <CategoryPhoto src={c.image} alt={c.name} />
-              <span className="block p-3 font-extrabold text-ink">{c.name}</span>
-            </Link>
+            <CategoryTile key={c.name} href={`/produits?cat=${encodeURIComponent(c.name)}`} src={c.image} name={c.name} />
           ))}
-          <Link href="/pharmacies" className="card flex flex-col items-center justify-center p-4 text-center">
-            <span className="text-3xl">🏥</span>
-            <span className="mt-2 font-extrabold text-ink">Pharmacies proches</span>
-          </Link>
+          <CategoryTile href="/pharmacies" name="Pharmacies proches" icon="🏥" />
         </div>
       </section>
 
       <section className="mx-auto mt-14 max-w-6xl px-4 sm:px-6">
         <div className="flex items-end justify-between">
           <h2 className="text-[19px] font-extrabold text-ink">Pharmacies proches</h2>
-          <Link href="/pharmacies" className="text-sm font-extrabold text-brand">
+          <Link href="/pharmacies" className="text-sm font-extrabold text-ink">
             Voir tout
           </Link>
         </div>

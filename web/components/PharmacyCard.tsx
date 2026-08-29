@@ -14,8 +14,8 @@ export function PharmacyCard({ pharmacy }: { pharmacy: Pharmacy }) {
       <p className="mt-2 text-sm text-muted">
         📍 {formatKm(pharmacy.distance)} · {pharmacy.area}
       </p>
-      <p className="mt-1 text-sm font-semibold text-brand">
-        {pharmacy.delivery ? '🚚 Livraison disponible' : 'Retrait uniquement'}
+      <p className="mt-1 text-sm font-semibold text-ink">
+        {pharmacy.delivery ? 'Livraison disponible' : 'Retrait uniquement'}
       </p>
       <PharmacyFeedback
         pharmacyId={pharmacy.id}
@@ -23,8 +23,8 @@ export function PharmacyCard({ pharmacy }: { pharmacy: Pharmacy }) {
         baseRating={pharmacy.rating}
         reviewCount={pharmacy.reviewCount}
       />
-      <Link href={`/pharmacies/${pharmacy.id}`} className="btn-secondary mt-4 inline-flex !h-10 text-sm">
-        Voir la pharmacie
+      <Link href={`/pharmacies/${pharmacy.id}`} className="btn-primary mt-4 inline-flex !h-10 text-sm">
+        Voir pharmacie
       </Link>
     </div>
   );

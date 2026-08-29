@@ -43,26 +43,38 @@ export function Header() {
   const links = session?.role === 'pharmacy' ? pharmacyLinks : session?.role === 'courier' ? courierLinks : clientLinks;
   const accountHref = session ? (isClient(session) ? '/compte' : homeFor(session.role)) : '/connexion';
   const accountLabel = session ? (isClient(session) ? displayName(session) : 'Mon espace') : 'Connexion';
+  const isOn = (href: string) =>
+    href === '/espace-pharmacie' || href === '/espace-livreur' || href === '/'
+      ? path === href
+      : Boolean(path === href || path?.startsWith(href + '/'));
 
   return (
-    <header className="sticky top-0 z-40 bg-black">
-      <div className="mx-auto flex h-[88px] max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" aria-label="Gopharmapro, accueil" className="flex shrink-0 items-center gap-2.5">
-          <BrandLogo size="md" priority />
+    <header className="sticky top-0 z-40 max-w-[100vw] overflow-x-clip bg-black">
+      <div className="mx-auto flex h-[72px] min-w-0 max-w-6xl items-center justify-between gap-2 px-3 sm:h-[88px] sm:gap-3 sm:px-6">
+        <Link href="/" aria-label="Gopharmapro, accueil" className="flex min-w-0 shrink items-center">
+          <BrandLogo
+            size="md"
+            priority
+            className="!h-9 !max-w-[min(44vw,190px)] sm:!h-12 sm:!max-w-[280px] lg:!h-14 lg:!max-w-[360px]"
+          />
         </Link>
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="hidden min-w-0 items-center gap-5 lg:flex">
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="text-sm font-bold text-white/70 hover:text-white">
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`text-sm font-bold hover:text-white ${isOn(l.href) ? 'text-white' : 'text-white/70'}`}
+            >
               {l.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {shopper ? (
             <Link
               href="/panier"
               aria-label={count ? `Panier, ${count} article(s), ${formatFcfa(subtotal)}` : 'Panier'}
-              className="relative flex h-10 items-center gap-2 rounded-2xl bg-white/10 px-2.5 text-brand hover:bg-white/15"
+              className="relative flex h-9 items-center gap-2 rounded-2xl bg-white/10 px-2 text-brand hover:bg-white/15 sm:h-10 sm:px-2.5"
             >
               <CartIcon />
               {count ? (
@@ -75,18 +87,27 @@ export function Header() {
               ) : null}
             </Link>
           ) : null}
-          <Link href={accountHref} className="btn-primary flex !h-10 items-center gap-2 !px-3 text-sm !text-black">
+          <Link
+            href={accountHref}
+            className="btn-primary flex !h-9 max-w-[38vw] items-center gap-2 !px-2.5 text-xs !text-black sm:!h-10 sm:max-w-none sm:!px-3 sm:text-sm"
+          >
             {isClient(session) && session.photoDataUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={session.photoDataUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+              <img src={session.photoDataUrl} alt="" className="h-6 w-6 shrink-0 rounded-full object-cover sm:h-7 sm:w-7" />
             ) : null}
-            {accountLabel}
+            <span className="truncate">{accountLabel}</span>
           </Link>
         </div>
       </div>
-      <nav className="flex gap-5 overflow-x-auto border-t border-white/10 px-4 py-2.5 lg:hidden">
+      <nav className="flex max-w-[100vw] gap-1.5 overflow-x-auto overscroll-x-contain border-t border-white/10 px-3 py-2 [scrollbar-width:thin] lg:hidden">
         {links.map((l) => (
-          <Link key={l.href} href={l.href} className="shrink-0 text-sm font-bold text-white/70">
+          <Link
+            key={l.href}
+            href={l.href}
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-extrabold ${
+              isOn(l.href) ? 'bg-brand text-black' : 'text-white/70'
+            }`}
+          >
             {l.label}
           </Link>
         ))}

@@ -15,19 +15,23 @@ export function BrandLogo({
   framed = false,
   mark = false,
   priority = false,
+  className = '',
 }: {
   size?: keyof typeof sizes;
   mark?: boolean;
   framed?: boolean;
   priority?: boolean;
+  className?: string;
 }) {
   const img = (
-    <span className="relative inline-flex items-center">
+    <span className="relative inline-flex min-w-0 items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=9'}
         alt="Gopharmapro"
-        className={mark ? markSizes[size] : `${sizes[size]} object-contain object-left`}
+        className={
+          mark ? `${markSizes[size]} ${className}` : `${sizes[size]} object-contain object-left ${className}`
+        }
         {...(priority ? { fetchPriority: 'high' as const } : {})}
       />
     </span>

@@ -74,12 +74,12 @@ const productAliases: Record<string, string> = {
 };
 
 export const categories = [
-  { name: 'Médicaments', icon: '💊', image: '/categories/medicaments.png' },
-  { name: 'Premiers soins', icon: '🩹', image: '/categories/premiers-soins.png' },
-  { name: 'Hygiène', icon: '🧴', image: '/categories/hygiene.png' },
-  { name: 'Bébé', icon: '👶', image: '/categories/bebe.png' },
-  { name: 'Vitamines', icon: '💪', image: '/categories/vitamines.png' },
-  { name: 'Parapharmacie', icon: '🧴', image: '/categories/parapharmacie.png' },
+  { name: 'Médicaments', icon: '💊', image: '/categories/medicaments.png?v=2' },
+  { name: 'Premiers soins', icon: '🩹', image: '/categories/premiers-soins.png?v=2' },
+  { name: 'Hygiène', icon: '🧴', image: '/categories/hygiene.png?v=2' },
+  { name: 'Bébé', icon: '👶', image: '/categories/bebe.png?v=2' },
+  { name: 'Vitamines', icon: '💪', image: '/categories/vitamines.png?v=2' },
+  { name: 'Parapharmacie', icon: '🧴', image: '/categories/parapharmacie.png?v=2' },
 ];
 
 export const paymentMethods: PaymentMethod[] = [

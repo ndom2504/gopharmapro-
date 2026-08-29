@@ -40,7 +40,7 @@ export function OfferCart({ product }: { product: Product }) {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <p className={`font-extrabold ${o.stock > 0 ? 'text-brand' : 'text-muted'}`}>{formatFcfa(o.price)}</p>
+            <p className={`font-extrabold ${o.stock > 0 ? 'text-ink' : 'text-muted'}`}>{formatFcfa(o.price)}</p>
             <button
               type="button"
               disabled={!o.stock}

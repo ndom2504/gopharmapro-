@@ -12,8 +12,8 @@ export function PhonePreview() {
       <div className="mt-3 grid grid-cols-3 gap-2">
         {categories.slice(0, 6).map((c) => (
           <div key={c.name} className="overflow-hidden rounded-2xl bg-white">
-            <CategoryPhoto src={c.image} alt="" compact />
-            <p className="px-1 py-1.5 text-center text-[10px] font-bold leading-tight text-ink">{c.name}</p>
+            <CategoryPhoto src={c.image} alt="" />
+            <p className="bg-mint px-1 py-1 text-center text-[10px] font-bold leading-tight text-ink">{c.name}</p>
           </div>
         ))}
       </div>

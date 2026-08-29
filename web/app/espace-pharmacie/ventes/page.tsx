@@ -19,7 +19,7 @@ export default function PharmacySalesPage() {
   const money = payoutTotals(mine, session.id);
   return (
     <RequireRole role="pharmacy">
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <h1 className="text-3xl font-extrabold text-ink">Ventes</h1>
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -34,12 +34,12 @@ export default function PharmacySalesPage() {
         </div>
         <div className="mt-6 space-y-3">
           {mine.map((p) => (
-            <div key={p.id} className="card flex justify-between p-5">
-              <div>
-                <p className="font-extrabold text-ink">#{p.orderId}</p>
+            <div key={p.id} className="card flex min-w-0 justify-between gap-3 p-4 sm:p-5">
+              <div className="min-w-0">
+                <p className="break-words font-extrabold text-ink">#{p.orderId}</p>
                 <p className="text-sm text-muted">{p.status === 'sent' ? 'Virement envoyé' : 'À virer'}</p>
               </div>
-              <p className="font-extrabold text-brand">{formatFcfa(p.amount)}</p>
+              <p className="shrink-0 font-extrabold text-brand">{formatFcfa(p.amount)}</p>
             </div>
           ))}
         </div>

@@ -86,10 +86,10 @@ const s = StyleSheet.create({
   chipText: { color: colors.text, fontWeight: '700' },
   activeText: { color: colors.onPrimary, fontWeight: '800' },
   count: { color: colors.muted, marginBottom: 12 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
   name: { fontSize: 16, fontWeight: '800', color: colors.text },
   pharmacy: { marginTop: 5, color: colors.muted },
-  price: { fontSize: 18, fontWeight: '900', color: colors.primary },
+  price: { fontSize: 18, fontWeight: '900', color: colors.text },
   meta: { fontSize: 13, color: colors.muted, marginTop: 4 },
-  command: { color: colors.primary, fontWeight: '800' },
+  command: { color: colors.text, fontWeight: '800' },
 });

@@ -19,7 +19,7 @@ export function FormField({
         onChange={(e) => onChange(e.target.value)}
         type={type}
         placeholder={placeholder}
-        className="mt-1 h-12 w-full rounded-2xl border border-border bg-white px-4 font-semibold text-ink outline-none focus:border-brand"
+        className="mt-1 h-12 w-full min-w-0 max-w-full rounded-2xl border border-border bg-white px-4 font-semibold text-ink outline-none focus:border-brand"
       />
     </label>
   );

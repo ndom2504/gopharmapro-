@@ -62,5 +62,5 @@ const s = StyleSheet.create({
   info: { fontWeight: '700', color: colors.text, marginVertical: 5 },
   section: { fontSize: 20, fontWeight: '900', color: colors.text, marginVertical: 20 },
   name: { fontWeight: '800', color: colors.text },
-  price: { fontWeight: '900', color: colors.primary },
+  price: { fontWeight: '900', color: colors.text },
 });

@@ -60,7 +60,7 @@ export default async function PharmacyDetail({ params }: { params: Promise<{ id:
                 <p className="font-extrabold text-ink">{p.name}</p>
                 <p className="text-sm text-muted">{p.form}</p>
               </div>
-              <p className="font-extrabold text-brand">{offer ? formatFcfa(offer.price) : ''}</p>
+              <p className="font-extrabold text-ink">{offer ? formatFcfa(offer.price) : ''}</p>
             </Link>
           );
         })}

@@ -67,7 +67,7 @@ export default function PharmacyProfilePage() {
 
   return (
     <RequireRole role="pharmacy">
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <h1 className="text-3xl font-extrabold text-ink">Profil</h1>
         {saved ? <p className="mt-3 text-sm font-extrabold text-brand">{saved}</p> : null}

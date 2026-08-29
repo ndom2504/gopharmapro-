@@ -7,7 +7,7 @@ import { colors } from '../../src/theme';
 import { UserRole } from '../../src/types';
 import { homeFor, useAuth } from '../../src/store/auth';
 import { GoogleButton } from '../../src/components/GoogleButton';
-import { BrandMark } from '../../src/components/BrandMark';
+import { BrandWordmark } from '../../src/components/BrandMark';
 
 type PublicRole = Exclude<UserRole, 'admin'>;
 
@@ -64,7 +64,7 @@ export default function Login() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
-        <BrandMark size={84} style={s.logo} />
+        <BrandWordmark width={168} style={s.logo} />
         <View style={s.switch}>
           <Pressable onPress={() => setRole('client')} style={[s.tab, role === 'client' && s.tabOn]}>
             <Text style={role === 'client' ? s.tabOnText : s.tabText}>Client</Text>

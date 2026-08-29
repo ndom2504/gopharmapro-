@@ -52,5 +52,5 @@ const aliases: Record<string, keyof typeof files> = {
 export function productImageSrc(key?: string) {
   if (!key) return undefined;
   const mapped = aliases[key] || (key in files ? (key as keyof typeof files) : undefined);
-  return mapped ? `/products/${files[mapped]}` : undefined;
+  return mapped ? `/products/${files[mapped]}?v=2` : undefined;
 }

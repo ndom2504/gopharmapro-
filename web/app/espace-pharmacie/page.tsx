@@ -48,9 +48,9 @@ function PharmacyHome() {
   return (
     <>
       <p className="text-sm font-extrabold text-brand">Espace pharmacie</p>
-      <h1 className="mt-2 text-3xl font-extrabold text-ink">{session.pharmacyName}</h1>
+      <h1 className="mt-2 break-words text-2xl font-extrabold text-ink sm:text-3xl">{session.pharmacyName}</h1>
       <div
-        className={`card mt-6 flex items-start gap-3 p-5 ${
+        className={`card mt-6 flex min-w-0 items-start gap-3 p-4 sm:p-5 ${
           verified
             ? 'border-brand/30 bg-mint'
             : session.status === 'rejected'
@@ -58,7 +58,7 @@ function PharmacyHome() {
               : 'border-[#FFD8A8] bg-[#FFF4E6]'
         }`}
       >
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <p className="font-extrabold text-ink">
             {verified ? 'Pharmacie vérifiée' : session.status === 'rejected' ? 'Dossier rejeté' : 'Vérification en cours'}
           </p>
@@ -125,7 +125,7 @@ function PharmacyHome() {
 export default function PharmacySpacePage() {
   return (
     <RequireRole role="pharmacy">
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <PharmacyHome />
       </main>

@@ -25,7 +25,7 @@ export default function Favorites() {
           <Text style={s.meta}>{p.area}</Text>
           <PharmacyFeedback pharmacyId={p.id} name={p.name} baseRating={p.rating} reviewCount={p.reviewCount} />
           <View style={{ marginTop: 12, gap: 8 }}>
-            <Button title="Voir la pharmacie" kind="secondary" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
+            <Button title="Voir pharmacie" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
             <Pressable onPress={() => togglePharmacy(p.id)}>
               <Text style={s.remove}>Retirer</Text>
             </Pressable>

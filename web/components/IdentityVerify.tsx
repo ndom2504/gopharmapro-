@@ -72,7 +72,7 @@ export function IdentityVerify() {
       {done ? (
         <span className="badge-green mt-4 inline-flex">Stripe Identity</span>
       ) : (
-        <button type="button" className="btn-primary mt-4" disabled={busy} onClick={start}>
+        <button type="button" className="btn-primary mt-4 h-auto min-h-12 w-full whitespace-normal py-2 sm:w-auto" disabled={busy} onClick={start}>
           {busy ? 'Ouverture…' : status === 'pending' ? 'Reprendre la vérification' : 'Vérifier mon identité'}
         </button>
       )}

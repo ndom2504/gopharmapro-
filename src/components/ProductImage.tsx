@@ -14,10 +14,10 @@ const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 type Size = 'thumb' | 'card' | 'hero';
 
-const box: Record<Size, { w: number; h: number; r: number; icon: number; pad: number }> = {
-  thumb: { w: 80, h: 80, r: 16, icon: 26, pad: 8 },
-  card: { w: 108, h: 108, r: 18, icon: 32, pad: 10 },
-  hero: { w: 0, h: 240, r: 24, icon: 54, pad: 16 },
+const box: Record<Size, { w: number; h: number; r: number; icon: number }> = {
+  thumb: { w: 88, h: 88, r: 16, icon: 26 },
+  card: { w: 112, h: 112, r: 18, icon: 32 },
+  hero: { w: 0, h: 280, r: 24, icon: 54 },
 };
 
 export function ProductImage({
@@ -36,20 +36,20 @@ export function ProductImage({
   const dim = box[size];
   const wrap =
     size === 'hero'
-      ? { height: dim.h, width: '100%' as const, borderRadius: dim.r, marginBottom: 18, padding: dim.pad }
-      : { width: dim.w, height: dim.h, borderRadius: dim.r, padding: dim.pad };
+      ? { height: dim.h, width: '100%' as const, borderRadius: dim.r, marginBottom: 18 }
+      : { width: dim.w, height: dim.h, borderRadius: dim.r };
   const frame = [s.frame, wrap];
   if (uploaded) {
     return (
       <View style={frame}>
-        <Image source={{ uri: uploaded }} style={s.fill} resizeMode="contain" />
+        <Image source={{ uri: uploaded }} style={s.fill} resizeMode="cover" />
       </View>
     );
   }
   if (bundled) {
     return (
       <View style={frame}>
-        <Image source={bundled} style={s.fill} resizeMode="contain" />
+        <Image source={bundled} style={s.fill} resizeMode="cover" />
       </View>
     );
   }
@@ -62,7 +62,7 @@ export function ProductImage({
 }
 
 const s = StyleSheet.create({
-  frame: { backgroundColor: colors.mint, overflow: 'hidden' },
+  frame: { backgroundColor: '#F3F7F4', overflow: 'hidden' },
   fill: { width: '100%', height: '100%' },
   ph: { backgroundColor: colors.mint, alignItems: 'center', justifyContent: 'center' },
   phText: { marginTop: 8, color: colors.primary, fontWeight: '800' },

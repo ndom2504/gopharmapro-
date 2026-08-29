@@ -30,10 +30,10 @@ function List() {
           mine.map((rx) => {
             const open = rx.status === 'sent' || rx.status === 'review';
             return (
-              <div key={rx.id} className="card p-5">
-                <div className="flex justify-between gap-3">
-                  <p className="font-extrabold text-ink">{rx.fileName}</p>
-                  <span className={rxStatusClass[rx.status]}>{rxStatusLabel[rx.status]}</span>
+              <div key={rx.id} className="card min-w-0 p-4 sm:p-5">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <p className="min-w-0 break-words font-extrabold text-ink">{rx.fileName}</p>
+                  <span className={`shrink-0 ${rxStatusClass[rx.status]}`}>{rxStatusLabel[rx.status]}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted">👤 {rx.clientName}</p>
                 {rx.products.length ? <p className="text-sm text-muted">{rx.products.join(', ')}</p> : null}
@@ -55,7 +55,7 @@ function List() {
                       placeholder="Motif en cas de refus"
                       className="mt-4 h-20 w-full rounded-2xl border border-border p-3 text-sm font-semibold outline-none focus:border-brand"
                     />
-                    <div className="mt-4 flex gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <button type="button" className="btn-primary !h-10 text-sm" onClick={() => setStatus(rx.id, 'approved')}>
                         Valider
                       </button>
@@ -85,7 +85,7 @@ function List() {
 export default function PharmacyPrescriptionsPage() {
   return (
     <RequireRole role="pharmacy">
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <List />
       </main>

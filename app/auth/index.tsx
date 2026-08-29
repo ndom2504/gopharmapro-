@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../src/theme';
 import { useAuth } from '../../src/store/auth';
-import { BrandMark } from '../../src/components/BrandMark';
+import { BrandWordmark } from '../../src/components/BrandMark';
 
 export default function AuthWelcome() {
   const continueAsGuest = useAuth((s) => s.continueAsGuest);
@@ -14,8 +14,7 @@ export default function AuthWelcome() {
   return (
     <View style={s.page}>
       <View style={s.hero}>
-        <BrandMark size={118} style={s.logo} />
-        <Text style={s.brand}>Go Pharma Pro</Text>
+        <BrandWordmark width={210} style={s.logo} />
         <Text style={s.tag}>Médicaments et parapharmacie, livrés au Gabon.</Text>
       </View>
       <Text style={s.ask}>Quel est votre profil ?</Text>
@@ -59,9 +58,8 @@ export default function AuthWelcome() {
 const s = StyleSheet.create({
   page: { flex: 1, padding: 24, justifyContent: 'center' },
   hero: { alignItems: 'center', marginBottom: 40 },
-  logo: { marginBottom: 16 },
-  brand: { fontSize: 32, fontWeight: '900', color: colors.text, textAlign: 'center' },
-  tag: { marginTop: 8, color: colors.muted, textAlign: 'center', lineHeight: 22, maxWidth: 280 },
+  logo: { marginBottom: 10 },
+  tag: { marginTop: 4, color: colors.muted, textAlign: 'center', lineHeight: 22, maxWidth: 280 },
   ask: { fontWeight: '800', color: colors.text, fontSize: 18, marginBottom: 20 },
   card: {
     flexDirection: 'row',

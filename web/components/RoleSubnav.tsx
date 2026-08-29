@@ -10,7 +10,7 @@ export function RoleSubnav({
 }) {
   const path = usePathname();
   return (
-    <nav className="mb-6 flex gap-2 overflow-x-auto">
+    <nav className="mb-6 hidden gap-2 overflow-x-auto lg:flex">
       {items.map((item) => {
         const on =
           item.href === '/espace-livreur' || item.href === '/espace-pharmacie'

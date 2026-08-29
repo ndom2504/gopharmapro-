@@ -39,7 +39,7 @@ export default function PharmacyIdentityPage() {
 
   return (
     <RequireRole role="pharmacy">
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <h1 className="text-3xl font-extrabold text-ink">Identité Stripe</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
