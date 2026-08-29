@@ -55,21 +55,25 @@ export function PhoneField({
   value,
   onChange,
   error,
+  prefix = '+241',
+  country,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   error?: string;
+  prefix?: string;
+  country?: string;
 }) {
   return (
     <View style={s.wrap}>
       <Text style={s.label}>{label}</Text>
       <View style={[s.box, error ? { borderColor: colors.danger } : null]}>
-        <Text style={s.prefix}>+241</Text>
+        <Text style={s.prefix}>{prefix}</Text>
         <TextInput
           value={value}
-          onChangeText={(v) => onChange(formatPhoneInput(v))}
-          placeholder="77 12 34 56"
+          onChangeText={(v) => onChange(formatPhoneInput(v, country))}
+          placeholder={country === 'CM' ? '670 12 34 56' : '77 12 34 56'}
           placeholderTextColor={colors.muted}
           keyboardType="phone-pad"
           style={s.input}

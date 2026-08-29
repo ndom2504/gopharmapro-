@@ -1,4 +1,5 @@
 import { PaymentMethodId } from '../types';
+import type { CountryId } from './places';
 
 export type PaymentMethod = {
   id: PaymentMethodId;
@@ -10,6 +11,7 @@ export type PaymentMethod = {
   color: string;
   background: string;
   hint: string;
+  countries: CountryId[];
 };
 
 export const paymentMethods: PaymentMethod[] = [
@@ -23,6 +25,7 @@ export const paymentMethods: PaymentMethod[] = [
     color: '#E87722',
     background: '#FFF4E8',
     hint: 'Validez le paiement MobiCash avec votre code PIN.',
+    countries: ['GA'],
   },
   {
     id: 'airtel-money',
@@ -34,6 +37,7 @@ export const paymentMethods: PaymentMethod[] = [
     color: '#E4002B',
     background: '#FDE8EC',
     hint: 'Validez le paiement Airtel Money avec votre code PIN.',
+    countries: ['GA'],
   },
   {
     id: 'moov-money',
@@ -45,6 +49,19 @@ export const paymentMethods: PaymentMethod[] = [
     color: '#0077C8',
     background: '#E8F4FC',
     hint: 'Validez le paiement Moov Money avec votre code PIN.',
+    countries: ['GA'],
+  },
+  {
+    id: 'geniuspay',
+    name: 'GeniusPay',
+    short: 'GP',
+    operator: 'MTN MoMo · Moov Money Bénin',
+    ussd: '',
+    prefixes: ['51', '52', '53', '54', '61', '62', '64', '65', '66', '67', '90', '91', '94', '95', '96', '97', '98', '99'],
+    color: '#0B4F8A',
+    background: '#E8F1F8',
+    hint: 'Choisissez MTN MoMo ou Moov Money sur la page GeniusPay, puis validez avec votre code PIN.',
+    countries: ['BJ'],
   },
   {
     id: 'card',
@@ -56,8 +73,22 @@ export const paymentMethods: PaymentMethod[] = [
     color: '#635BFF',
     background: '#EEF0FF',
     hint: 'Paiement sécurisé par Stripe. En test, utilisez 4242 4242 4242 4242.',
+    countries: ['GA', 'BJ', 'CM'],
   },
 ];
+
+export function methodsForCountry(country?: CountryId | string | null) {
+  const id = country === 'BJ' || country === 'CM' ? country : 'GA';
+  return paymentMethods.filter((m) => m.countries.includes(id));
+}
+
+export function isGeniusPay(id: string) {
+  return id === 'geniuspay';
+}
+
+export function isHostedPayment(id: string) {
+  return id === 'card' || id === 'geniuspay';
+}
 
 export function getPaymentMethod(id: string) {
   return paymentMethods.find((m) => m.id === id) || paymentMethods[0];
@@ -71,6 +102,7 @@ export function isCardPayment(id: string) {
 export function parseGabonPhone(input: string) {
   let digits = input.replace(/\D/g, '');
   if (digits.startsWith('241')) digits = digits.slice(3);
+  if (digits.startsWith('229') || digits.startsWith('237')) return null;
   if (digits.startsWith('0')) digits = digits.slice(1);
   if (!/^[2-7]\d{6,7}$/.test(digits)) return null;
   const local = '0' + digits;
@@ -82,18 +114,64 @@ export function parseGabonPhone(input: string) {
   };
 }
 
+/** Normalise un numéro béninois vers +229 XX XX XX XX */
+export function parseBeninPhone(input: string) {
+  let digits = input.replace(/\D/g, '');
+  if (digits.startsWith('229')) digits = digits.slice(3);
+  if (digits.startsWith('241') || digits.startsWith('237')) return null;
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  if (!/^[4569]\d{7}$/.test(digits)) return null;
+  const groups = digits.match(/.{1,2}/g)?.join(' ') || digits;
+  return {
+    local: '0' + digits,
+    e164: '+229' + digits,
+    display: '+229 ' + groups,
+  };
+}
+
+/** Normalise un numéro camerounais vers +237 6XX XX XX XX */
+export function parseCameroonPhone(input: string) {
+  let digits = input.replace(/\D/g, '');
+  if (digits.startsWith('237')) digits = digits.slice(3);
+  if (digits.startsWith('241') || digits.startsWith('229')) return null;
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  if (!/^6\d{8}$/.test(digits)) return null;
+  const groups = digits.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4');
+  return {
+    local: '0' + digits,
+    e164: '+237' + digits,
+    display: '+237 ' + groups,
+  };
+}
+
+export function parseServicePhone(input: string, country?: string) {
+  if (country === 'BJ') return parseBeninPhone(input);
+  if (country === 'CM') return parseCameroonPhone(input);
+  if (country === 'GA') return parseGabonPhone(input);
+  return parseGabonPhone(input) || parseBeninPhone(input) || parseCameroonPhone(input);
+}
+
 export function suggestPaymentMethod(input: string): PaymentMethodId | null {
   const digits = input.replace(/\D/g, '');
+  if (digits.startsWith('229') || parseBeninPhone(input)) return 'geniuspay';
   const national = digits.startsWith('241') ? '0' + digits.slice(3) : digits.startsWith('0') ? digits : '0' + digits;
-  const match = paymentMethods.find((m) => m.prefixes.some((p) => national.startsWith(p)));
+  const match = paymentMethods.find((m) => m.id !== 'geniuspay' && m.prefixes.some((p) => national.startsWith(p)));
   return match?.id ?? null;
 }
 
-export function formatPhoneInput(input: string) {
+export function formatPhoneInput(input: string, country?: string) {
   let digits = input.replace(/\D/g, '');
+  if (digits.startsWith('237')) digits = digits.slice(3);
   if (digits.startsWith('241')) digits = digits.slice(3);
+  if (digits.startsWith('229')) digits = digits.slice(3);
   if (digits.startsWith('0')) digits = digits.slice(1);
-  digits = digits.slice(0, 8);
+  const max = country === 'CM' ? 9 : 8;
+  digits = digits.slice(0, max);
+  if (country === 'CM') {
+    return digits.replace(/(\d{3})(\d{0,2})(\d{0,2})(\d{0,2})/, (_, a, b, c, d) =>
+      [a, b, c, d].filter(Boolean).join(' '),
+    );
+  }
   return digits.replace(/(\d{2})(\d{0,2})(\d{0,2})(\d{0,2})/, (_, a, b, c, d) =>
     [a, b, c, d].filter(Boolean).join(' '),
   );

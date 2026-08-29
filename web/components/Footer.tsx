@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrandLogo } from '@/components/BrandLogo';
 import { site } from '@/lib/site';
+import { serviceZoneShort } from '@/lib/places';
 
 export function Footer() {
   const path = usePathname();
@@ -42,9 +43,9 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <p className="text-sm font-extrabold text-white">Gabon</p>
+          <p className="text-sm font-extrabold text-white">{serviceZoneShort()}</p>
           <p className="mt-3 text-sm leading-6 text-white/65">
-            Libreville
+            Libreville · Cotonou · Douala · Yaoundé
             <br />
             <a href={`mailto:${site.email}`} className="hover:text-brand">
               {site.email}

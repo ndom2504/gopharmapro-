@@ -126,6 +126,8 @@ function stripPassword(user: StoredUser): Session {
 function normalizePhone(value: string) {
   let digits = value.replace(/\D/g, '');
   if (digits.startsWith('241')) digits = digits.slice(3);
+  if (digits.startsWith('229')) digits = digits.slice(3);
+  if (digits.startsWith('237')) digits = digits.slice(3);
   if (digits.startsWith('0')) digits = digits.slice(1);
   return digits;
 }
@@ -160,6 +162,7 @@ function normalizeCourier(raw: CourierAccount): CourierAccount {
     vehicleOther: raw.vehicleOther || '',
     plate: raw.plate || '',
     payoutPhone: raw.payoutPhone || raw.phone || '',
+    country: raw.country || base.country,
     province: raw.province || base.province,
     city: raw.city || base.city,
     commune: raw.commune || base.commune,
@@ -178,6 +181,7 @@ function normalizePharmacy(raw: PharmacyAccount): PharmacyAccount {
     services: { ...fallback.services, ...raw.services },
     hours: { ...fallback.hours, ...raw.hours },
     documents: raw.documents?.length ? raw.documents : fallback.documents,
+    country: raw.country || fallback.country,
     pharmacistName: raw.pharmacistName || `${raw.managerFirstName || ''} ${raw.managerLastName || ''}`.trim(),
   };
 }

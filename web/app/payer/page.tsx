@@ -16,6 +16,12 @@ function PayInner() {
   const { cart, placeOrder, ready, session } = useShop();
   const router = useRouter();
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (method.id !== 'geniuspay') return;
+    const q = new URLSearchParams({ phone, total: String(total), fulfillment });
+    router.replace(`/payer/geniuspay?${q.toString()}`);
+  }, [method.id, phone, total, fulfillment, router]);
   const done = useRef(false);
   const placeRef = useRef(placeOrder);
   const cartRef = useRef(cart);
@@ -30,6 +36,7 @@ function PayInner() {
   useEffect(() => {
     if (!ready) return;
     if (session && !isClient(session)) return;
+    if (method.id === 'geniuspay') return;
     if (!cartRef.current.length) return;
     const t1 = setTimeout(() => setStep(1), 900);
     const t2 = setTimeout(() => setStep(2), 2200);
@@ -44,7 +51,9 @@ function PayInner() {
       clearTimeout(t2);
       clearTimeout(t3);
     };
-  }, [ready, fulfillment, method.name, router, total]);
+  }, [ready, fulfillment, method.id, method.name, router, total, session]);
+
+  if (method.id === 'geniuspay') return null;
 
   if (!cart.length && !done.current) {
     return (

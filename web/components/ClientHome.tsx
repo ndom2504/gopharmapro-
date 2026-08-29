@@ -31,7 +31,13 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      () => setArea('Libreville, Gabon'),
+      (pos) => {
+        const lng = pos.coords.longitude;
+        const lat = pos.coords.latitude;
+        if (lng < 5) setArea('Cotonou, Bénin');
+        else if (lat > 2.3) setArea(lng > 10.5 ? 'Yaoundé, Cameroun' : 'Douala, Cameroun');
+        else setArea('Libreville, Gabon');
+      },
       () => setArea('Libreville, Gabon'),
     );
   };

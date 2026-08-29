@@ -61,7 +61,7 @@ export default function Profile() {
       </View>
       <Card style={{ marginBottom: 16 }}>
         <Text style={s.payTitle}>Moyens de paiement</Text>
-        <Text style={s.meta}>MobiCash, Airtel Money, Moov Money et carte (Stripe).</Text>
+        <Text style={s.meta}>Gabon : mobile money. Bénin : GeniusPay. Carte Visa / Mastercard partout.</Text>
         {paymentMethods.map((m) => (
           <View key={m.id} style={s.payRow}>
             <View style={[s.payDot, { backgroundColor: m.color }]} />

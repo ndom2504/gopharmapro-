@@ -31,19 +31,18 @@ export async function setupLocalNotifications() {
       });
     }
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('payments', {
+      // Son système : un nom .wav ici plante si le binaire n’a pas encore res/raw.
+      await Notifications.setNotificationChannelAsync('payments-v2', {
         name: 'Paiements',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 240, 80, 240, 80, 320],
-        sound: 'payment.wav',
         enableVibrate: true,
         lightColor: '#00B428',
       });
-      await Notifications.setNotificationChannelAsync('catalog', {
+      await Notifications.setNotificationChannelAsync('catalog-v2', {
         name: 'Médicaments',
         importance: Notifications.AndroidImportance.HIGH,
         vibrationPattern: [0, 160, 90, 160],
-        sound: 'catalog.wav',
         enableVibrate: true,
         lightColor: '#0050D0',
       });
@@ -71,12 +70,11 @@ export async function presentLocalNotification(
     const granted = await Notifications.getPermissionsAsync();
     if (granted.status !== 'granted') return;
     const meta = notifyMeta[type];
-    const soundFile = meta.sound + '.wav';
     await Notifications.scheduleNotificationAsync({
       content: {
         title,
         body,
-        sound: playSound ? soundFile : false,
+        sound: playSound,
         vibrate: playSound ? [0, 220, 100, 220] : [],
       },
       trigger: null,

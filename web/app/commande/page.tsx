@@ -5,18 +5,34 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { colors } from '@/lib/site';
-import { formatFcfa, paymentMethods } from '@/lib/catalog';
+import { formatFcfa, methodsForCountry } from '@/lib/catalog';
 import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 import { homeFor, isClient } from '@/lib/accounts';
 import { cartRxGate, rxPayBlocked, usePrescriptions } from '@/lib/prescriptions';
 
-function parseGabonPhone(input: string) {
+function parseCheckoutPhone(input: string, country: string) {
   let digits = input.replace(/\D/g, '');
+  if (country === 'BJ') {
+    if (digits.startsWith('229')) digits = digits.slice(3);
+    if (digits.startsWith('0')) digits = digits.slice(1);
+    if (!/^[4569]\d{7}$/.test(digits)) return null;
+    return '+229 ' + (digits.match(/.{1,2}/g)?.join(' ') || digits);
+  }
   if (digits.startsWith('241')) digits = digits.slice(3);
   if (digits.startsWith('0')) digits = digits.slice(1);
   if (!/^[2-7]\d{6,7}$/.test(digits)) return null;
-  const groups = digits.match(/.{1,2}/g)?.join(' ') || digits;
-  return '+241 ' + groups;
+  return '+241 ' + (digits.match(/.{1,2}/g)?.join(' ') || digits);
+}
+
+function countryOfPharmacy(pharmacy?: { latitude?: number; longitude?: number; city?: string; area?: string }) {
+  if (!pharmacy) return 'GA';
+  const lat = pharmacy.latitude || 0;
+  const lng = pharmacy.longitude || 0;
+  if (lng > 0.7 && lng < 3.9 && lat > 6.2) return 'BJ';
+  if (lat > 2.3 && lng > 8.4) return 'CM';
+  const text = `${pharmacy.city || ''} ${pharmacy.area || ''}`.toLowerCase();
+  if (text.includes('cotonou') || text.includes('porto-novo') || text.includes('parakou') || text.includes('godomey')) return 'BJ';
+  return 'GA';
 }
 
 function CheckoutForm() {
@@ -24,10 +40,12 @@ function CheckoutForm() {
   const { items: rxItems } = usePrescriptions();
   const router = useRouter();
   const [method, setMethod] = useState<string | null>(null);
-  const [phone, setPhone] = useState(session && isClient(session) ? session.phone.replace('+241 ', '') : '');
+  const [phone, setPhone] = useState(session && isClient(session) ? session.phone.replace(/^\+\d{3}\s?/, '') : '');
   const [fulfillment, setFulfillment] = useState<'pickup' | 'delivery'>('pickup');
   const [error, setError] = useState('');
   const pharmacy = cart[0]?.offer.pharmacy;
+  const payCountry = countryOfPharmacy(pharmacy);
+  const availableMethods = methodsForCountry(payCountry);
   const canDelivery = !!pharmacy?.delivery;
   const mode = !canDelivery ? 'pickup' : fulfillment;
   const subtotal = cartSubtotal(cart);
@@ -74,9 +92,13 @@ function CheckoutForm() {
       router.push(`/payer/carte?total=${total}&fulfillment=${mode}`);
       return;
     }
-    const parsed = parseGabonPhone(phone);
+    const parsed = parseCheckoutPhone(phone, payCountry);
     if (!parsed) {
-      setError('Entrez un numéro gabonais valide, ex. 77 12 34 56.');
+      setError(payCountry === 'BJ' ? 'Entrez un numéro béninois valide, ex. 97 12 34 56.' : 'Entrez un numéro gabonais valide, ex. 77 12 34 56.');
+      return;
+    }
+    if (method === 'geniuspay') {
+      router.push(`/payer/geniuspay?phone=${encodeURIComponent(parsed)}&total=${total}&fulfillment=${mode}`);
       return;
     }
     router.push(`/payer?method=${method}&phone=${encodeURIComponent(parsed)}&total=${total}&fulfillment=${mode}`);
@@ -116,8 +138,13 @@ function CheckoutForm() {
         </div>
       ) : null}
       <h2 className="mt-8 text-lg font-extrabold text-ink">Paiement</h2>
+      <p className="mt-1 text-sm text-muted">
+        {payCountry === 'BJ'
+          ? 'Au Bénin : GeniusPay (MTN MoMo, Moov Money) ou carte. Le montant est encaissé par Go Pharma Pro.'
+          : 'Mobile money, ou carte Visa / Mastercard. Le montant est encaissé par Go Pharma Pro.'}
+      </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        {paymentMethods.map((m) => (
+        {availableMethods.map((m) => (
           <button
             key={m.id}
             type="button"
@@ -140,7 +167,7 @@ function CheckoutForm() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="mt-1 h-12 w-full rounded-2xl border border-border px-4 font-semibold outline-none focus:border-brand"
-            placeholder="77 12 34 56"
+            placeholder={payCountry === 'BJ' ? '97 12 34 56' : '77 12 34 56'}
           />
         </label>
       ) : null}

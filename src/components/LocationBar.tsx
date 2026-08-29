@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
 import { LocationStatus } from '../store/location';
+import { serviceZoneAnd } from '../data/places';
 
 export function LocationBar({
   status,
@@ -30,7 +31,7 @@ export function LocationBar({
       <View style={{ flex: 1 }}>
         <Text style={s.kicker}>Votre position</Text>
         <Text style={s.label}>{label}</Text>
-        {outsideGabon ? <Text style={s.hint}>Livraison Go Pharma Pro : Gabon uniquement</Text> : null}
+        {outsideGabon ? <Text style={s.hint}>Livraison Go Pharma Pro : {serviceZoneAnd()}</Text> : null}
       </View>
       <Text style={s.action}>{status === 'granted' ? 'Actualiser' : 'Utiliser ma position'}</Text>
     </Pressable>

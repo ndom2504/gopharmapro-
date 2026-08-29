@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Linking } from 'react-native';
 import * as Location from 'expo-location';
 import { Coords } from '../types';
-import { formatAddress, isInGabon, LIBREVILLE } from '../lib/geo';
+import { formatAddress, isInServiceArea, nearestHub } from '../lib/geo';
 
 export type LocationStatus = 'idle' | 'loading' | 'granted' | 'denied' | 'error';
 
@@ -19,10 +19,10 @@ let inflight: Promise<void> | null = null;
 async function readAddress(coords: Coords) {
   try {
     const [place] = await Location.reverseGeocodeAsync(coords);
-    if (!place) return isInGabon(coords) ? 'Libreville, Gabon' : 'Position actuelle';
+    if (!place) return 'Position actuelle';
     return formatAddress(place);
   } catch {
-    return isInGabon(coords) ? 'Libreville, Gabon' : 'Position actuelle';
+    return 'Position actuelle';
   }
 }
 
@@ -53,11 +53,11 @@ export const useLocation = create<LocationStore>((set) => ({
           accuracy: Location.Accuracy.Balanced,
         });
         const coords = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-        const outsideGabon = !isInGabon(coords);
-        const address = outsideGabon ? 'Hors Gabon · aperçu Libreville' : await readAddress(coords);
+        const outsideGabon = !isInServiceArea(coords);
+        const address = outsideGabon ? 'Hors zone · aperçu la ville la plus proche' : await readAddress(coords);
         set({
           status: 'granted',
-          coords: outsideGabon ? LIBREVILLE : coords,
+          coords: outsideGabon ? nearestHub(coords) : coords,
           address,
           outsideGabon,
         });

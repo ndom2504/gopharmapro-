@@ -12,6 +12,7 @@ import { totalsFor, usePayouts } from '../src/store/payouts';
 import { useOrders } from '../src/store/orders';
 import { usePrescriptions } from '../src/store/prescriptions';
 import { formatFcfa } from '../src/lib/payouts';
+import { countryLabel } from '../src/data/places';
 
 const pipeline = [
   { id: 'signup', label: 'Inscription' },
@@ -159,7 +160,7 @@ export default function PharmacyHome() {
         <Text style={s.value}>
           {session.address}
           {'\n'}
-          {session.area}, {session.commune}, {session.city} ({session.province})
+          {session.area}, {session.commune}, {session.city} ({session.province} · {countryLabel(session.country)})
         </Text>
         <Text style={[s.label, { marginTop: 14 }]}>Contact</Text>
         <Text style={s.value}>

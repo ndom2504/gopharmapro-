@@ -5,6 +5,7 @@ import { Card } from '../src/components/UI';
 import { AdminBar } from '../src/components/AdminBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
+import { serviceZoneShort } from '../src/data/places';
 
 export default function AdminConfig() {
   const session = useAuth((s) => s.session);
@@ -13,8 +14,8 @@ export default function AdminConfig() {
     <ScrollView contentContainerStyle={s.page}>
       <AdminBar title="Configuration" />
       <Card style={{ marginTop: 12 }}>
-        <Text style={s.label}>Zone principale</Text>
-        <Text style={s.value}>Libreville, Gabon</Text>
+        <Text style={s.label}>Zones</Text>
+        <Text style={s.value}>{serviceZoneShort()}</Text>
       </Card>
       <Card style={{ marginTop: 12 }}>
         <Text style={s.label}>Code de confirmation</Text>

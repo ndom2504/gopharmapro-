@@ -10,10 +10,10 @@ export const notifyMeta: Record<
   NotificationType,
   { icon: keyof typeof Ionicons.glyphMap; color: string; channel: string; sound: 'payment' | 'payout' | 'catalog'; label: string }
 > = {
-  payment: { icon: 'cash', color: colors.primary, channel: 'payments', sound: 'payment', label: 'Paiement' },
-  payout: { icon: 'wallet', color: colors.primaryDark, channel: 'payments', sound: 'payout', label: 'Virement' },
-  catalog_new: { icon: 'medkit', color: colors.blue, channel: 'catalog', sound: 'catalog', label: 'Nouveau produit' },
-  catalog_stock: { icon: 'layers', color: '#E67700', channel: 'catalog', sound: 'catalog', label: 'Stock' },
-  delivery: { icon: 'bicycle', color: colors.primary, channel: 'payments', sound: 'payout', label: 'Livraison' },
-  prescription: { icon: 'document-text', color: colors.blue, channel: 'catalog', sound: 'catalog', label: 'Ordonnance' },
+  payment: { icon: 'cash', color: colors.primary, channel: 'payments-v2', sound: 'payment', label: 'Paiement' },
+  payout: { icon: 'wallet', color: colors.primaryDark, channel: 'payments-v2', sound: 'payout', label: 'Virement' },
+  catalog_new: { icon: 'medkit', color: colors.blue, channel: 'catalog-v2', sound: 'catalog', label: 'Nouveau produit' },
+  catalog_stock: { icon: 'layers', color: '#E67700', channel: 'catalog-v2', sound: 'catalog', label: 'Stock' },
+  delivery: { icon: 'bicycle', color: colors.primary, channel: 'payments-v2', sound: 'payout', label: 'Livraison' },
+  prescription: { icon: 'document-text', color: colors.blue, channel: 'catalog-v2', sound: 'catalog', label: 'Ordonnance' },
 };

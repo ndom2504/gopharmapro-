@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../src/theme';
 import { useAuth } from '../../src/store/auth';
 import { BrandWordmark } from '../../src/components/BrandMark';
+import { serviceZoneAnd } from '../../src/data/places';
 
 export default function AuthWelcome() {
   const continueAsGuest = useAuth((s) => s.continueAsGuest);
@@ -15,7 +16,7 @@ export default function AuthWelcome() {
     <View style={s.page}>
       <View style={s.hero}>
         <BrandWordmark width={210} style={s.logo} />
-        <Text style={s.tag}>Médicaments et parapharmacie, livrés au Gabon.</Text>
+        <Text style={s.tag}>Médicaments et parapharmacie, livrés au {serviceZoneAnd()}.</Text>
       </View>
       <Text style={s.ask}>Quel est votre profil ?</Text>
       <Pressable onPress={() => router.push({ pathname: '/auth/login', params: { role: 'client' } })} style={s.card}>

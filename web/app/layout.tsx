@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Providers } from '@/components/Providers';
 import { site } from '@/lib/site';
+import { serviceZoneAnd } from '@/lib/places';
 import './globals.css';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -15,7 +16,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — Pharmacie en ligne au Gabon`,
+    default: `${site.name} — Pharmacie en ligne au ${serviceZoneAnd()}`,
     template: `%s · ${site.name}`,
   },
   description: site.tagline,

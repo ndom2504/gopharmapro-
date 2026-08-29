@@ -1,4 +1,7 @@
+import type { CountryId } from './data/places';
+
 export type Coords = { latitude: number; longitude: number };
+export type { CountryId };
 
 export type Pharmacy = {
   id: string;
@@ -36,7 +39,7 @@ export type Product = {
 
 export type CartItem = { product: Product; offer: Offer; quantity: number };
 
-export type PaymentMethodId = 'mobicash' | 'airtel-money' | 'moov-money' | 'card';
+export type PaymentMethodId = 'mobicash' | 'airtel-money' | 'moov-money' | 'geniuspay' | 'card';
 
 export type PaymentStatus = 'pending' | 'paid' | 'failed';
 
@@ -154,6 +157,7 @@ export type PharmacyAccount = {
   managerEmail: string;
   professionalNumber: string;
   pharmacistName: string;
+  country: CountryId;
   province: string;
   city: string;
   commune: string;
@@ -194,6 +198,7 @@ export type CourierAccount = {
   vehicleOther: string;
   plate: string;
   payoutPhone: string;
+  country: CountryId;
   province: string;
   city: string;
   commune: string;

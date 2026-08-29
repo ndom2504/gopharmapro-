@@ -44,11 +44,18 @@ export type PaymentMethod = {
   ussd: string;
   color: string;
   background: string;
+  countries?: Array<'GA' | 'BJ' | 'CM'>;
 };
 
 const pharmacyAliases: Record<string, string> = {
   p1: 'ph-centre',
   p3: 'ph-palmiers',
+  p4: 'ph-akpakpa',
+  p5: 'ph-haievive',
+  p6: 'ph-godomey',
+  p7: 'ph-bonanjo',
+  p8: 'ph-bastos',
+  p9: 'ph-bonamoussadi',
 };
 
 const productAliases: Record<string, string> = {
@@ -85,11 +92,17 @@ export const categories = catalogTree.map((c) => ({
 }));
 
 export const paymentMethods: PaymentMethod[] = [
-  { id: 'mobicash', name: 'MobiCash', operator: 'Gabon Telecom', ussd: '*555#', color: '#E87722', background: '#FFF4E8' },
-  { id: 'airtel-money', name: 'Airtel Money', operator: 'Airtel Gabon', ussd: '*150#', color: '#E4002B', background: '#FDE8EC' },
-  { id: 'moov-money', name: 'Moov Money', operator: 'Moov Africa', ussd: '*555#', color: '#0077C8', background: '#E8F4FC' },
-  { id: 'card', name: 'Carte bancaire', operator: 'Visa · Mastercard', ussd: '', color: '#635BFF', background: '#EEF0FF' },
+  { id: 'mobicash', name: 'MobiCash', operator: 'Gabon Telecom', ussd: '*555#', color: '#E87722', background: '#FFF4E8', countries: ['GA'] },
+  { id: 'airtel-money', name: 'Airtel Money', operator: 'Airtel Gabon', ussd: '*150#', color: '#E4002B', background: '#FDE8EC', countries: ['GA'] },
+  { id: 'moov-money', name: 'Moov Money', operator: 'Moov Africa', ussd: '*555#', color: '#0077C8', background: '#E8F4FC', countries: ['GA'] },
+  { id: 'geniuspay', name: 'GeniusPay', operator: 'MTN MoMo · Moov Money Bénin', ussd: '', color: '#0B4F8A', background: '#E8F1F8', countries: ['BJ'] },
+  { id: 'card', name: 'Carte bancaire', operator: 'Visa · Mastercard', ussd: '', color: '#635BFF', background: '#EEF0FF', countries: ['GA', 'BJ', 'CM'] },
 ];
+
+export function methodsForCountry(country?: string | null) {
+  const id = country === 'BJ' || country === 'CM' ? country : 'GA';
+  return paymentMethods.filter((m) => !m.countries || m.countries.includes(id));
+}
 
 function toPharmacy(p: AdminPharmacy): Pharmacy {
   return {

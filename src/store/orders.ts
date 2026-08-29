@@ -330,7 +330,16 @@ export const useOrders = create<OrdersStore>((set, get) => ({
 }));
 
 export function buildPayment(methodLabel: string, method: OrderPayment['method'], phone: string): OrderPayment {
-  const prefix = method === 'airtel-money' ? 'AM' : method === 'moov-money' ? 'MM' : method === 'card' ? 'ST' : 'MC';
+  const prefix =
+    method === 'airtel-money'
+      ? 'AM'
+      : method === 'moov-money'
+        ? 'MM'
+        : method === 'card'
+          ? 'ST'
+          : method === 'geniuspay'
+            ? 'GP'
+            : 'MC';
   const reference = prefix + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
   return { method, methodLabel, phone, status: 'paid', reference };
 }

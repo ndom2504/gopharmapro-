@@ -239,7 +239,7 @@ export default function ComptePage() {
         }}
       >
         <p className="font-extrabold text-ink">Moyens de paiement</p>
-        <p className="text-sm text-muted">Choisissez le moyen utilisé à la commande. Le numéro ci-dessus sert au mobile money.</p>
+        <p className="text-sm text-muted">Gabon : mobile money. Bénin : GeniusPay. Carte partout. Le numéro ci-dessus sert au mobile money.</p>
         <div className="space-y-2">
           {paymentMethods.map((m) => (
             <label key={m.id} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border px-4 py-3">

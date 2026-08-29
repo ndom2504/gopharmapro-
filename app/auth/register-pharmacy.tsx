@@ -17,11 +17,22 @@ import { ChoiceChips, Field, PhoneField, ToggleRow } from '../../src/components/
 import { DocRow, HoursTable, MapPinCard, StepHeader } from '../../src/components/pharmacy-wizard/WizardUI';
 import { colors } from '../../src/theme';
 import { useAuth } from '../../src/store/auth';
-import { parseGabonPhone } from '../../src/data/payments';
-import { citiesOf, communesOf, provinces, quartiersOf } from '../../src/data/gabon';
+import { parseServicePhone } from '../../src/data/payments';
+import {
+  citiesOf,
+  communeLabel,
+  communesOf,
+  countries,
+  countryMeta,
+  firstPlace,
+  quartiersOf,
+  regionsOf,
+  serviceZoneAnd,
+  type CountryId,
+} from '../../src/data/places';
 import { defaultHours, emptyPharmacyForm, managerRoleOptions, structureOptions, toPharmacyAccount } from '../../src/pharmacy-onboarding/defaults';
 import { ManagerRole, StructureType } from '../../src/types';
-import { isInGabon } from '../../src/lib/geo';
+import { hubForCountry, isInServiceArea } from '../../src/lib/geo';
 
 function emailOk(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -61,13 +72,13 @@ export default function RegisterPharmacy() {
     if (step === 1) {
       if (form.pharmacyName.trim().length < 3) e.pharmacyName = 'Indiquez le nom officiel.';
       if (form.structureType === 'other' && form.structureTypeOther.trim().length < 2) e.structureTypeOther = 'Précisez le type de structure.';
-      if (!parseGabonPhone(form.phone)) e.phone = 'Téléphone professionnel invalide.';
+      if (!parseServicePhone(form.phone, form.country)) e.phone = 'Téléphone professionnel invalide.';
       if (!emailOk(form.email)) e.email = 'E-mail professionnel invalide.';
     }
     if (step === 2) {
       if (form.managerFirstName.trim().length < 2) e.managerFirstName = 'Prénom requis.';
       if (form.managerLastName.trim().length < 2) e.managerLastName = 'Nom requis.';
-      if (!parseGabonPhone(form.managerPhone)) e.managerPhone = 'Téléphone du responsable invalide.';
+      if (!parseServicePhone(form.managerPhone, form.country)) e.managerPhone = 'Téléphone du responsable invalide.';
       if (!emailOk(form.managerEmail)) e.managerEmail = 'E-mail du responsable invalide.';
       if (form.managerRole === 'other' && form.managerRoleOther.trim().length < 2) e.managerRoleOther = 'Précisez la fonction.';
       if (form.managerRole === 'titulaire' && form.professionalNumber.trim().length < 3) e.professionalNumber = 'N° d’ordre requis pour le titulaire.';
@@ -106,14 +117,14 @@ export default function RegisterPharmacy() {
       setStep(step + 1);
       return;
     }
-    const phone = parseGabonPhone(form.phone)!;
-    const managerPhone = parseGabonPhone(form.managerPhone)!;
+    const phone = parseServicePhone(form.phone, form.country)!;
+    const managerPhone = parseServicePhone(form.managerPhone, form.country)!;
     const account = toPharmacyAccount(
       {
         ...form,
         phone: phone.display,
         managerPhone: managerPhone.display,
-        phoneSecondary: parseGabonPhone(form.phoneSecondary)?.display || form.phoneSecondary,
+        phoneSecondary: parseServicePhone(form.phoneSecondary, form.country)?.display || form.phoneSecondary,
         documents: form.documents.map((d) => ({ ...d, status: d.fileName ? 'pending' : d.status })),
       },
       'ph-' + Date.now(),
@@ -191,7 +202,27 @@ export default function RegisterPharmacy() {
       <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
         {step === 1 ? (
           <>
-            <StepHeader step={1} title="Votre pharmacie" subtitle="Référencez votre officine et permettez à vos clients de trouver vos produits." />
+            <StepHeader step={1} title="Votre pharmacie" subtitle={`Référencez votre officine au ${serviceZoneAnd()}.`} />
+            <Text style={s.label}>Pays *</Text>
+            <ChoiceChips
+              options={countries.map((c) => ({ id: c.id, label: `${c.flag} ${c.name}` }))}
+              value={form.country}
+              onChange={(id) => {
+                const country = id as CountryId;
+                const place = firstPlace(country);
+                const hub = hubForCountry(country);
+                patch({
+                  country,
+                  province: place.province,
+                  city: place.city,
+                  commune: place.commune,
+                  area: '',
+                  latitude: hub.latitude,
+                  longitude: hub.longitude,
+                  gpsConfirmed: false,
+                });
+              }}
+            />
             <Field label="Nom officiel de la pharmacie *" value={form.pharmacyName} onChange={(pharmacyName) => patch({ pharmacyName })} placeholder="Pharmacie du Centre" error={errors.pharmacyName} />
             <Field label="Nom commercial (si différent)" value={form.tradeName} onChange={(tradeName) => patch({ tradeName })} placeholder="Facultatif" />
             <Text style={s.label}>Type de structure *</Text>
@@ -199,9 +230,9 @@ export default function RegisterPharmacy() {
             {form.structureType === 'other' ? <Field label="Précisez" value={form.structureTypeOther} onChange={(structureTypeOther) => patch({ structureTypeOther })} error={errors.structureTypeOther} /> : null}
             <Field label="Numéro d’autorisation / agrément" value={form.authorizationNumber} onChange={(authorizationNumber) => patch({ authorizationNumber })} placeholder="MS/…/PH-…" autoCapitalize="characters" />
             <Field label="Numéro d’identification de la structure" value={form.structureIdNumber} onChange={(structureIdNumber) => patch({ structureIdNumber })} placeholder="NIF / identifiant" autoCapitalize="characters" />
-            <PhoneField label="Téléphone professionnel *" value={form.phone} onChange={(phone) => patch({ phone })} error={errors.phone} />
+            <PhoneField label="Téléphone professionnel *" value={form.phone} onChange={(phone) => patch({ phone })} error={errors.phone} prefix={countryMeta(form.country).callingCode} country={form.country} />
             <Field label="Email professionnel *" value={form.email} onChange={(email) => patch({ email })} placeholder="pharmacie@email.ga" keyboardType="email-address" autoCapitalize="none" error={errors.email} />
-            <PhoneField label="Téléphone secondaire" value={form.phoneSecondary} onChange={(phoneSecondary) => patch({ phoneSecondary })} />
+            <PhoneField label="Téléphone secondaire" value={form.phoneSecondary} onChange={(phoneSecondary) => patch({ phoneSecondary })} prefix={countryMeta(form.country).callingCode} country={form.country} />
             <Field label="Site web (facultatif)" value={form.website} onChange={(website) => patch({ website })} placeholder="https://" keyboardType="url" autoCapitalize="none" />
           </>
         ) : null}
@@ -214,7 +245,7 @@ export default function RegisterPharmacy() {
             <Text style={s.label}>Fonction *</Text>
             <ChoiceChips options={managerRoleOptions} value={form.managerRole} onChange={(id) => patch({ managerRole: id as ManagerRole })} />
             {form.managerRole === 'other' ? <Field label="Précisez la fonction" value={form.managerRoleOther} onChange={(managerRoleOther) => patch({ managerRoleOther })} error={errors.managerRoleOther} /> : null}
-            <PhoneField label="Téléphone *" value={form.managerPhone} onChange={(managerPhone) => patch({ managerPhone })} error={errors.managerPhone} />
+            <PhoneField label="Téléphone *" value={form.managerPhone} onChange={(managerPhone) => patch({ managerPhone })} error={errors.managerPhone} prefix={countryMeta(form.country).callingCode} country={form.country} />
             <Field label="Email *" value={form.managerEmail} onChange={(managerEmail) => patch({ managerEmail })} placeholder="responsable@email.ga" keyboardType="email-address" autoCapitalize="none" error={errors.managerEmail} />
             <Field
               label="N° professionnel / ordre, si applicable"
@@ -230,34 +261,34 @@ export default function RegisterPharmacy() {
         {step === 3 ? (
           <>
             <StepHeader step={3} title="Localisation" subtitle="Cette position servira à afficher « pharmacie à 1,4 km de vous »." />
-            <Text style={s.label}>Province *</Text>
+            <Text style={s.label}>{countryMeta(form.country).regionLabel} *</Text>
             <ChoiceChips
-              options={provinces.map((id) => ({ id, label: id }))}
+              options={regionsOf(form.country).map((id) => ({ id, label: id }))}
               value={form.province}
               onChange={(province) => {
-                const city = citiesOf(province)[0] || '';
-                const commune = communesOf(province, city)[0] || '';
+                const city = citiesOf(province, form.country)[0] || '';
+                const commune = communesOf(province, city, form.country)[0] || '';
                 patch({ province, city, commune, area: '' });
               }}
             />
             <Text style={s.label}>Ville *</Text>
             <ChoiceChips
-              options={citiesOf(form.province).map((id) => ({ id, label: id }))}
+              options={citiesOf(form.province, form.country).map((id) => ({ id, label: id }))}
               value={form.city}
               onChange={(city) => {
-                const commune = communesOf(form.province, city)[0] || '';
+                const commune = communesOf(form.province, city, form.country)[0] || '';
                 patch({ city, commune, area: '' });
               }}
             />
-            <Text style={s.label}>Commune *</Text>
+            <Text style={s.label}>{communeLabel(form.country, form.city)} *</Text>
             <ChoiceChips
-              options={communesOf(form.province, form.city).map((id) => ({ id, label: id }))}
+              options={communesOf(form.province, form.city, form.country).map((id) => ({ id, label: id }))}
               value={form.commune}
               onChange={(commune) => patch({ commune, area: '' })}
             />
-            <Text style={s.label}>Quartier *</Text>
+            <Text style={s.label}>Quartier / localité *</Text>
             <ChoiceChips
-              options={quartiersOf(form.province, form.city, form.commune).map((id) => ({ id, label: id }))}
+              options={quartiersOf(form.province, form.city, form.commune, form.country).map((id) => ({ id, label: id }))}
               value={form.area}
               onChange={(area) => patch({ area })}
             />
@@ -276,8 +307,8 @@ export default function RegisterPharmacy() {
                 setErrors((e) => ({ ...e, gps: '' }));
               }}
             />
-            {!isInGabon({ latitude: form.latitude, longitude: form.longitude }) ? (
-              <Text style={s.warn}>Cette position semble hors Gabon. Vérifiez avant de confirmer.</Text>
+            {!isInServiceArea({ latitude: form.latitude, longitude: form.longitude }) ? (
+              <Text style={s.warn}>Cette position semble hors {serviceZoneAnd()}. Vérifiez avant de confirmer.</Text>
             ) : null}
             {errors.gps ? <Text style={s.error}>{errors.gps}</Text> : null}
           </>

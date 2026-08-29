@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,10 +17,18 @@ import { LocationBar } from '../src/components/LocationBar';
 import { useCart } from '../src/store/cart';
 import { colors } from '../src/theme';
 import { Fulfillment, PaymentMethodId } from '../src/types';
-import { formatPhoneInput, isCardPayment, parseGabonPhone, paymentMethods, suggestPaymentMethod } from '../src/data/payments';
+import {
+  formatPhoneInput,
+  isCardPayment,
+  isGeniusPay,
+  methodsForCountry,
+  parseServicePhone,
+  suggestPaymentMethod,
+} from '../src/data/payments';
 import { useGeoCatalog } from '../src/hooks/useGeoCatalog';
 import { useCartRx } from '../src/hooks/useCartRx';
-import { formatKm, locatePharmacy } from '../src/lib/geo';
+import { countryFromCoords, formatKm, locatePharmacy } from '../src/lib/geo';
+import { countryMeta } from '../src/data/places';
 import { RxPayBanner } from '../src/components/RxPayBanner';
 
 export default function Checkout() {
@@ -36,18 +44,29 @@ export default function Checkout() {
   const [fulfillment, setFulfillment] = useState<Fulfillment>('pickup');
   const { status, address, outsideGabon, refresh, coords } = useGeoCatalog();
   const pharmacy = items[0] ? locatePharmacy(items[0].offer.pharmacy, coords) : null;
+  const payCountry =
+    (pharmacy && countryFromCoords(pharmacy)) || countryFromCoords(coords || { latitude: 0, longitude: 0 }) || 'GA';
+  const availableMethods = methodsForCountry(payCountry);
+  const calling = countryMeta(payCountry).callingCode;
   const canPickup = pharmacy?.pickup !== false;
   const canDelivery = !!pharmacy?.delivery;
   const mode: Fulfillment = !canPickup && canDelivery ? 'delivery' : !canDelivery ? 'pickup' : fulfillment;
   const fee = mode === 'delivery' ? items[0]?.offer.pharmacy.fee || 0 : 0;
   const total = subtotal + fee;
 
+  useEffect(() => {
+    if (method && !availableMethods.some((m) => m.id === method)) {
+      setMethod(null);
+      setPicked(false);
+    }
+  }, [payCountry, method, availableMethods]);
+
   const onPhone = (value: string) => {
-    const next = formatPhoneInput(value);
+    const next = formatPhoneInput(value, payCountry);
     setPhone(next);
     setPhoneError('');
     const suggested = suggestPaymentMethod(next);
-    if (suggested && !picked) setMethod(suggested);
+    if (suggested && !picked && availableMethods.some((m) => m.id === suggested)) setMethod(suggested);
   };
 
   const pay = () => {
@@ -63,9 +82,20 @@ export default function Checkout() {
       });
       return;
     }
-    const parsed = parseGabonPhone(phone);
+    const parsed = parseServicePhone(phone, payCountry);
     if (!parsed) {
-      setPhoneError('Entrez un numéro gabonais valide, ex. 77 12 34 56.');
+      setPhoneError(
+        payCountry === 'BJ'
+          ? 'Entrez un numéro béninois valide, ex. 97 12 34 56.'
+          : 'Entrez un numéro valide pour ce pays.',
+      );
+      return;
+    }
+    if (isGeniusPay(method)) {
+      router.push({
+        pathname: '/pay-genius',
+        params: { phone: parsed.display, total: String(total), fulfillment: mode },
+      });
       return;
     }
     router.push({
@@ -162,9 +192,11 @@ export default function Checkout() {
         </Card>
         <Text style={s.section}>Paiement</Text>
         <Text style={s.meta}>
-          Mobile money gabonais, ou carte Visa / Mastercard via Stripe. Le montant est encaissé par Go Pharma Pro.
+          {payCountry === 'BJ'
+            ? 'Au Bénin : GeniusPay (MTN MoMo, Moov Money) ou carte. Le montant est encaissé par Go Pharma Pro.'
+            : 'Mobile money, ou carte Visa / Mastercard. Le montant est encaissé par Go Pharma Pro.'}
         </Text>
-        {paymentMethods.map((m) => {
+        {availableMethods.map((m) => {
           const selected = method === m.id;
           return (
             <Pressable
@@ -172,7 +204,7 @@ export default function Checkout() {
               onPress={() => {
                 setMethod(m.id);
                 setPicked(true);
-                if (m.id === 'card') setPhoneError('');
+                if (m.id === 'card' || m.id === 'geniuspay') setPhoneError('');
               }}
               style={[s.payCard, selected && { borderColor: m.color, backgroundColor: m.background }]}
             >
@@ -191,11 +223,11 @@ export default function Checkout() {
           <>
             <Text style={s.label}>Numéro du compte mobile money</Text>
             <View style={[s.phoneBox, phoneError ? { borderColor: colors.danger } : null]}>
-              <Text style={s.prefix}>+241</Text>
+              <Text style={s.prefix}>{calling}</Text>
               <TextInput
                 value={phone}
                 onChangeText={onPhone}
-                placeholder="77 12 34 56"
+                placeholder={payCountry === 'BJ' ? '97 12 34 56' : '77 12 34 56'}
                 placeholderTextColor={colors.muted}
                 keyboardType="phone-pad"
                 style={s.phoneInput}
@@ -204,7 +236,10 @@ export default function Checkout() {
             {phoneError ? (
               <Text style={s.error}>{phoneError}</Text>
             ) : (
-              <Text style={s.hint}>Indicatif Gabon +241 déjà inclus. Le 0 local n’est pas nécessaire.</Text>
+              <Text style={s.hint}>
+                Indicatif {calling} déjà inclus. Le 0 local n’est pas nécessaire.
+                {isGeniusPay(method) ? ' GeniusPay ouvrira MTN MoMo ou Moov Money.' : ''}
+              </Text>
             )}
           </>
         ) : method === 'card' ? (

@@ -8,8 +8,19 @@ import { DocRow, StepHeader } from '../../src/components/pharmacy-wizard/WizardU
 import { colors } from '../../src/theme';
 import { useAuth } from '../../src/store/auth';
 import { GoogleButton } from '../../src/components/GoogleButton';
-import { parseGabonPhone } from '../../src/data/payments';
-import { citiesOf, communesOf, provinces, quartiersOf } from '../../src/data/gabon';
+import { parseServicePhone } from '../../src/data/payments';
+import {
+  citiesOf,
+  communeLabel,
+  communesOf,
+  countries,
+  countryMeta,
+  firstPlace,
+  quartiersOf,
+  regionsOf,
+  serviceZoneAnd,
+  type CountryId,
+} from '../../src/data/places';
 import { emptyCourierForm, toCourierAccount, vehicleOptions } from '../../src/courier-onboarding/defaults';
 import { CourierVehicle } from '../../src/types';
 
@@ -51,7 +62,7 @@ export default function RegisterCourier() {
     if (step === 1) {
       if (form.firstName.trim().length < 2) e.firstName = 'Indiquez votre prénom.';
       if (form.lastName.trim().length < 2) e.lastName = 'Indiquez votre nom.';
-      if (!parseGabonPhone(form.phone)) e.phone = 'Numéro gabonais invalide.';
+      if (!parseServicePhone(form.phone, form.country)) e.phone = 'Numéro invalide pour ce pays.';
       if (!emailOk(form.email)) e.email = 'E-mail requis et valide.';
       if (form.password.length < 6) e.password = 'Au moins 6 caractères.';
       if (form.password !== form.confirm) e.confirm = 'Les mots de passe ne correspondent pas.';
@@ -59,7 +70,7 @@ export default function RegisterCourier() {
     if (step === 2) {
       if (form.vehicle === 'other' && form.vehicleOther.trim().length < 2) e.vehicleOther = 'Précisez le type de véhicule.';
       if (form.plate.trim().length < 3) e.plate = 'Indiquez l’immatriculation.';
-      if (!parseGabonPhone(form.payoutPhone || form.phone)) e.payoutPhone = 'Numéro mobile money invalide.';
+      if (!parseServicePhone(form.payoutPhone || form.phone, form.country)) e.payoutPhone = 'Numéro mobile money invalide.';
     }
     if (step === 3) {
       if (!form.area) e.area = 'Choisissez votre quartier de rattachement.';
@@ -93,8 +104,8 @@ export default function RegisterCourier() {
       setStep(step + 1);
       return;
     }
-    const phone = parseGabonPhone(form.phone)!;
-    const payout = parseGabonPhone(form.payoutPhone || form.phone)!;
+    const phone = parseServicePhone(form.phone, form.country)!;
+    const payout = parseServicePhone(form.payoutPhone || form.phone, form.country)!;
     const account = toCourierAccount({ ...form, phone: phone.display, payoutPhone: payout.display }, 'tmp');
     const { id: _id, role: _role, status: _status, provider: _provider, googleId: _gid, ...rest } = account;
     const result = register({ ...rest, password: form.password });
@@ -136,7 +147,7 @@ export default function RegisterCourier() {
               step={1}
               total={4}
               title="Identité du livreur"
-              subtitle="Pour récupérer les commandes en pharmacie et les livrer aux clients au Gabon."
+              subtitle={`Pour récupérer les commandes en pharmacie et les livrer aux clients au ${serviceZoneAnd()}.`}
             />
             <GoogleButton
               label="S’inscrire avec Google"
@@ -154,9 +165,19 @@ export default function RegisterCourier() {
               }}
             />
             <Text style={s.or}>ou remplir le formulaire</Text>
+            <Text style={s.label}>Pays *</Text>
+            <ChoiceChips
+              options={countries.map((c) => ({ id: c.id, label: `${c.flag} ${c.name}` }))}
+              value={form.country}
+              onChange={(id) => {
+                const country = id as CountryId;
+                const place = firstPlace(country);
+                patch({ country, province: place.province, city: place.city, commune: place.commune, area: '' });
+              }}
+            />
             <Field label="Prénom *" value={form.firstName} onChange={(firstName) => patch({ firstName })} placeholder="Jean" error={errors.firstName} autoCapitalize="words" />
             <Field label="Nom *" value={form.lastName} onChange={(lastName) => patch({ lastName })} placeholder="Mba" error={errors.lastName} autoCapitalize="words" />
-            <PhoneField label="Téléphone *" value={form.phone} onChange={(phone) => patch({ phone })} error={errors.phone} />
+            <PhoneField label="Téléphone *" value={form.phone} onChange={(phone) => patch({ phone })} error={errors.phone} prefix={countryMeta(form.country).callingCode} country={form.country} />
             <Field
               label="E-mail *"
               value={form.email}
@@ -196,6 +217,7 @@ export default function RegisterCourier() {
               value={form.payoutPhone}
               onChange={(payoutPhone) => patch({ payoutPhone })}
               error={errors.payoutPhone}
+              prefix={countryMeta(form.country).callingCode} country={form.country}
             />
             <Text style={s.hint}>Airtel Money, Moov Money ou MobiCash. Par défaut on peut reprendre votre téléphone.</Text>
           </>
@@ -204,34 +226,34 @@ export default function RegisterCourier() {
         {step === 3 ? (
           <>
             <StepHeader step={3} total={4} title="Zone d’activité" subtitle="Les courses vous seront proposées autour de ce quartier." />
-            <Text style={s.label}>Province *</Text>
+            <Text style={s.label}>{countryMeta(form.country).regionLabel} *</Text>
             <ChoiceChips
-              options={provinces.map((id) => ({ id, label: id }))}
+              options={regionsOf(form.country).map((id) => ({ id, label: id }))}
               value={form.province}
               onChange={(province) => {
-                const city = citiesOf(province)[0] || '';
-                const commune = communesOf(province, city)[0] || '';
+                const city = citiesOf(province, form.country)[0] || '';
+                const commune = communesOf(province, city, form.country)[0] || '';
                 patch({ province, city, commune, area: '' });
               }}
             />
             <Text style={s.label}>Ville *</Text>
             <ChoiceChips
-              options={citiesOf(form.province).map((id) => ({ id, label: id }))}
+              options={citiesOf(form.province, form.country).map((id) => ({ id, label: id }))}
               value={form.city}
               onChange={(city) => {
-                const commune = communesOf(form.province, city)[0] || '';
+                const commune = communesOf(form.province, city, form.country)[0] || '';
                 patch({ city, commune, area: '' });
               }}
             />
-            <Text style={s.label}>Commune *</Text>
+            <Text style={s.label}>{communeLabel(form.country, form.city)} *</Text>
             <ChoiceChips
-              options={communesOf(form.province, form.city).map((id) => ({ id, label: id }))}
+              options={communesOf(form.province, form.city, form.country).map((id) => ({ id, label: id }))}
               value={form.commune}
               onChange={(commune) => patch({ commune, area: '' })}
             />
-            <Text style={s.label}>Quartier de rattachement *</Text>
+            <Text style={s.label}>Quartier / localité *</Text>
             <ChoiceChips
-              options={quartiersOf(form.province, form.city, form.commune).map((id) => ({ id, label: id }))}
+              options={quartiersOf(form.province, form.city, form.commune, form.country).map((id) => ({ id, label: id }))}
               value={form.area}
               onChange={(area) => patch({ area })}
             />

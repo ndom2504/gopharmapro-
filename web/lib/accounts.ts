@@ -72,6 +72,7 @@ export type PharmacyAccount = {
   commune: string;
   city: string;
   province: string;
+  country?: 'GA' | 'BJ' | 'CM';
   managerRole: string;
   status: PharmacyStatus;
   identityStatus: IdentityStatus;
@@ -92,6 +93,7 @@ export type CourierAccount = {
   area: string;
   city: string;
   province: string;
+  country?: 'GA' | 'BJ' | 'CM';
   payoutPhone: string;
   status: CourierStatus;
   documents: PartnerDoc[];
@@ -141,6 +143,7 @@ export const accountSeed: StoredAccount[] = [
     commune: 'Libreville',
     city: 'Libreville',
     province: 'Estuaire',
+    country: 'GA',
     managerRole: 'titulaire',
     status: 'verified',
     identityStatus: 'verified',
@@ -160,10 +163,51 @@ export const accountSeed: StoredAccount[] = [
     commune: 'Owendo',
     city: 'Libreville',
     province: 'Estuaire',
+    country: 'GA',
     managerRole: 'titulaire',
     status: 'pending',
     identityStatus: 'unverified',
     documents: pharmacyDocs('pending'),
+  },
+  {
+    role: 'pharmacy',
+    id: 'ph-akpakpa',
+    pharmacyName: 'Pharmacie Akpakpa',
+    pharmacistName: 'Awa Dossou',
+    professionalNumber: 'ONPB-4412',
+    phone: '+229 97 11 22 33',
+    email: 'akpakpa@pharma.bj',
+    password: 'demo123',
+    address: 'Carrefour Akpakpa Dodomey',
+    area: 'Akpakpa',
+    commune: '5e arrondissement',
+    city: 'Cotonou',
+    province: 'Littoral',
+    country: 'BJ',
+    managerRole: 'titulaire',
+    status: 'verified',
+    identityStatus: 'verified',
+    documents: pharmacyDocs('verified'),
+  },
+  {
+    role: 'pharmacy',
+    id: 'ph-bonanjo',
+    pharmacyName: 'Pharmacie Bonanjo',
+    pharmacistName: 'Paul Essomba',
+    professionalNumber: 'ONPC-1184',
+    phone: '+237 670 11 22 33',
+    email: 'bonanjo@pharma.cm',
+    password: 'demo123',
+    address: 'Boulevard de la Liberté, Bonanjo',
+    area: 'Bonanjo',
+    commune: 'Douala I',
+    city: 'Douala',
+    province: 'Littoral',
+    country: 'CM',
+    managerRole: 'titulaire',
+    status: 'verified',
+    identityStatus: 'verified',
+    documents: pharmacyDocs('verified'),
   },
   {
     role: 'courier',
@@ -178,6 +222,7 @@ export const accountSeed: StoredAccount[] = [
     area: 'Centre-ville',
     city: 'Libreville',
     province: 'Estuaire',
+    country: 'GA',
     payoutPhone: '+241 66 00 00 00',
     status: 'active',
     documents: courierDocs('verified'),
@@ -196,6 +241,7 @@ export const accountSeed: StoredAccount[] = [
     area: 'Owendo',
     city: 'Libreville',
     province: 'Estuaire',
+    country: 'GA',
     payoutPhone: '+241 66 11 22 33',
     status: 'pending',
     documents: courierDocs('pending'),
@@ -238,6 +284,11 @@ const partnerCatalogSeed: PartnerCatalogItem[] = [
   { id: 'pc-baume', pharmacyId: 'ph-centre', name: 'Baume à lèvres', category: 'Parapharmacie', price: 900, stock: 28, status: 'published', imageKey: 'vitamin-c' },
   { id: 'pc-glyco', pharmacyId: 'ph-centre', name: 'Bandelettes glycémie', category: 'Diabète', price: 8500, stock: 9, status: 'published', imageKey: 'bandages' },
   { id: 'pc-preserv', pharmacyId: 'ph-centre', name: 'Préservatifs', category: 'Santé sexuelle', price: 2500, stock: 20, status: 'published', imageKey: 'bandages' },
+  { id: 'pa-para', pharmacyId: 'ph-akpakpa', name: 'Paracétamol 500 mg', category: 'Médicaments', price: 2800, stock: 18, status: 'published', imageKey: 'paracetamol' },
+  { id: 'pa-amox', pharmacyId: 'ph-akpakpa', name: 'Amoxicilline 500 mg', category: 'Médicaments', price: 5900, stock: 8, status: 'published', imageKey: 'amoxicillin' },
+  { id: 'pa-compresse', pharmacyId: 'ph-akpakpa', name: 'Compresses stériles', category: 'Premiers soins', price: 1500, stock: 20, status: 'published', imageKey: 'bandages' },
+  { id: 'pb-para', pharmacyId: 'ph-bonanjo', name: 'Paracétamol 500 mg', category: 'Médicaments', price: 2100, stock: 22, status: 'published', imageKey: 'paracetamol' },
+  { id: 'pb-amox', pharmacyId: 'ph-bonanjo', name: 'Amoxicilline 500 mg', category: 'Médicaments', price: 4800, stock: 10, status: 'published', imageKey: 'amoxicillin' },
 ];
 
 export const partnerCatalog: PartnerCatalogItem[] = partnerCatalogSeed.map((i) => {
