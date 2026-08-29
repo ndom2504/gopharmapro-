@@ -146,7 +146,7 @@ export default function Login() {
 
 const s = StyleSheet.create({
   page: { padding: 20, paddingBottom: 40 },
-  logo: { alignSelf: 'center', marginBottom: 18, borderRadius: 42 },
+  logo: { alignSelf: 'center', marginBottom: 18 },
   switch: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: colors.border, padding: 4, marginBottom: 22 },
   tab: { flex: 1, height: 42, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   tabOn: { backgroundColor: colors.primary },

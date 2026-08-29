@@ -12,7 +12,7 @@ export function Footer() {
     <footer className="mt-auto bg-black">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
-          <BrandLogo mark />
+          <BrandLogo size="md" />
           <p className="mt-4 max-w-xs text-sm leading-6 text-white/65">{site.tagline}</p>
         </div>
         <div>

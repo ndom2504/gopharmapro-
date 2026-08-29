@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   description: site.tagline,
   icons: {
-    icon: [{ url: '/brand/mark.png?v=5', type: 'image/png' }],
+    icon: [{ url: '/brand/mark.png?v=6', type: 'image/png' }],
     apple: '/apple-icon.png',
   },
   openGraph: {

@@ -57,12 +57,12 @@ export default function AuthWelcome() {
 }
 
 const s = StyleSheet.create({
-  page: { flex: 1, padding: 24, paddingTop: 64 },
-  hero: { alignItems: 'center', marginBottom: 28 },
-  logo: { marginBottom: 16, borderRadius: 59 },
-  brand: { fontSize: 30, fontWeight: '900', color: colors.text },
+  page: { flex: 1, padding: 24, justifyContent: 'center' },
+  hero: { alignItems: 'center', marginBottom: 40 },
+  logo: { marginBottom: 16 },
+  brand: { fontSize: 32, fontWeight: '900', color: colors.text, textAlign: 'center' },
   tag: { marginTop: 8, color: colors.muted, textAlign: 'center', lineHeight: 22, maxWidth: 280 },
-  ask: { fontWeight: '800', color: colors.text, fontSize: 16, marginBottom: 14 },
+  ask: { fontWeight: '800', color: colors.text, fontSize: 18, marginBottom: 20 },
   card: {
     flexDirection: 'row',
     alignItems: 'center',

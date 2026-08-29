@@ -127,7 +127,9 @@ function ConnexionInner() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-16">
-      <BrandLogo framed size="md" priority />
+      <div className="flex justify-center">
+        <BrandLogo size="lg" priority />
+      </div>
       <h1 className="mt-6 text-3xl font-extrabold text-ink">Connexion</h1>
       <p className="mt-2 text-sm leading-6 text-muted">{copy.meta}</p>
       <div className="mt-6 grid grid-cols-3 gap-1 rounded-2xl border border-border bg-white p-1">
