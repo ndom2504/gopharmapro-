@@ -12,15 +12,13 @@ import { formatKm } from '../../src/lib/geo';
 import { categoryPhoto } from '../../src/lib/categoryPhotos';
 import { categoryIcons } from '../../src/lib/dashboard';
 import { useCart } from '../../src/store/cart';
-import { useFavorites } from '../../src/store/favorites';
 import { useAuth } from '../../src/store/auth';
+import { PharmacyFeedback } from '../../src/components/PharmacyFeedback';
 
 export default function Home() {
   const [q, setQ] = useState('');
   const { nearbyPharmacies, locatedProducts, status, address, outsideGabon, refresh } = useGeoCatalog();
   const add = useCart((s) => s.add);
-  const togglePharmacy = useFavorites((s) => s.togglePharmacy);
-  const isFav = useFavorites((s) => s.isPharmacy);
   const session = useAuth((s) => s.session);
   const hello = session?.role === 'client' ? `Bonjour ${session.firstName} 👋` : 'Bonjour 👋';
   const go = () => router.push({ pathname: '/(tabs)/search', params: { q } });
@@ -95,17 +93,13 @@ export default function Home() {
       </View>
       {nearbyPharmacies.slice(0, 2).map((p) => (
         <Card key={p.id} style={{ marginBottom: 12 }}>
-          <View style={s.row}>
-            <Text style={s.cardTitle}>{p.name}</Text>
-            <Text onPress={() => togglePharmacy(p.id)} style={s.heart}>
-              {isFav(p.id) ? '❤️' : '♡'}
-            </Text>
-          </View>
+          <Text style={s.cardTitle}>{p.name}</Text>
           <Text style={s.meta}>📍 {formatKm(p.distance)} · {p.area}</Text>
           <View style={[s.row, { marginTop: 8 }]}>
             <Badge text={p.open ? 'Ouverte' : 'Fermée'} tone={p.open ? 'green' : 'red'} />
             {p.delivery ? <Badge text="Livraison disponible" /> : <Badge text="Retrait uniquement" tone="gray" />}
           </View>
+          <PharmacyFeedback pharmacyId={p.id} name={p.name} baseRating={p.rating} reviewCount={p.reviewCount} />
           <View style={{ marginTop: 12 }}>
             <Button title="Voir la pharmacie" kind="secondary" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
           </View>
@@ -176,5 +170,4 @@ const s = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: '800', color: colors.text, flex: 1 },
   meta: { fontSize: 13, color: colors.muted, marginTop: 5 },
   price: { fontSize: 18, fontWeight: '900', color: colors.primary, marginTop: 4 },
-  heart: { fontSize: 20, padding: 4 },
 });

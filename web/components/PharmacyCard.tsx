@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { formatKm, type Pharmacy } from '@/lib/catalog';
+import { PharmacyFeedback } from '@/components/PharmacyFeedback';
 
 export function PharmacyCard({ pharmacy }: { pharmacy: Pharmacy }) {
   return (
@@ -10,10 +11,18 @@ export function PharmacyCard({ pharmacy }: { pharmacy: Pharmacy }) {
           {pharmacy.open ? 'Ouverte' : 'Fermée'}
         </span>
       </div>
-      <p className="mt-2 text-sm text-muted">📍 {formatKm(pharmacy.distance)} · {pharmacy.area}</p>
+      <p className="mt-2 text-sm text-muted">
+        📍 {formatKm(pharmacy.distance)} · {pharmacy.area}
+      </p>
       <p className="mt-1 text-sm font-semibold text-brand">
         {pharmacy.delivery ? '🚚 Livraison disponible' : 'Retrait uniquement'}
       </p>
+      <PharmacyFeedback
+        pharmacyId={pharmacy.id}
+        name={pharmacy.name}
+        baseRating={pharmacy.rating}
+        reviewCount={pharmacy.reviewCount}
+      />
       <Link href={`/pharmacies/${pharmacy.id}`} className="btn-secondary mt-4 inline-flex !h-10 text-sm">
         Voir la pharmacie
       </Link>

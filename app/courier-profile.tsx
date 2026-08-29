@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
-import { RoleTabBar, courierTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, courierTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 
@@ -11,6 +11,7 @@ const vehicleLabel = { moto: 'Moto', voiture: 'Voiture', other: 'Autre' } as con
 export default function CourierProfile() {
   const session = useAuth((s) => s.session);
   const logout = useAuth((s) => s.logout);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'courier') return <Redirect href={'/auth' as Href} />;
   const leave = () => {
     logout();
@@ -21,7 +22,7 @@ export default function CourierProfile() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={s.page}>
+      <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
         <Text style={s.title}>Profil livreur</Text>
         <Card style={{ marginTop: 16 }}>
           <View style={s.avatar}>
@@ -57,7 +58,7 @@ export default function CourierProfile() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 58, paddingBottom: 100 },
+  page: { padding: 20, paddingTop: 58 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.mint, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   initials: { fontWeight: '900', fontSize: 22, color: colors.primary },

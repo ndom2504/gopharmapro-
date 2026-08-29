@@ -91,8 +91,8 @@ async function persistPrefs() {
 export function visibleFor(list: AppNotification[], audience: UserRole, targetId?: string) {
   return list.filter((n) => {
     if (n.audience !== audience) return false;
-    if (audience === 'client') return true;
     if (!n.targetId) return true;
+    if (!targetId) return audience === 'client';
     return n.targetId === targetId;
   });
 }

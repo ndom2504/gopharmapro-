@@ -2,7 +2,7 @@ import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Button, Card } from '../src/components/UI';
-import { RoleTabBar, courierTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, courierTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { useOrders } from '../src/store/orders';
@@ -11,12 +11,13 @@ import { isDelivery } from '../src/lib/orderStatus';
 export default function CourierMap() {
   const session = useAuth((s) => s.session);
   const orders = useOrders((s) => s.orders);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'courier') return <Redirect href={'/auth' as Href} />;
   const active = orders.find((o) => isDelivery(o) && o.courierId === session.id && o.status !== 'delivered');
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={s.page}>
+      <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
         <Text style={s.title}>Carte</Text>
         {!active ? (
           <Card>
@@ -50,7 +51,7 @@ export default function CourierMap() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 58, paddingBottom: 100 },
+  page: { padding: 20, paddingTop: 58 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text, marginBottom: 16 },
   node: { fontWeight: '800', color: colors.text, fontSize: 16 },
   arrow: { color: colors.muted, marginVertical: 6, fontWeight: '800' },

@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
-import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, pharmacyTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { methodLabel, totalsFor, usePayouts } from '../src/store/payouts';
@@ -15,6 +15,7 @@ export default function PharmacyPayouts() {
   const items = usePayouts((s) => s.items);
   const markSent = usePayouts((s) => s.markSent);
   const push = useNotifications((s) => s.push);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'pharmacy') return <Redirect href={'/auth' as Href} />;
 
   const mine = items.filter((p) => p.beneficiary === 'pharmacy' && p.accountId === session.id);
@@ -25,7 +26,7 @@ export default function PharmacyPayouts() {
 
   return (
     <View style={{ flex: 1 }}>
-    <ScrollView contentContainerStyle={s.page}>
+    <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
       <Text style={s.title}>Ventes</Text>
       <Text style={s.meta}>
         Le client paie Go Pharma Pro par mobile money. Votre part est ensuite versée sur le numéro de l’officine.
@@ -96,7 +97,7 @@ export default function PharmacyPayouts() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingBottom: 100 },
+  page: { padding: 20 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },
   label: { fontWeight: '800', color: colors.text, fontSize: 13 },

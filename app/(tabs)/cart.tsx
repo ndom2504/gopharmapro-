@@ -2,15 +2,17 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { router } from 'expo-router';
 import { Badge, Button, Card, ScreenTitle } from '../../src/components/UI';
 import { ProductImage } from '../../src/components/ProductImage';
+import { RxPayBanner } from '../../src/components/RxPayBanner';
 import { useCart } from '../../src/store/cart';
+import { useCartRx } from '../../src/hooks/useCartRx';
 import { colors } from '../../src/theme';
 
 export default function CartTab() {
   const items = useCart((s) => s.items);
   const change = useCart((s) => s.change);
   const remove = useCart((s) => s.remove);
+  const { gate, blocked } = useCartRx();
   const subtotal = items.reduce((a, i) => a + i.offer.price * i.quantity, 0);
-  const rx = items.some((i) => i.product.requiresPrescription);
   const canDelivery = !!items[0]?.offer.pharmacy.delivery;
   const fee = canDelivery ? items[0]?.offer.pharmacy.fee || 0 : 0;
   const total = subtotal + fee;
@@ -67,22 +69,19 @@ export default function CartTab() {
           <Text style={s.total}>{total.toLocaleString('fr-FR')} FCFA</Text>
         </View>
       </Card>
-      {rx ? (
-        <Card style={s.rx}>
-          <Text style={s.rxTitle}>Ce produit nécessite une ordonnance.</Text>
-          <Text style={s.meta}>Paiement désactivé jusqu’à validation de l’ordonnance.</Text>
-          <View style={{ marginTop: 12 }}>
-            <Button title="Ajouter mon ordonnance" kind="secondary" onPress={() => router.push('/prescription')} />
-          </View>
-        </Card>
-      ) : null}
+      <RxPayBanner />
       <View style={{ marginTop: 16 }}>
         <Button
-          title={rx ? 'Paiement bloqué' : 'Commander'}
-          disabled={rx}
+          title={blocked ? (gate === 'pending' ? 'En attente de validation' : 'Paiement bloqué') : 'Commander'}
+          disabled={blocked}
           onPress={() => {
-            if (rx) {
-              Alert.alert('Ordonnance requise', 'Transmettez d’abord votre ordonnance. Le paiement reste bloqué.');
+            if (blocked) {
+              Alert.alert(
+                'Ordonnance requise',
+                gate === 'pending'
+                  ? 'La pharmacie n’a pas encore validé le fichier.'
+                  : 'Transmettez d’abord votre ordonnance. Le paiement reste bloqué.',
+              );
               return;
             }
             router.push('/checkout');
@@ -105,6 +104,4 @@ const s = StyleSheet.create({
   number: { fontWeight: '800', minWidth: 18, textAlign: 'center' },
   remove: { color: colors.danger, fontWeight: '700', marginTop: 10 },
   total: { fontSize: 18, fontWeight: '900', color: colors.primary },
-  rx: { marginTop: 14, backgroundColor: '#FFF5F5', borderColor: '#FFC9C9' },
-  rxTitle: { color: colors.danger, fontWeight: '900' },
 });

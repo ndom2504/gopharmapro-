@@ -9,6 +9,7 @@ export type Pharmacy = {
   longitude: number;
   distance: number;
   rating: number;
+  reviewCount?: number;
   open: boolean;
   delivery: boolean;
   pickup: boolean;
@@ -82,6 +83,7 @@ function toPharmacy(p: AdminPharmacy): Pharmacy {
     longitude: p.longitude,
     distance: p.distance,
     rating: p.rating,
+    reviewCount: p.reviewCount ?? 12,
     open: p.open,
     delivery: p.delivery,
     pickup: p.pickup,
@@ -157,6 +159,14 @@ export function resolvePharmacyId(id: string) {
 export function getPharmacy(id: string) {
   const resolved = resolvePharmacyId(id);
   return getPublicPharmacies().find((p) => p.id === resolved);
+}
+
+export function pharmacyAccountIdFor(pharmacy: { id: string; name: string }) {
+  if (pharmacyAliases[pharmacy.id]) return pharmacyAliases[pharmacy.id];
+  if (pharmacy.id.startsWith('ph-')) return pharmacy.id;
+  if (pharmacy.name.toLowerCase().includes('centre')) return 'ph-centre';
+  if (pharmacy.name.toLowerCase().includes('palmier')) return 'ph-palmiers';
+  return pharmacy.id;
 }
 
 export function resolveProductId(id: string) {

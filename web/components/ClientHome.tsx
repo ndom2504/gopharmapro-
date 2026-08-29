@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SearchForm } from '@/components/SearchForm';
 import { ProductNearCard } from '@/components/ProductNearCard';
-import { categories, formatKm, type Pharmacy, type Product } from '@/lib/catalog';
+import { PharmacyCard } from '@/components/PharmacyCard';
+import { categories, type Pharmacy, type Product } from '@/lib/catalog';
 import { CategoryPhoto } from '@/components/ProductPhoto';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
@@ -84,19 +85,7 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {pharmacies.slice(0, 2).map((p) => (
-            <div key={p.id} className="card p-5">
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-extrabold text-ink">{p.name}</h3>
-                <span className={p.open ? 'badge-green' : 'badge-red'}>{p.open ? 'Ouverte' : 'Fermée'}</span>
-              </div>
-              <p className="mt-2 text-sm text-muted">📍 {formatKm(p.distance)}</p>
-              <p className="mt-1 text-sm font-semibold text-brand">
-                {p.delivery ? '🚚 Livraison disponible' : 'Retrait uniquement'}
-              </p>
-              <Link href={`/pharmacies/${p.id}`} className="btn-secondary mt-4 inline-flex !h-10 text-sm">
-                Voir la pharmacie
-              </Link>
-            </div>
+            <PharmacyCard key={p.id} pharmacy={p} />
           ))}
         </div>
       </section>

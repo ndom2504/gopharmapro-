@@ -3,7 +3,7 @@ import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
 import { NotificationBell } from '../src/components/NotificationBell';
-import { RoleTabBar, courierTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, courierTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { totalsFor, usePayouts } from '../src/store/payouts';
@@ -19,6 +19,7 @@ export default function CourierHome() {
   const acceptRun = useOrders((s) => s.acceptRun);
   const available = useCourierPrefs((s) => s.available);
   const setAvailable = useCourierPrefs((s) => s.setAvailable);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'courier') return <Redirect href={'/auth' as Href} />;
 
   const money = totalsFor(
@@ -31,7 +32,7 @@ export default function CourierHome() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={s.page}>
+      <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
         <View style={s.top}>
           <View style={{ flex: 1 }}>
             <Text style={s.kicker}>Espace livreur</Text>
@@ -103,7 +104,7 @@ export default function CourierHome() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 58, paddingBottom: 100 },
+  page: { padding: 20, paddingTop: 58 },
   top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   kicker: { color: colors.muted, fontWeight: '700' },
   title: { fontSize: 26, fontWeight: '900', color: colors.text, marginTop: 4 },

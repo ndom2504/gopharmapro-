@@ -10,7 +10,7 @@ export function NotificationBell() {
   const session = useAuth((s) => s.session);
   const items = useNotifications((s) => s.items);
   const audience = session?.role || 'client';
-  const targetId = session && session.role !== 'client' ? session.id : undefined;
+  const targetId = session?.id;
   const unread = visibleFor(items, audience, targetId).filter((n) => !n.read).length;
   const swing = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;

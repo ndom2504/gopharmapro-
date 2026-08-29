@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
-import { RoleTabBar, courierTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, courierTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { useOrders } from '../src/store/orders';
@@ -14,6 +14,7 @@ export default function CourierRuns() {
   const session = useAuth((s) => s.session);
   const orders = useOrders((s) => s.orders);
   const [filter, setFilter] = useState<'all' | 'done' | 'cancel'>('all');
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'courier') return <Redirect href={'/auth' as Href} />;
 
   const mine = orders.filter((o) => isDelivery(o) && o.courierId === session.id);
@@ -25,7 +26,7 @@ export default function CourierRuns() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={s.page}>
+      <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
         <Text style={s.title}>Livraisons</Text>
         <View style={s.filters}>
           {[
@@ -64,7 +65,7 @@ export default function CourierRuns() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 58, paddingBottom: 100 },
+  page: { padding: 20, paddingTop: 58 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   filters: { flexDirection: 'row', gap: 8, marginVertical: 16 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },

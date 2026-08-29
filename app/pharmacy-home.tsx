@@ -4,12 +4,13 @@ import type { Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Badge, Button, Card } from '../src/components/UI';
 import { NotificationBell } from '../src/components/NotificationBell';
-import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, pharmacyTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { usePharmacyCatalog } from '../src/store/catalog';
 import { totalsFor, usePayouts } from '../src/store/payouts';
 import { useOrders } from '../src/store/orders';
+import { usePrescriptions } from '../src/store/prescriptions';
 import { formatFcfa } from '../src/lib/payouts';
 
 const pipeline = [
@@ -33,6 +34,8 @@ export default function PharmacyHome() {
   const items = usePharmacyCatalog((s) => s.items);
   const payouts = usePayouts((s) => s.items);
   const orders = useOrders((s) => s.orders);
+  const rxItems = usePrescriptions((s) => s.items);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'pharmacy') return <Redirect href={'/auth' as Href} />;
 
   const current = pipelineIndex(session.status);
@@ -44,10 +47,11 @@ export default function PharmacyHome() {
     session.id,
   );
   const jobs = orders.filter((o) => o.pharmacyAccountId === session.id && o.status !== 'delivered');
+  const pendingRx = rxItems.filter((r) => r.pharmacyAccountId === session.id && (r.status === 'sent' || r.status === 'review'));
 
   return (
     <View style={{ flex: 1 }}>
-    <ScrollView contentContainerStyle={s.page}>
+    <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
       <View style={s.top}>
         <View style={{ flex: 1 }}>
           <Text style={s.kicker}>Espace pharmacie</Text>
@@ -87,6 +91,20 @@ export default function PharmacyHome() {
           </Text>
           <View style={{ marginTop: 14 }}>
             <Button title="Voir les virements" onPress={() => router.push('/pharmacy-payouts')} />
+          </View>
+        </Card>
+      ) : null}
+
+      {verified ? (
+        <Card style={{ marginTop: 16 }}>
+          <Text style={s.label}>Ordonnances</Text>
+          <Text style={s.meta}>
+            {pendingRx.length
+              ? pendingRx.length + ' fichier(s) à valider. Le client ne peut pas payer tant que vous n’avez pas décidé.'
+              : 'Aucune ordonnance en attente.'}
+          </Text>
+          <View style={{ marginTop: 14 }}>
+            <Button title="Voir les ordonnances" onPress={() => router.push('/pharmacy-prescriptions')} />
           </View>
         </Card>
       ) : null}
@@ -169,7 +187,7 @@ export default function PharmacyHome() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 64, paddingBottom: 100 },
+  page: { padding: 20, paddingTop: 64 },
   top: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   kicker: { color: colors.primary, fontWeight: '800', marginBottom: 6 },
   title: { fontSize: 28, fontWeight: '900', color: colors.text },

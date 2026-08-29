@@ -2,9 +2,22 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
 
 export type RoleTab = { href: Href; icon: keyof typeof Ionicons.glyphMap; label: string; match: string };
+
+export const TAB_BAR_BASE = 62;
+
+export function useBottomChromePad() {
+  const insets = useSafeAreaInsets();
+  return Math.max(insets.bottom, 10);
+}
+
+/** Espace sous le contenu pour ne pas passer sous la barre d’onglets (edge-to-edge). */
+export function useTabScreenPad(extra = 28) {
+  return TAB_BAR_BASE + useBottomChromePad() + extra;
+}
 
 export const courierTabs: RoleTab[] = [
   { href: '/courier-home', icon: 'home', label: 'Accueil', match: '/courier-home' },
@@ -25,8 +38,9 @@ export const pharmacyTabs: RoleTab[] = [
 
 export function RoleTabBar({ items }: { items: RoleTab[] }) {
   const path = usePathname() || '';
+  const pad = useBottomChromePad();
   return (
-    <View style={s.bar}>
+    <View style={[s.bar, { paddingBottom: pad }]}>
       {items.map((item) => {
         const on = path === item.match || path.startsWith(item.match + '/');
         return (
@@ -48,14 +62,15 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: 72,
+    minHeight: TAB_BAR_BASE,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: colors.border,
     flexDirection: 'row',
     paddingTop: 8,
-    paddingBottom: 10,
     paddingHorizontal: 4,
+    zIndex: 20,
+    elevation: 12,
   },
   item: { flex: 1, alignItems: 'center', gap: 3 },
   label: { fontSize: 10, fontWeight: '700', color: colors.muted },

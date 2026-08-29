@@ -19,6 +19,7 @@ export function splitPayment(subtotal: number, deliveryFee: number): PaymentSpli
 
 export function pharmacyAccountIdFor(pharmacy: Pick<Pharmacy, 'id' | 'name'>) {
   if (pharmacy.id === 'p1' || pharmacy.name.toLowerCase().includes('centre')) return 'ph-centre';
+  if (pharmacy.id === 'p3' || pharmacy.name.toLowerCase().includes('palmier')) return 'ph-palmiers';
   return pharmacy.id;
 }
 

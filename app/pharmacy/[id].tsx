@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { pharmacies } from '../../src/data/mock';
 import { Badge, Card } from '../../src/components/UI';
 import { ProductImage } from '../../src/components/ProductImage';
+import { PharmacyFeedback } from '../../src/components/PharmacyFeedback';
 import { colors } from '../../src/theme';
 import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
 import { formatKm, locatePharmacy } from '../../src/lib/geo';
@@ -24,9 +25,10 @@ export default function Pharmacy() {
         <Badge text={p.open ? 'Ouverte' : 'Fermée'} tone={p.open ? 'green' : 'red'} />
       </View>
       <Text style={s.meta}>
-        ★ {p.rating} · {formatKm(p.distance)} · {p.eta}
+        {formatKm(p.distance)} · {p.eta}
       </Text>
       <Text style={s.meta}>{p.area}</Text>
+      <PharmacyFeedback pharmacyId={p.id} name={p.name} baseRating={p.rating} reviewCount={p.reviewCount} />
       <Card style={{ marginTop: 18 }}>
         <Text style={s.info}>{p.delivery ? '✓ Livraison disponible' : '- Pas de livraison'}</Text>
         <Text style={s.info}>✓ Retrait en pharmacie</Text>

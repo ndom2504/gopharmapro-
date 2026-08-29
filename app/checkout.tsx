@@ -19,14 +19,16 @@ import { colors } from '../src/theme';
 import { Fulfillment, PaymentMethodId } from '../src/types';
 import { formatPhoneInput, isCardPayment, parseGabonPhone, paymentMethods, suggestPaymentMethod } from '../src/data/payments';
 import { useGeoCatalog } from '../src/hooks/useGeoCatalog';
+import { useCartRx } from '../src/hooks/useCartRx';
 import { formatKm, locatePharmacy } from '../src/lib/geo';
+import { RxPayBanner } from '../src/components/RxPayBanner';
 
 export default function Checkout() {
   const items = useCart((s) => s.items);
   const change = useCart((s) => s.change);
   const remove = useCart((s) => s.remove);
   const subtotal = items.reduce((a, i) => a + i.offer.price * i.quantity, 0);
-  const rx = items.some((i) => i.product.requiresPrescription);
+  const { gate, blocked } = useCartRx();
   const [method, setMethod] = useState<PaymentMethodId | null>(null);
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState('');
@@ -49,6 +51,7 @@ export default function Checkout() {
   };
 
   const pay = () => {
+    if (blocked) return;
     if (!method) {
       setPhoneError('Choisissez un moyen de paiement.');
       return;
@@ -142,15 +145,7 @@ export default function Checkout() {
             </Text>
           </Card>
         ))}
-        {rx ? (
-          <Card style={s.rx}>
-            <Text style={s.rxTitle}>Ce produit nécessite une ordonnance.</Text>
-            <Text style={s.meta}>Paiement désactivé jusqu’à validation de l’ordonnance.</Text>
-            <View style={{ marginTop: 13 }}>
-              <Button title="Ajouter mon ordonnance" kind="secondary" onPress={() => router.push('/prescription')} />
-            </View>
-          </Card>
-        ) : null}
+        <RxPayBanner />
         <Card style={{ marginTop: 16 }}>
           <View style={s.row}>
             <Text>Sous-total</Text>
@@ -219,8 +214,8 @@ export default function Checkout() {
         ) : null}
         <View style={{ marginTop: 18 }}>
           <Button
-            title={rx ? 'Paiement désactivé jusqu’à validation' : 'Payer ' + total.toLocaleString('fr-FR') + ' FCFA'}
-            disabled={rx}
+            title={blocked ? (gate === 'pending' ? 'En attente de validation' : 'Paiement désactivé jusqu’à validation') : 'Payer ' + total.toLocaleString('fr-FR') + ' FCFA'}
+            disabled={blocked}
             onPress={pay}
           />
         </View>
@@ -241,8 +236,6 @@ const s = StyleSheet.create({
   control: { fontSize: 22, fontWeight: '900', color: colors.primary, backgroundColor: colors.mint, width: 34, height: 34, textAlign: 'center', borderRadius: 10 },
   number: { fontWeight: '800' },
   remove: { color: colors.danger, fontWeight: '700', marginTop: 12 },
-  rx: { marginTop: 16, backgroundColor: '#FFF5F5', borderColor: '#FFC9C9' },
-  rxTitle: { color: colors.danger, fontWeight: '900' },
   total: { fontSize: 19, fontWeight: '900', color: colors.primary },
   payCard: {
     flexDirection: 'row',

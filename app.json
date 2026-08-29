@@ -33,10 +33,11 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Go Pharma Pro utilise vos photos pour illustrer les produits de la pharmacie.",
-          "cameraPermission": "Go Pharma Pro utilise l’appareil photo pour photographier les produits."
+          "photosPermission": "Go Pharma Pro utilise vos photos pour illustrer les produits et transmettre une ordonnance.",
+          "cameraPermission": "Go Pharma Pro utilise l’appareil photo pour photographier les produits et les ordonnances."
         }
       ],
+      "expo-document-picker",
       [
         "expo-notifications",
         {
@@ -62,9 +63,13 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Go Pharma Pro utilise votre position pour afficher les pharmacies les plus proches et estimer la livraison au Gabon.",
-        "NSPhotoLibraryUsageDescription": "Go Pharma Pro utilise vos photos pour illustrer les produits de la pharmacie.",
-        "NSCameraUsageDescription": "Go Pharma Pro utilise l’appareil photo pour photographier les produits."
+        "NSPhotoLibraryUsageDescription": "Go Pharma Pro utilise vos photos pour illustrer les produits et transmettre une ordonnance.",
+        "NSCameraUsageDescription": "Go Pharma Pro utilise l’appareil photo pour photographier les produits et les ordonnances."
       }
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#FFFFFF",
+      "barStyle": "dark-content"
     },
     "android": {
       "package": "ga.pharmamarket.app",
@@ -72,6 +77,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "softwareKeyboardLayoutMode": "resize",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { formatFcfa, formatKm, getPharmacy, productsForPharmacy, resolvePharmacyId } from '@/lib/catalog';
 import { ProductPhoto } from '@/components/ProductPhoto';
+import { PharmacyFeedback } from '@/components/PharmacyFeedback';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,9 +30,15 @@ export default async function PharmacyDetail({ params }: { params: Promise<{ id:
         </span>
       </div>
       <p className="mt-3 text-muted">
-        ★ {pharmacy.rating} · {formatKm(pharmacy.distance)} · {pharmacy.eta}
+        {formatKm(pharmacy.distance)} · {pharmacy.eta}
       </p>
       <p className="text-muted">{pharmacy.area}</p>
+      <PharmacyFeedback
+        pharmacyId={pharmacy.id}
+        name={pharmacy.name}
+        baseRating={pharmacy.rating}
+        reviewCount={pharmacy.reviewCount}
+      />
       <div className="mt-3">
         <span className="badge-green">Vérifiée</span>
       </div>

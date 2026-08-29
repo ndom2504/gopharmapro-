@@ -5,6 +5,7 @@ import { RoleSubnav, pharmacyNav } from '@/components/RoleSubnav';
 import { useShop } from '@/components/ShopProvider';
 import { isPharmacy, partnerCatalog, partnerOrders, partnerPayouts, payoutTotals } from '@/lib/accounts';
 import { formatFcfa } from '@/lib/catalog';
+import { usePrescriptions } from '@/lib/prescriptions';
 import Link from 'next/link';
 import { IdentityVerify } from '@/components/IdentityVerify';
 
@@ -31,6 +32,7 @@ function pipelineIndex(
 
 function PharmacyHome() {
   const { session } = useShop();
+  const { items: rxItems } = usePrescriptions();
   if (!isPharmacy(session)) return null;
 
   const verified = session.status === 'verified';
@@ -41,7 +43,7 @@ function PharmacyHome() {
     partnerPayouts.filter((p) => p.beneficiary === 'pharmacy'),
     session.id,
   );
-  const pendingRx = jobs.filter((o) => o.items.some((i) => /amoxi/i.test(i.name))).length;
+  const pendingRx = rxItems.filter((r) => r.pharmacyAccountId === session.id && (r.status === 'sent' || r.status === 'review')).length;
 
   return (
     <>
@@ -75,7 +77,7 @@ function PharmacyHome() {
       <IdentityVerify />
 
       {verified ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Link href="/espace-pharmacie/commandes" className="card p-5">
             <p className="text-2xl font-extrabold text-ink">{jobs.length}</p>
             <p className="mt-1 text-sm font-extrabold text-ink">Commandes</p>
@@ -84,10 +86,14 @@ function PharmacyHome() {
             <p className="text-2xl font-extrabold text-ink">{catalog.length}</p>
             <p className="mt-1 text-sm font-extrabold text-ink">Produits</p>
           </Link>
+          <Link href="/espace-pharmacie/ordonnances" className="card p-5">
+            <p className="text-2xl font-extrabold text-ink">{pendingRx}</p>
+            <p className="mt-1 text-sm font-extrabold text-ink">Ordonnances</p>
+            <p className="text-xs text-muted">{pendingRx ? 'À valider' : 'Aucune en attente'}</p>
+          </Link>
           <Link href="/espace-pharmacie/ventes" className="card p-5">
             <p className="text-lg font-extrabold text-ink">{formatFcfa(money.pending + money.sent)}</p>
             <p className="mt-1 text-sm font-extrabold text-ink">Ventes</p>
-            <p className="text-xs text-muted">{pendingRx} ordonnance(s) à traiter</p>
           </Link>
         </div>
       ) : (

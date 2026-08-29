@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, Card, ScreenTitle } from '../src/components/UI';
+import { PharmacyFeedback } from '../src/components/PharmacyFeedback';
 import { colors } from '../src/theme';
 import { useFavorites } from '../src/store/favorites';
 import { pharmacies, products } from '../src/data/mock';
@@ -20,8 +21,9 @@ export default function Favorites() {
       {favPharmacies.length === 0 ? <Text style={s.meta}>Aucune pharmacie favorite.</Text> : null}
       {favPharmacies.map((p) => (
         <Card key={p.id} style={{ marginBottom: 10 }}>
-          <Text style={s.name}>{p.name} ❤️</Text>
+          <Text style={s.name}>{p.name}</Text>
           <Text style={s.meta}>{p.area}</Text>
+          <PharmacyFeedback pharmacyId={p.id} name={p.name} baseRating={p.rating} reviewCount={p.reviewCount} />
           <View style={{ marginTop: 12, gap: 8 }}>
             <Button title="Voir la pharmacie" kind="secondary" onPress={() => router.push({ pathname: '/pharmacy/[id]', params: { id: p.id } })} />
             <Pressable onPress={() => togglePharmacy(p.id)}>

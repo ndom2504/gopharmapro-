@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Badge, Button, Card } from '../src/components/UI';
-import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, pharmacyTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { useOrders } from '../src/store/orders';
@@ -12,6 +12,7 @@ import { formatFcfa } from '../src/lib/payouts';
 export default function PharmacyOrders() {
   const session = useAuth((s) => s.session);
   const orders = useOrders((s) => s.orders);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'pharmacy') return <Redirect href={'/auth' as Href} />;
 
   const mine = orders.filter((o) => o.pharmacyAccountId === session.id);
@@ -19,7 +20,7 @@ export default function PharmacyOrders() {
 
   return (
     <View style={{ flex: 1 }}>
-    <ScrollView contentContainerStyle={s.page}>
+    <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
       <Text style={s.title}>Commandes</Text>
       <Text style={s.meta}>
         Le client choisit retrait ou livraison. S’il prend un livreur, celui-ci dicte un code. S’il vient lui-même, il dicte son code de retrait.
@@ -54,7 +55,7 @@ export default function PharmacyOrders() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingBottom: 100 },
+  page: { padding: 20 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },

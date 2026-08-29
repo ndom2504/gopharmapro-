@@ -8,6 +8,7 @@ export type Pharmacy = {
   longitude: number;
   distance: number;
   rating: number;
+  reviewCount?: number;
   open: boolean;
   delivery: boolean;
   pickup: boolean;

@@ -10,7 +10,9 @@ import { usePharmacyCatalog } from '../src/store/catalog';
 import { useNotifications } from '../src/store/notifications';
 import { usePayouts } from '../src/store/payouts';
 import { useFavorites } from '../src/store/favorites';
+import { useReviews } from '../src/store/reviews';
 import { useOrders } from '../src/store/orders';
+import { usePrescriptions } from '../src/store/prescriptions';
 import { setupLocalNotifications } from '../src/lib/notifyLocal';
 import { NotificationToast } from '../src/components/NotificationToast';
 import { BrandSplash } from '../src/components/BrandMark';
@@ -26,6 +28,8 @@ export default function Root() {
   const hydratePayouts = usePayouts((s) => s.hydrate);
   const hydrateOrders = useOrders((s) => s.hydrate);
   const hydrateFav = useFavorites((s) => s.hydrate);
+  const hydrateReviews = useReviews((s) => s.hydrate);
+  const hydrateRx = usePrescriptions((s) => s.hydrate);
   useEffect(() => {
     hydrate();
     hydrateCatalog();
@@ -33,14 +37,16 @@ export default function Root() {
     hydratePayouts();
     hydrateOrders();
     hydrateFav();
+    hydrateReviews();
+    hydrateRx();
     setupLocalNotifications();
-  }, [hydrate, hydrateCatalog, hydrateNotifs, hydratePayouts, hydrateOrders, hydrateFav]);
+  }, [hydrate, hydrateCatalog, hydrateNotifs, hydratePayouts, hydrateOrders, hydrateFav, hydrateReviews, hydrateRx]);
   useEffect(() => {
     if (hydrated) SplashScreen.hideAsync();
   }, [hydrated]);
   if (!hydrated) return <BrandSplash />;
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ flex: 1 }}>
       <StatusBar style="dark" />
       <View style={{ flex: 1 }}>
         <Stack
@@ -88,6 +94,7 @@ export default function Root() {
         <Stack.Screen name="admin-config" options={{ title: 'Configuration' }} />
         <Stack.Screen name="prescription" options={{ title: 'Ordonnance' }} />
         <Stack.Screen name="prescriptions" options={{ title: 'Mes ordonnances' }} />
+        <Stack.Screen name="rx/[id]" options={{ title: 'Ordonnance' }} />
         <Stack.Screen name="favorites" options={{ title: 'Mes favoris' }} />
         <Stack.Screen name="order/[id]" options={{ title: 'Suivi de commande' }} />
       </Stack>

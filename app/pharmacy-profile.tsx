@@ -3,7 +3,7 @@ import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Badge, Button, Card } from '../src/components/UI';
-import { RoleTabBar, pharmacyTabs } from '../src/components/RoleTabBar';
+import { RoleTabBar, pharmacyTabs, useTabScreenPad } from '../src/components/RoleTabBar';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { startPharmacyIdentity } from '../src/lib/stripePay';
@@ -11,6 +11,7 @@ import { startPharmacyIdentity } from '../src/lib/stripePay';
 export default function PharmacyProfile() {
   const session = useAuth((s) => s.session);
   const logout = useAuth((s) => s.logout);
+  const tabPad = useTabScreenPad();
   if (!session || session.role !== 'pharmacy') return <Redirect href={'/auth' as Href} />;
   const leave = () => {
     logout();
@@ -19,7 +20,7 @@ export default function PharmacyProfile() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={s.page}>
+      <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
         <Text style={s.title}>Profil officine</Text>
         <Card style={{ marginTop: 16 }}>
           <Text style={s.name}>{session.pharmacyName}</Text>
@@ -70,7 +71,7 @@ export default function PharmacyProfile() {
 }
 
 const s = StyleSheet.create({
-  page: { padding: 20, paddingTop: 58, paddingBottom: 100 },
+  page: { padding: 20, paddingTop: 58 },
   title: { fontSize: 26, fontWeight: '900', color: colors.text },
   name: { fontSize: 20, fontWeight: '900', color: colors.text, marginBottom: 8 },
   meta: { color: colors.muted, marginTop: 6, lineHeight: 20 },

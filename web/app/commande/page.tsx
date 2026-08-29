@@ -8,6 +8,7 @@ import { colors } from '@/lib/site';
 import { formatFcfa, paymentMethods } from '@/lib/catalog';
 import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 import { homeFor, isClient } from '@/lib/accounts';
+import { cartRxGate, rxPayBlocked, usePrescriptions } from '@/lib/prescriptions';
 
 function parseGabonPhone(input: string) {
   let digits = input.replace(/\D/g, '');
@@ -20,6 +21,7 @@ function parseGabonPhone(input: string) {
 
 function CheckoutForm() {
   const { cart, session, ready } = useShop();
+  const { items: rxItems } = usePrescriptions();
   const router = useRouter();
   const [method, setMethod] = useState<string | null>(null);
   const [phone, setPhone] = useState(session && isClient(session) ? session.phone.replace('+241 ', '') : '');
@@ -31,6 +33,8 @@ function CheckoutForm() {
   const subtotal = cartSubtotal(cart);
   const fee = mode === 'delivery' ? Number(pharmacy?.fee) || 0 : 0;
   const total = subtotal + fee;
+  const { gate } = cartRxGate(cart, rxItems, session && isClient(session) ? session.id : undefined);
+  const blocked = rxPayBlocked(gate);
 
   useEffect(() => {
     if (!ready) return;
@@ -58,6 +62,10 @@ function CheckoutForm() {
 
   const pay = () => {
     setError('');
+    if (blocked) {
+      setError('Transmettez et faites valider l’ordonnance avant le paiement.');
+      return;
+    }
     if (!method) {
       setError('Choisissez un moyen de paiement.');
       return;
@@ -97,6 +105,16 @@ function CheckoutForm() {
           Livraison {pharmacy?.fee ? `· ${formatFcfa(pharmacy.fee)}` : ''}
         </button>
       </div>
+      {blocked ? (
+        <div className="card mt-6 border-[#F5C2C7] bg-[#FFF0F0] p-5">
+          <p className="font-extrabold text-danger">
+            {gate === 'pending' ? 'Ordonnance en cours de validation' : 'Ordonnance requise'}
+          </p>
+          <Link href="/ordonnances" className="btn-secondary mt-4 inline-flex">
+            Gérer l’ordonnance
+          </Link>
+        </div>
+      ) : null}
       <h2 className="mt-8 text-lg font-extrabold text-ink">Paiement</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {paymentMethods.map((m) => (
@@ -129,8 +147,8 @@ function CheckoutForm() {
       {error ? <p className="mt-3 text-sm font-bold text-danger">{error}</p> : null}
       <div className="mt-8 flex items-center justify-between">
         <p className="text-lg font-extrabold text-ink">{formatFcfa(total)}</p>
-        <button type="button" className="btn-primary" onClick={pay}>
-          Payer
+        <button type="button" className="btn-primary disabled:opacity-40" disabled={blocked} onClick={pay}>
+          {blocked ? (gate === 'pending' ? 'En attente de validation' : 'Paiement bloqué') : 'Payer'}
         </button>
       </div>
     </main>

@@ -28,6 +28,7 @@ export type AdminPharmacy = {
   longitude: number;
   distance: number;
   rating: number;
+  reviewCount?: number;
   open: boolean;
   delivery: boolean;
   pickup: boolean;
@@ -136,6 +137,7 @@ let state: AdminState = {
       longitude: 9.4544,
       distance: 0.8,
       rating: 4.8,
+      reviewCount: 24,
       open: true,
       delivery: true,
       pickup: true,
@@ -160,6 +162,7 @@ let state: AdminState = {
       longitude: 9.5041,
       distance: 2.9,
       rating: 4.5,
+      reviewCount: 11,
       open: true,
       delivery: true,
       pickup: true,

@@ -29,7 +29,7 @@ export default function NotificationsScreen() {
   const push = useNotifications((s) => s.push);
 
   const audience = session?.role || 'client';
-  const targetId = session && session.role !== 'client' ? session.id : undefined;
+  const targetId = session?.id;
   const list = visibleFor(items, audience, targetId);
 
   const testAlert = () => {
