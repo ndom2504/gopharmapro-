@@ -25,7 +25,7 @@ export function BrandLogo({
     <span className="relative inline-flex items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=7'}
+        src={mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=8'}
         alt="Gopharmapro"
         className={mark ? markSizes[size] : `${sizes[size]} object-contain object-left`}
         {...(priority ? { fetchPriority: 'high' as const } : {})}
