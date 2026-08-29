@@ -64,7 +64,7 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
         <h2 className="text-[19px] font-extrabold text-ink">Catégories</h2>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
           {categories.map((c) => (
-            <Link key={c.name} href={`/produits?q=${encodeURIComponent(c.name)}`} className="card overflow-hidden p-0">
+            <Link key={c.name} href={`/produits?cat=${encodeURIComponent(c.name)}`} className="card overflow-hidden p-0">
               <CategoryPhoto src={c.image} alt={c.name} />
               <span className="block p-3 font-extrabold text-ink">{c.name}</span>
             </Link>
@@ -93,7 +93,7 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
       <section className="mx-auto mt-14 mb-20 max-w-6xl px-4 sm:px-6">
         <h2 className="text-[19px] font-extrabold text-ink">Produits disponibles près de vous</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          {products.slice(0, 4).map((p) => (
+          {products.slice(0, 8).map((p) => (
             <ProductNearCard key={p.id} product={p} />
           ))}
         </div>

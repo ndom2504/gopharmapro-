@@ -50,9 +50,24 @@ const pharmacyAliases: Record<string, string> = {
 
 const productAliases: Record<string, string> = {
   'pc-para': 'paracetamol',
+  'pc-ibup': 'ibuprofene',
   'pc-amox': 'amoxicilline',
+  'pc-metf': 'metformine',
+  'pc-amlo': 'amlodipine',
+  'pc-cipro': 'ciprofloxacine',
   'pc-vitc': 'vitamine-c',
+  'pc-vitd': 'vitamine-d',
+  'pc-mag': 'magnesium',
   'pc-bandage': 'pansement',
+  'pc-compresse': 'compresses',
+  'pc-thermo': 'thermometre',
+  'pc-gel': 'gel-hydro',
+  'pc-savon': 'savon-surgras',
+  'pc-lait': 'lait-1er-age',
+  'pc-couches': 'couches-t3',
+  'pc-serum': 'serum-physio',
+  'pc-solaire': 'creme-solaire',
+  'pc-baume': 'baume-levres',
   amoxicillin: 'amoxicilline',
   'vitamin-c': 'vitamine-c',
   bandages: 'pansement',
@@ -183,14 +198,21 @@ export function productsForPharmacy(pharmacyId: string) {
   return getPublicProducts().filter((p) => p.offers.some((o) => o.pharmacy.id === resolved && o.stock > 0));
 }
 
-export function searchProducts(query: string) {
+export function searchProducts(query: string, opts: { category?: string; prescription?: boolean } = {}) {
   const list = getPublicProducts();
-  const q = query.trim().toLowerCase();
-  if (!q) return list;
-  return list.filter(
-    (p) =>
-      p.name.toLowerCase().includes(q) ||
-      p.genericName.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q),
-  );
+  const q = fold(query);
+  return list.filter((p) => {
+    if (opts.category && p.category !== opts.category) return false;
+    if (opts.prescription && !p.requiresPrescription) return false;
+    if (!q) return true;
+    return fold(p.name).includes(q) || fold(p.genericName).includes(q) || fold(p.category).includes(q);
+  });
+}
+
+function fold(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 }

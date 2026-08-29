@@ -214,9 +214,24 @@ export type PartnerCatalogItem = {
 
 export const partnerCatalog: PartnerCatalogItem[] = [
   { id: 'pc-para', pharmacyId: 'ph-centre', name: 'Paracétamol 500 mg', category: 'Médicaments', price: 3500, stock: 20, status: 'published', imageKey: 'paracetamol' },
-  { id: 'pc-amox', pharmacyId: 'ph-centre', name: 'Amoxicilline 500 mg', category: 'Médicaments', price: 6200, stock: 12, status: 'review', imageKey: 'amoxicillin' },
+  { id: 'pc-ibup', pharmacyId: 'ph-centre', name: 'Ibuprofène 400 mg', category: 'Médicaments', price: 2800, stock: 18, status: 'published', imageKey: 'paracetamol' },
+  { id: 'pc-amox', pharmacyId: 'ph-centre', name: 'Amoxicilline 500 mg', category: 'Médicaments', price: 6200, stock: 12, status: 'published', imageKey: 'amoxicillin' },
+  { id: 'pc-metf', pharmacyId: 'ph-centre', name: 'Metformine 1000 mg', category: 'Médicaments', price: 5400, stock: 10, status: 'published', imageKey: 'amoxicillin' },
+  { id: 'pc-amlo', pharmacyId: 'ph-centre', name: 'Amlodipine 5 mg', category: 'Médicaments', price: 4800, stock: 9, status: 'published', imageKey: 'amoxicillin' },
+  { id: 'pc-cipro', pharmacyId: 'ph-centre', name: 'Ciprofloxacine 500 mg', category: 'Médicaments', price: 7100, stock: 6, status: 'review', imageKey: 'amoxicillin' },
   { id: 'pc-vitc', pharmacyId: 'ph-centre', name: 'Vitamine C 1000 mg', category: 'Vitamines', price: 4500, stock: 16, status: 'published', imageKey: 'vitamin-c' },
+  { id: 'pc-vitd', pharmacyId: 'ph-centre', name: 'Vitamine D3 1000 UI', category: 'Vitamines', price: 5200, stock: 14, status: 'published', imageKey: 'vitamin-c' },
+  { id: 'pc-mag', pharmacyId: 'ph-centre', name: 'Magnésium B6', category: 'Vitamines', price: 3900, stock: 11, status: 'published', imageKey: 'vitamin-c' },
   { id: 'pc-bandage', pharmacyId: 'ph-centre', name: 'Pansements stériles', category: 'Premiers soins', price: 2200, stock: 30, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-compresse', pharmacyId: 'ph-centre', name: 'Compresses stériles', category: 'Premiers soins', price: 1800, stock: 22, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-thermo', pharmacyId: 'ph-centre', name: 'Thermomètre digital', category: 'Premiers soins', price: 6500, stock: 8, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-gel', pharmacyId: 'ph-centre', name: 'Gel hydroalcoolique 100 ml', category: 'Hygiène', price: 1500, stock: 40, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-savon', pharmacyId: 'ph-centre', name: 'Savon surgras 150 g', category: 'Hygiène', price: 1200, stock: 25, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-lait', pharmacyId: 'ph-centre', name: 'Lait 1er âge 400 g', category: 'Bébé', price: 8900, stock: 7, status: 'published', imageKey: 'vitamin-c' },
+  { id: 'pc-couches', pharmacyId: 'ph-centre', name: 'Couches taille 3', category: 'Bébé', price: 7200, stock: 15, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-serum', pharmacyId: 'ph-centre', name: 'Sérum physiologique', category: 'Bébé', price: 2100, stock: 19, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-solaire', pharmacyId: 'ph-centre', name: 'Crème solaire SPF 50', category: 'Parapharmacie', price: 7800, stock: 10, status: 'published', imageKey: 'vitamin-c' },
+  { id: 'pc-baume', pharmacyId: 'ph-centre', name: 'Baume à lèvres', category: 'Parapharmacie', price: 900, stock: 28, status: 'published', imageKey: 'vitamin-c' },
 ];
 
 export type PartnerOrderItem = { name: string; quantity: number };
