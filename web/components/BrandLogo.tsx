@@ -1,7 +1,7 @@
 const sizes = {
-  sm: 'h-8 w-auto max-w-[168px] sm:h-9 sm:max-w-[190px]',
-  md: 'h-11 w-auto max-w-[220px] sm:h-12 sm:max-w-[240px]',
-  lg: 'h-14 w-auto max-w-[280px] sm:h-16 sm:max-w-[320px]',
+  sm: 'h-10 w-auto max-w-[min(70vw,280px)] sm:h-12 sm:max-w-[320px]',
+  md: 'h-12 w-auto max-w-[min(72vw,360px)] sm:h-14 sm:max-w-[420px]',
+  lg: 'h-16 w-auto max-w-[min(88vw,400px)] sm:h-20 sm:max-w-[480px]',
 };
 
 const markSizes = {
@@ -25,7 +25,7 @@ export function BrandLogo({
     <span className="relative inline-flex items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=4'}
+        src={mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=7'}
         alt="Gopharmapro"
         className={mark ? markSizes[size] : `${sizes[size]} object-contain object-left`}
         {...(priority ? { fetchPriority: 'high' as const } : {})}

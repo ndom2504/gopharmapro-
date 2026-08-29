@@ -46,9 +46,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 bg-black">
-      <div className="mx-auto flex h-[76px] max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-[88px] max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
         <Link href="/" aria-label="Gopharmapro, accueil" className="flex shrink-0 items-center gap-2.5">
-          <BrandLogo size="sm" priority />
+          <BrandLogo size="md" priority />
         </Link>
         <nav className="hidden items-center gap-6 lg:flex">
           {links.map((l) => (
