@@ -65,9 +65,7 @@ export function ClientHome({ pharmacies, products }: { pharmacies: Pharmacy[]; p
           {categories.map((c) => (
             <Link key={c.name} href={`/produits?q=${encodeURIComponent(c.name)}`} className="card overflow-hidden p-0">
               <CategoryPhoto src={c.image} alt={c.name} />
-              <span className="block p-3 font-extrabold text-ink">
-                {c.icon} {c.name}
-              </span>
+              <span className="block p-3 font-extrabold text-ink">{c.name}</span>
             </Link>
           ))}
           <Link href="/pharmacies" className="card flex flex-col items-center justify-center p-4 text-center">

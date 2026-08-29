@@ -82,10 +82,7 @@ export default function Home() {
                   <Text style={{ fontSize: 36 }}>{categoryIcons[item] || '💊'}</Text>
                 </View>
               )}
-              <Text style={s.catText}>
-                {categoryIcons[item] ? categoryIcons[item] + ' ' : ''}
-                {item}
-              </Text>
+              <Text style={s.catText}>{item}</Text>
             </Pressable>
           );
         }}

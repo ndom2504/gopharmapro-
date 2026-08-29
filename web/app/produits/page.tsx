@@ -32,7 +32,7 @@ export default async function ProductsPage({
               q === c.name ? 'border-brand bg-mint text-brand-dark' : 'border-border bg-white text-muted'
             }`}
           >
-            {c.icon} {c.name}
+            {c.name}
           </Link>
         ))}
       </div>

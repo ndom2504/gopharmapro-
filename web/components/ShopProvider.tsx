@@ -43,7 +43,7 @@ type ShopCtx = {
   loginWithGoogle: (profile: GoogleProfile, role: GoogleRole) => 'ok' | 'conflict' | 'error';
   logout: () => void;
   setIdentity: (status: IdentityStatus, sessionId?: string) => void;
-  updateAccount: (patch: AccountPatch) => 'ok' | 'exists' | 'invalid';
+  updateAccount: (patch: AccountPatch) => 'ok' | 'exists' | 'invalid' | 'quota';
   add: (product: Product, offer: Offer) => 'added' | 'different-pharmacy' | 'partner';
   change: (offerId: string, delta: number) => void;
   remove: (offerId: string) => void;
@@ -88,6 +88,15 @@ function read<T>(key: string, fallback: T): T {
 
 function write(key: string, value: unknown) {
   localStorage.setItem(key, JSON.stringify(value));
+}
+
+function tryWrite(key: string, value: unknown) {
+  try {
+    write(key, value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function coerceSession(raw: unknown): ShopSession | null {
@@ -356,30 +365,47 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           if (key === 'email' && typeof value === 'string') next.email = value.trim().toLowerCase();
           else next[key] = value;
         }
-        persistUsers(users.map((u) => (u.id === stored.id ? (next as StoredAccount) : u)));
-        persistSession(stripPassword(next as StoredAccount));
+        const nextUsers = users.map((u) => (u.id === stored.id ? (next as StoredAccount) : u));
+        const nextSession = stripPassword(next as StoredAccount);
+        if (!tryWrite(USERS_KEY, nextUsers) || !tryWrite(SESSION_KEY, nextSession)) return 'quota';
+        setUsers(nextUsers);
+        setSession(nextSession);
         return 'ok';
       },
       add: (product, offer) => {
         if (session && !isClient(session)) return 'partner';
-        if (cart.length && cart[0].offer.pharmacy.id !== offer.pharmacy.id) return 'different-pharmacy';
-        const found = cart.find((i) => i.offer.id === offer.id);
-        const next = found
-          ? cart.map((i) => (i.offer.id === offer.id ? { ...i, quantity: i.quantity + 1 } : i))
-          : [...cart, { product, offer, quantity: 1 }];
-        setCart(next);
-        write(CART_KEY, next);
-        return 'added';
+        let result: 'added' | 'different-pharmacy' | 'partner' = 'added';
+        setCart((current) => {
+          if (current.length && current[0].offer.pharmacy.id !== offer.pharmacy.id) {
+            result = 'different-pharmacy';
+            return current;
+          }
+          const found = current.find((i) => i.offer.id === offer.id);
+          const next = found
+            ? current.map((i) =>
+                i.offer.id === offer.id ? { ...i, quantity: i.quantity + 1, offer: { ...offer, price: Number(offer.price) } } : i,
+              )
+            : [...current, { product, offer: { ...offer, price: Number(offer.price) }, quantity: 1 }];
+          write(CART_KEY, next);
+          return next;
+        });
+        return result;
       },
       change: (offerId, delta) => {
-        const next = cart.map((i) => (i.offer.id === offerId ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i));
-        setCart(next);
-        write(CART_KEY, next);
+        setCart((current) => {
+          const next = current
+            .map((i) => (i.offer.id === offerId ? { ...i, quantity: i.quantity + delta } : i))
+            .filter((i) => i.quantity > 0);
+          write(CART_KEY, next);
+          return next;
+        });
       },
       remove: (offerId) => {
-        const next = cart.filter((i) => i.offer.id !== offerId);
-        setCart(next);
-        write(CART_KEY, next);
+        setCart((current) => {
+          const next = current.filter((i) => i.offer.id !== offerId);
+          write(CART_KEY, next);
+          return next;
+        });
       },
       clearCart: () => {
         setCart([]);

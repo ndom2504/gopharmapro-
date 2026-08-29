@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa, paymentMethods } from '@/lib/catalog';
+import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 import { homeFor, isClient } from '@/lib/accounts';
 
 function parseGabonPhone(input: string) {
@@ -26,8 +27,8 @@ function CheckoutForm() {
   const pharmacy = cart[0]?.offer.pharmacy;
   const canDelivery = !!pharmacy?.delivery;
   const mode = !canDelivery ? 'pickup' : fulfillment;
-  const subtotal = cart.reduce((a, i) => a + i.offer.price * i.quantity, 0);
-  const fee = mode === 'delivery' ? pharmacy?.fee || 0 : 0;
+  const subtotal = cartSubtotal(cart);
+  const fee = mode === 'delivery' ? Number(pharmacy?.fee) || 0 : 0;
   const total = subtotal + fee;
 
   useEffect(() => {
@@ -75,7 +76,9 @@ function CheckoutForm() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <h1 className="text-3xl font-extrabold text-ink">Finaliser la commande</h1>
-      <p className="mt-2 text-sm text-muted">{pharmacy?.name} · {cart.length} article(s)</p>
+      <p className="mt-2 text-sm text-muted">
+        {pharmacy?.name} · {cartCount(cart)} article(s) · sous-total {formatFcfa(subtotal)}
+      </p>
       <div className="mt-6 grid gap-2 sm:grid-cols-2">
         <button
           type="button"

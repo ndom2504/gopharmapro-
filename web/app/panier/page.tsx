@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShop } from '@/components/ShopProvider';
 import { formatFcfa } from '@/lib/catalog';
+import { cartSubtotal, lineTotal } from '@/lib/cartMoney';
 import { ProductPhoto } from '@/components/ProductPhoto';
 import { homeFor, isClient } from '@/lib/accounts';
 
@@ -19,9 +20,9 @@ export default function PanierPage() {
 
   if (!ready || (session && !isClient(session))) return null;
 
-  const subtotal = cart.reduce((a, i) => a + i.offer.price * i.quantity, 0);
+  const subtotal = cartSubtotal(cart);
   const rx = cart.some((i) => i.product.requiresPrescription);
-  const fee = cart[0]?.offer.pharmacy.delivery ? cart[0].offer.pharmacy.fee : 0;
+  const fee = cart[0]?.offer.pharmacy.delivery ? Number(cart[0].offer.pharmacy.fee) || 0 : 0;
   const total = subtotal + fee;
   if (!cart.length) {
     return (
@@ -45,9 +46,7 @@ export default function PanierPage() {
             <div className="min-w-0 flex-1">
               <p className="font-extrabold text-ink">{i.product.name}</p>
               <p className="text-sm text-muted">
-                × {i.quantity}
-                {'                    '}
-                {formatFcfa(i.offer.price * i.quantity)}
+                {formatFcfa(i.offer.price)} × {i.quantity} = {formatFcfa(lineTotal(i.offer.price, i.quantity))}
               </p>
             </div>
             <div className="flex items-center gap-2">

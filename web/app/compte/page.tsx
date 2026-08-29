@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FormField } from '@/components/FormField';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
 import { paymentMethods } from '@/lib/catalog';
+import { resizeProfilePhoto } from '@/lib/profilePhoto';
 import { site } from '@/lib/site';
 
 export default function ComptePage() {
@@ -27,6 +28,7 @@ export default function ComptePage() {
   const [notifyOffers, setNotifyOffers] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
+  const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -68,6 +70,11 @@ export default function ComptePage() {
       setError('Cet e-mail ou ce téléphone est déjà utilisé.');
       return;
     }
+    if (result === 'quota') {
+      setSaved('');
+      setError('Espace insuffisant pour enregistrer. Réessayez avec une photo plus légère.');
+      return;
+    }
     if (result !== 'ok') {
       setSaved('');
       setError('Vérifiez les informations, notamment le mot de passe actuel.');
@@ -76,11 +83,17 @@ export default function ComptePage() {
     setSaved(ok);
   };
 
-  const pickPhoto = (file?: File) => {
+  const pickPhoto = async (file?: File) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => apply({ photoDataUrl: String(reader.result || '') }, 'Photo mise à jour.');
-    reader.readAsDataURL(file);
+    setError('');
+    try {
+      const photoDataUrl = await resizeProfilePhoto(file);
+      apply({ photoDataUrl }, 'Photo de profil enregistrée.');
+    } catch (err) {
+      setSaved('');
+      setError(err instanceof Error ? err.message : 'Impossible d’ajouter cette photo.');
+    }
+    if (photoInput.current) photoInput.current.value = '';
   };
 
   return (
@@ -155,16 +168,39 @@ export default function ComptePage() {
       </form>
 
       <section className="card mt-4 p-5">
-        <p className="font-extrabold text-ink">Photo</p>
-        <label className="btn-secondary mt-3 inline-flex cursor-pointer">
-          Choisir une photo
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => pickPhoto(e.target.files?.[0])} />
-        </label>
-        {photo ? (
-          <button type="button" className="mt-3 block text-sm font-extrabold text-danger" onClick={() => apply({ photoDataUrl: '' }, 'Photo retirée.')}>
-            Retirer la photo
-          </button>
-        ) : null}
+        <p className="font-extrabold text-ink">Photo de profil</p>
+        <p className="mt-1 text-sm leading-6 text-muted">
+          C’est votre avatar : il s’affiche ici et à côté de votre nom en haut du site, pour que l’on vous reconnaisse
+          (commandes, compte). Ce n’est pas une pièce d’identité.
+        </p>
+        <div className="mt-4 flex items-center gap-4">
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo} alt="Photo de profil" className="h-20 w-20 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-mint text-xl font-extrabold text-brand">
+              {displayName(session)[0]}
+              {session.lastName[0]}
+            </div>
+          )}
+          <div className="flex flex-col gap-2">
+            <input
+              ref={photoInput}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+              className="sr-only"
+              onChange={(e) => void pickPhoto(e.target.files?.[0])}
+            />
+            <button type="button" className="btn-primary !h-11" onClick={() => photoInput.current?.click()}>
+              Téléverser une photo
+            </button>
+            {photo ? (
+              <button type="button" className="text-sm font-extrabold text-danger" onClick={() => apply({ photoDataUrl: '' }, 'Photo retirée.')}>
+                Retirer la photo
+              </button>
+            ) : null}
+          </div>
+        </div>
       </section>
 
       <form

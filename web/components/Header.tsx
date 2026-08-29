@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { BrandLogo } from '@/components/BrandLogo';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
+import { formatFcfa } from '@/lib/catalog';
+import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 
 const clientLinks = [
   { href: '/', label: 'Accueil' },
@@ -35,7 +37,8 @@ export function Header() {
   const path = usePathname();
   const { session, cart } = useShop();
   if (path?.startsWith('/admin')) return null;
-  const count = cart.reduce((a, i) => a + i.quantity, 0);
+  const count = cartCount(cart);
+  const subtotal = cartSubtotal(cart);
   const shopper = !session || isClient(session);
   const links = session?.role === 'pharmacy' ? pharmacyLinks : session?.role === 'courier' ? courierLinks : clientLinks;
   const accountHref = session ? (isClient(session) ? '/compte' : homeFor(session.role)) : '/connexion';
@@ -58,18 +61,25 @@ export function Header() {
           {shopper ? (
             <Link
               href="/panier"
-              aria-label={count ? `Panier, ${count} article(s)` : 'Panier'}
-              className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-brand hover:bg-white/15"
+              aria-label={count ? `Panier, ${count} article(s), ${formatFcfa(subtotal)}` : 'Panier'}
+              className="relative flex h-10 items-center gap-2 rounded-2xl bg-white/10 px-2.5 text-brand hover:bg-white/15"
             >
               <CartIcon />
               {count ? (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-extrabold text-black">
-                  {count > 9 ? '9+' : count}
-                </span>
+                <>
+                  <span className="hidden text-xs font-extrabold text-white sm:inline">{formatFcfa(subtotal)}</span>
+                  <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-extrabold text-black">
+                    {count > 9 ? '9+' : count}
+                  </span>
+                </>
               ) : null}
             </Link>
           ) : null}
-          <Link href={accountHref} className="btn-primary !h-10 !px-4 text-sm !text-black">
+          <Link href={accountHref} className="btn-primary flex !h-10 items-center gap-2 !px-3 text-sm !text-black">
+            {isClient(session) && session.photoDataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={session.photoDataUrl} alt="" className="h-7 w-7 rounded-full object-cover" />
+            ) : null}
             {accountLabel}
           </Link>
         </div>
