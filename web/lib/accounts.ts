@@ -1,3 +1,5 @@
+import { taxonomyFor } from './taxonomy';
+
 export type UserRole = 'client' | 'pharmacy' | 'courier';
 export type DocStatus = 'pending' | 'verified' | 'rejected';
 export type PharmacyStatus = 'pending' | 'verified' | 'rejected';
@@ -206,13 +208,15 @@ export type PartnerCatalogItem = {
   pharmacyId: string;
   name: string;
   category: string;
+  subcategory?: string;
+  regulatoryStatus?: 'otc' | 'rx' | 'controlled';
   price: number;
   stock: number;
   status: 'published' | 'review';
   imageKey: string;
 };
 
-export const partnerCatalog: PartnerCatalogItem[] = [
+const partnerCatalogSeed: PartnerCatalogItem[] = [
   { id: 'pc-para', pharmacyId: 'ph-centre', name: 'Paracétamol 500 mg', category: 'Médicaments', price: 3500, stock: 20, status: 'published', imageKey: 'paracetamol' },
   { id: 'pc-ibup', pharmacyId: 'ph-centre', name: 'Ibuprofène 400 mg', category: 'Médicaments', price: 2800, stock: 18, status: 'published', imageKey: 'paracetamol' },
   { id: 'pc-amox', pharmacyId: 'ph-centre', name: 'Amoxicilline 500 mg', category: 'Médicaments', price: 6200, stock: 12, status: 'published', imageKey: 'amoxicillin' },
@@ -232,7 +236,14 @@ export const partnerCatalog: PartnerCatalogItem[] = [
   { id: 'pc-serum', pharmacyId: 'ph-centre', name: 'Sérum physiologique', category: 'Bébé', price: 2100, stock: 19, status: 'published', imageKey: 'bandages' },
   { id: 'pc-solaire', pharmacyId: 'ph-centre', name: 'Crème solaire SPF 50', category: 'Parapharmacie', price: 7800, stock: 10, status: 'published', imageKey: 'vitamin-c' },
   { id: 'pc-baume', pharmacyId: 'ph-centre', name: 'Baume à lèvres', category: 'Parapharmacie', price: 900, stock: 28, status: 'published', imageKey: 'vitamin-c' },
+  { id: 'pc-glyco', pharmacyId: 'ph-centre', name: 'Bandelettes glycémie', category: 'Diabète', price: 8500, stock: 9, status: 'published', imageKey: 'bandages' },
+  { id: 'pc-preserv', pharmacyId: 'ph-centre', name: 'Préservatifs', category: 'Santé sexuelle', price: 2500, stock: 20, status: 'published', imageKey: 'bandages' },
 ];
+
+export const partnerCatalog: PartnerCatalogItem[] = partnerCatalogSeed.map((i) => {
+  const tax = taxonomyFor(i.id, i.category);
+  return { ...i, category: tax.category, subcategory: tax.subcategory, regulatoryStatus: tax.regulatoryStatus };
+});
 
 export type PartnerOrderItem = { name: string; quantity: number };
 

@@ -8,6 +8,7 @@ import { RoleTabBar, pharmacyTabs, useTabScreenPad } from '../src/components/Rol
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { usePharmacyCatalog } from '../src/store/catalog';
+import { regulatoryLabel, regulatoryTone, resolveStatus } from '../src/lib/taxonomy';
 
 export default function PharmacyCatalog() {
   const session = useAuth((s) => s.session);
@@ -23,7 +24,7 @@ export default function PharmacyCatalog() {
     <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={[s.page, { paddingBottom: tabPad }]}>
       <Text style={s.title}>Produits de l’officine</Text>
-      <Text style={s.meta}>Ajoutez le stock visible pour les clients. Un médicament avec ordonnance passe en contrôle avant publication.</Text>
+      <Text style={s.meta}>Catégorie commerciale et statut réglementaire sont distincts. Un produit sur ordonnance ou à contrôle requis passe en revue avant publication.</Text>
       <View style={{ marginTop: 16, marginBottom: 8 }}>
         <Button title="Ajouter un produit" onPress={() => router.push('/pharmacy-product-new')} />
       </View>
@@ -46,13 +47,12 @@ export default function PharmacyCatalog() {
                 </View>
                 <Text style={s.meta}>
                   {item.form} · {item.dosage} · {item.category}
+                  {item.subcategory ? ` · ${item.subcategory}` : ''}
                 </Text>
                 <Text style={s.price}>{item.price.toLocaleString('fr-FR')} FCFA</Text>
-                {item.requiresPrescription ? (
-                  <View style={{ marginTop: 8 }}>
-                    <Badge text="Ordonnance" tone="red" />
-                  </View>
-                ) : null}
+                <View style={{ marginTop: 8 }}>
+                  <Badge text={regulatoryLabel(resolveStatus(item))} tone={regulatoryTone(resolveStatus(item))} />
+                </View>
                 <View style={s.stockRow}>
                   <Pressable onPress={() => updateStock(item.id, Math.max(0, item.stock - 1))} style={s.stockBtn}>
                     <Ionicons name="remove" size={16} color={colors.primary} />

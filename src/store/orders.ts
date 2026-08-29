@@ -31,6 +31,8 @@ const demoItems = [
       dosage: '500 mg',
       form: 'Comprimés',
       category: 'Médicaments',
+      subcategory: 'Antalgiques & fièvre',
+      regulatoryStatus: 'otc',
       description: '',
       requiresPrescription: false,
       offers: [],

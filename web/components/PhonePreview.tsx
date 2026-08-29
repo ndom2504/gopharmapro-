@@ -9,8 +9,8 @@ export function PhonePreview() {
       <p className="mt-1 text-xl font-extrabold text-ink">Que recherchez-vous ?</p>
       <div className="mt-4 h-12 rounded-2xl border border-border bg-white" />
       <p className="mt-5 text-sm font-extrabold text-ink">Catégories</p>
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {categories.slice(0, 6).map((c) => (
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {categories.map((c) => (
           <div key={c.name} className="overflow-hidden rounded-2xl bg-white">
             <CategoryPhoto src={c.image} alt="" />
             <p className="bg-mint px-1 py-1 text-center text-[10px] font-bold leading-tight text-ink">{c.name}</p>

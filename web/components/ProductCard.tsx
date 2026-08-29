@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatFcfa, lowestPrice, type Product } from '@/lib/catalog';
 import { ProductPhoto } from '@/components/ProductPhoto';
+import { RegulatoryBadge } from '@/components/RegulatoryBadge';
 
 export function ProductCard({ product }: { product: Product }) {
   return (
@@ -10,16 +11,14 @@ export function ProductCard({ product }: { product: Product }) {
         <div>
           <h3 className="font-extrabold text-ink">{product.name}</h3>
           <p className="mt-1 text-sm text-muted">
+            {product.category}
+            {product.subcategory ? ` · ${product.subcategory}` : ''}
+          </p>
+          <p className="mt-0.5 text-sm text-muted">
             {product.form} · dès {formatFcfa(lowestPrice(product))}
           </p>
         </div>
-        {product.requiresPrescription ? (
-          <span className="badge-red">Ordonnance</span>
-        ) : (
-          <span className="rounded-full border border-border bg-[#F6F8F7] px-2.5 py-1 text-xs font-extrabold text-ink">
-            Disponible
-          </span>
-        )}
+        <RegulatoryBadge status={product.regulatoryStatus} requiresPrescription={product.requiresPrescription} />
       </div>
     </Link>
   );

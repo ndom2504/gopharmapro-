@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { categories } from '../data/mock';
+import { catalogCategories, needsPrescription, taxonomyFor } from '../lib/taxonomy';
 import { useNotifications } from './notifications';
 
-const KEY = 'pharmarket-pharmacy-catalog-v2';
+const KEY = 'pharmarket-pharmacy-catalog-v3';
 
 export type CatalogStatus = 'published' | 'review';
 
@@ -16,6 +16,8 @@ export type CatalogItem = {
   dosage: string;
   form: string;
   category: string;
+  subcategory?: string;
+  regulatoryStatus?: 'otc' | 'rx' | 'controlled';
   description: string;
   requiresPrescription: boolean;
   price: number;
@@ -44,6 +46,8 @@ const seed: CatalogItem[] = [
     dosage: '500 mg',
     form: 'Comprimés',
     category: 'Médicaments',
+    subcategory: 'Antalgiques & fièvre',
+    regulatoryStatus: 'otc',
     description: 'Douleur et fièvre. Respectez la notice.',
     requiresPrescription: false,
     price: 3500,
@@ -61,6 +65,8 @@ const seed: CatalogItem[] = [
     dosage: '500 mg',
     form: 'Gélules',
     category: 'Médicaments',
+    subcategory: 'Anti-infectieux',
+    regulatoryStatus: 'rx',
     description: 'Antibiotique soumis à ordonnance.',
     requiresPrescription: true,
     price: 6200,
@@ -77,7 +83,9 @@ const seed: CatalogItem[] = [
     genericName: 'Acide ascorbique',
     dosage: '1000 mg',
     form: 'Comprimés effervescents',
-    category: 'Vitamines',
+    category: 'Vitamines & Nutrition',
+    subcategory: 'Vitamines',
+    regulatoryStatus: 'otc',
     description: 'Complément alimentaire.',
     requiresPrescription: false,
     price: 4500,
@@ -95,6 +103,8 @@ const seed: CatalogItem[] = [
     dosage: 'Boîte de 20',
     form: 'Boîte',
     category: 'Premiers soins',
+    subcategory: 'Pansements & compresses',
+    regulatoryStatus: 'otc',
     description: 'Pansements individuels stériles pour petites plaies.',
     requiresPrescription: false,
     price: 2200,
@@ -111,7 +121,7 @@ async function persist() {
   await AsyncStorage.setItem(KEY, JSON.stringify({ items }));
 }
 
-export const catalogCategories = categories;
+export { catalogCategories };
 
 export const usePharmacyCatalog = create<CatalogStore>((set) => ({
   hydrated: false,
@@ -123,12 +133,19 @@ export const usePharmacyCatalog = create<CatalogStore>((set) => ({
         const parsed = JSON.parse(raw) as { items?: CatalogItem[] };
         if (parsed.items?.length) {
           const seedById = Object.fromEntries(seed.map((s) => [s.id, s]));
-          items = parsed.items.map((i) => ({
-            ...i,
-            imageUris: i.imageUris || [],
-            pharmacyName: i.pharmacyName || 'Pharmacie',
-            imageKey: i.imageKey || seedById[i.id]?.imageKey,
-          }));
+          items = parsed.items.map((i) => {
+            const tax = taxonomyFor(i.imageKey || i.id, i.category, i.requiresPrescription);
+            return {
+              ...i,
+              imageUris: i.imageUris || [],
+              pharmacyName: i.pharmacyName || 'Pharmacie',
+              imageKey: i.imageKey || seedById[i.id]?.imageKey,
+              category: tax.category,
+              subcategory: i.subcategory || tax.subcategory,
+              regulatoryStatus: i.regulatoryStatus || tax.regulatoryStatus,
+              requiresPrescription: needsPrescription(i.regulatoryStatus || tax.regulatoryStatus),
+            };
+          });
           for (const extra of seed) {
             if (!items.some((i) => i.id === extra.id)) items = [...items, extra];
           }
@@ -144,7 +161,9 @@ export const usePharmacyCatalog = create<CatalogStore>((set) => ({
       ...input,
       id: 'pc-' + Date.now(),
       pharmacyName: input.pharmacyName || 'Pharmacie',
-      status: input.status || (input.requiresPrescription ? 'review' : 'published'),
+      regulatoryStatus: input.regulatoryStatus || (input.requiresPrescription ? 'rx' : 'otc'),
+      requiresPrescription: needsPrescription(input.regulatoryStatus || (input.requiresPrescription ? 'rx' : 'otc')),
+      status: input.status || (needsPrescription(input.regulatoryStatus || (input.requiresPrescription ? 'rx' : 'otc')) ? 'review' : 'published'),
       imageUris: input.imageUris || [],
     };
     items = [item, ...items];

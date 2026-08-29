@@ -4,10 +4,11 @@ import { Redirect, router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../src/components/UI';
-import { ChoiceChips, Field, ToggleRow } from '../src/components/Field';
+import { ChoiceChips, Field } from '../src/components/Field';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { catalogCategories, usePharmacyCatalog } from '../src/store/catalog';
+import { needsPrescription, regulatoryStatuses, subcategoriesOf, type RegulatoryStatus } from '../src/lib/taxonomy';
 import { pickProductImages, takeProductPhoto } from '../src/lib/productImages';
 
 const forms = ['Comprimés', 'Gélules', 'Sirop', 'Crème', 'Boîte', 'Autre'];
@@ -20,10 +21,11 @@ export default function NewPharmacyProduct() {
   const [dosage, setDosage] = useState('');
   const [form, setForm] = useState('Comprimés');
   const [category, setCategory] = useState(catalogCategories[0]);
+  const [subcategory, setSubcategory] = useState(subcategoriesOf(catalogCategories[0])[0] || '');
+  const [regulatoryStatus, setRegulatoryStatus] = useState<RegulatoryStatus>('otc');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [requiresPrescription, setRequiresPrescription] = useState(false);
   const [imageUris, setImageUris] = useState<string[]>([]);
   const [error, setError] = useState('');
 
@@ -44,8 +46,10 @@ export default function NewPharmacyProduct() {
       dosage: dosage.trim() || '—',
       form,
       category,
+      subcategory,
+      regulatoryStatus,
       description: description.trim(),
-      requiresPrescription,
+      requiresPrescription: needsPrescription(regulatoryStatus),
       price: Math.round(parsedPrice),
       stock: Math.round(parsedStock),
       imageUris,
@@ -89,16 +93,29 @@ export default function NewPharmacyProduct() {
         <Field label="Dosage" value={dosage} onChange={setDosage} placeholder="500 mg" />
         <Text style={s.label}>Forme</Text>
         <ChoiceChips options={forms.map((f) => ({ id: f, label: f }))} value={form} onChange={setForm} />
-        <Text style={s.label}>Catégorie</Text>
-        <ChoiceChips options={catalogCategories.map((c) => ({ id: c, label: c }))} value={category} onChange={setCategory} />
+        <Text style={s.label}>Catégorie commerciale</Text>
+        <ChoiceChips
+          options={catalogCategories.map((c) => ({ id: c, label: c }))}
+          value={category}
+          onChange={(next) => {
+            setCategory(next);
+            setSubcategory(subcategoriesOf(next)[0] || '');
+          }}
+        />
+        <Text style={s.label}>Sous-catégorie</Text>
+        <ChoiceChips
+          options={subcategoriesOf(category).map((c) => ({ id: c, label: c }))}
+          value={subcategory}
+          onChange={setSubcategory}
+        />
+        <Text style={s.label}>Statut réglementaire</Text>
+        <ChoiceChips
+          options={regulatoryStatuses.map((s) => ({ id: s.id, label: s.label }))}
+          value={regulatoryStatus}
+          onChange={(id) => setRegulatoryStatus(id as RegulatoryStatus)}
+        />
         <Field label="Prix (FCFA)" value={price} onChange={setPrice} placeholder="3500" keyboardType="number-pad" />
         <Field label="Stock" value={stock} onChange={setStock} placeholder="20" keyboardType="number-pad" />
-        <ToggleRow
-          label="Ordonnance obligatoire"
-          hint="Si oui, le produit suit le contrôle pharmacie avant publication."
-          value={requiresPrescription}
-          onChange={setRequiresPrescription}
-        />
         <Field label="Description (optionnel)" value={description} onChange={setDescription} placeholder="Conseils, posologie…" />
         {error ? <Text style={s.error}>{error}</Text> : null}
         <Button title="Enregistrer le produit" onPress={submit} />

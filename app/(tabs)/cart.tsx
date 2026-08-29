@@ -6,6 +6,7 @@ import { RxPayBanner } from '../../src/components/RxPayBanner';
 import { useCart } from '../../src/store/cart';
 import { useCartRx } from '../../src/hooks/useCartRx';
 import { colors } from '../../src/theme';
+import { regulatoryLabel, regulatoryTone, resolveStatus } from '../../src/lib/taxonomy';
 
 export default function CartTab() {
   const items = useCart((s) => s.items);
@@ -38,7 +39,9 @@ export default function CartTab() {
               <Text style={s.meta}>
                 × {i.quantity} · {(i.offer.price * i.quantity).toLocaleString('fr-FR')} FCFA
               </Text>
-              {i.product.requiresPrescription ? <Badge text="Ordonnance" tone="red" /> : null}
+              <View style={{ marginTop: 8 }}>
+                <Badge text={regulatoryLabel(resolveStatus(i.product))} tone={regulatoryTone(resolveStatus(i.product))} />
+              </View>
             </View>
             <View style={s.qty}>
               <Text onPress={() => change(i.offer.id, -1)} style={s.control}>

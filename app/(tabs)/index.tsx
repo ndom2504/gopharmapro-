@@ -11,6 +11,7 @@ import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
 import { formatKm } from '../../src/lib/geo';
 import { categoryPhoto } from '../../src/lib/categoryPhotos';
 import { categoryIcons } from '../../src/lib/dashboard';
+import { regulatoryLabel, regulatoryTone, resolveStatus } from '../../src/lib/taxonomy';
 import { useCart } from '../../src/store/cart';
 import { useAuth } from '../../src/store/auth';
 import { PharmacyFeedback } from '../../src/components/PharmacyFeedback';
@@ -70,7 +71,7 @@ export default function Home() {
           }
           const photo = categoryPhoto(item);
           return (
-            <Pressable onPress={() => router.push({ pathname: '/(tabs)/search', params: { q: item } })} style={s.category}>
+            <Pressable onPress={() => router.push({ pathname: '/(tabs)/search', params: { cat: item } })} style={s.category}>
               {photo ? (
                 <View style={s.catImgWrap}>
                   <Image source={photo} style={s.catImg} resizeMode="cover" />
@@ -114,8 +115,15 @@ export default function Home() {
               <ProductImage uris={p.imageUris} imageKey={p.imageKey || p.id} category={p.category} size="thumb" />
               <View style={{ flex: 1 }}>
                 <Text style={s.cardTitle}>{p.name}</Text>
+                <Text style={s.meta}>
+                  {p.category}
+                  {p.subcategory ? ` · ${p.subcategory}` : ''}
+                </Text>
                 <Text style={s.price}>{offer.price.toLocaleString('fr-FR')} FCFA</Text>
                 <Text style={s.meta}>{offer.pharmacy.name} · {formatKm(offer.pharmacy.distance)}</Text>
+                <View style={{ marginTop: 8 }}>
+                  <Badge text={regulatoryLabel(resolveStatus(p))} tone={regulatoryTone(resolveStatus(p))} />
+                </View>
               </View>
             </Pressable>
             <View style={{ marginTop: 12, gap: 8 }}>

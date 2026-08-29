@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getProduct, resolveProductId } from '@/lib/catalog';
 import { ProductPhoto } from '@/components/ProductPhoto';
 import { OfferCart } from '@/components/OfferCart';
+import { RegulatoryBadge } from '@/components/RegulatoryBadge';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +26,11 @@ export default async function ProductDetail({ params }: { params: Promise<{ id: 
         <div>
           <h1 className="text-3xl font-extrabold text-ink">{product.name}</h1>
           <p className="mt-2 text-muted">
-            {product.genericName} · {product.dosage} · {product.form}
+            {product.category}
+            {product.subcategory ? ` · ${product.subcategory}` : ''} · {product.genericName} · {product.dosage} · {product.form}
           </p>
         </div>
-        {product.requiresPrescription ? (
-          <span className="badge-red">Ordonnance</span>
-        ) : (
-          <span className="badge-green">Sans ordonnance</span>
-        )}
+        <RegulatoryBadge status={product.regulatoryStatus} requiresPrescription={product.requiresPrescription} />
       </div>
       <p className="mt-6 leading-7 text-muted">{product.description}</p>
       {product.requiresPrescription ? (

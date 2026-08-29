@@ -2,13 +2,18 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
 import { productPhoto } from '../lib/productPhotos';
+import { normalizeCategory } from '../lib/taxonomy';
 
 const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
   Médicaments: 'medical',
-  Hygiène: 'sparkles',
-  Bébé: 'happy',
+  'Maman & Bébé': 'happy',
   'Premiers soins': 'bandage',
-  Vitamines: 'nutrition',
+  'Hygiène & Soins': 'sparkles',
+  Dermatologie: 'color-filter',
+  'Vitamines & Nutrition': 'nutrition',
+  'Matériel médical': 'medkit',
+  Diabète: 'water',
+  'Santé sexuelle': 'heart',
   Parapharmacie: 'leaf',
 };
 
@@ -55,7 +60,7 @@ export function ProductImage({
   }
   return (
     <View style={[s.ph, wrap]}>
-      <Ionicons name={icons[category || ''] || 'medkit'} size={dim.icon} color={colors.primary} />
+      <Ionicons name={icons[normalizeCategory(category)] || 'medkit'} size={dim.icon} color={colors.primary} />
       {size === 'hero' ? <Text style={s.phText}>Photo du produit</Text> : null}
     </View>
   );

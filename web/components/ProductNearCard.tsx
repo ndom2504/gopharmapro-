@@ -7,6 +7,7 @@ import { formatFcfa, formatKm, type Product } from '@/lib/catalog';
 import { useShop } from '@/components/ShopProvider';
 import { isClient } from '@/lib/accounts';
 import { ProductPhoto } from '@/components/ProductPhoto';
+import { RegulatoryBadge } from '@/components/RegulatoryBadge';
 
 export function ProductNearCard({ product }: { product: Product }) {
   const { add, session } = useShop();
@@ -36,6 +37,13 @@ export function ProductNearCard({ product }: { product: Product }) {
         <ProductPhoto src={product.imageSrc} alt={product.name} size="thumb" />
         <div className="min-w-0 flex-1">
           <p className="font-extrabold text-ink">{product.name}</p>
+          <p className="mt-1 text-sm text-muted">
+            {product.category}
+            {product.subcategory ? ` · ${product.subcategory}` : ''}
+          </p>
+          <div className="mt-1">
+            <RegulatoryBadge status={product.regulatoryStatus} requiresPrescription={product.requiresPrescription} />
+          </div>
           <p className="mt-1 text-sm font-extrabold text-ink">{formatFcfa(offer.price)}</p>
           <p className="mt-1 text-sm text-muted">
             {offer.pharmacy.name} · {formatKm(offer.pharmacy.distance)}

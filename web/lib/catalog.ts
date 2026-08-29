@@ -1,5 +1,6 @@
 import { getAdminState, type AdminCatalogItem, type AdminPharmacy } from './adminData';
 import { productImageSrc } from './photos';
+import { catalogTree, needsPrescription, sameCategory, type RegulatoryStatus } from './taxonomy';
 
 export type Pharmacy = {
   id: string;
@@ -27,6 +28,8 @@ export type Product = {
   dosage: string;
   form: string;
   category: string;
+  subcategory?: string;
+  regulatoryStatus?: RegulatoryStatus;
   description: string;
   requiresPrescription: boolean;
   imageKey?: string;
@@ -68,19 +71,18 @@ const productAliases: Record<string, string> = {
   'pc-serum': 'serum-physio',
   'pc-solaire': 'creme-solaire',
   'pc-baume': 'baume-levres',
+  'pc-glyco': 'bandelettes-glycemie',
+  'pc-preserv': 'preservatifs',
   amoxicillin: 'amoxicilline',
   'vitamin-c': 'vitamine-c',
   bandages: 'pansement',
 };
 
-export const categories = [
-  { name: 'Médicaments', icon: '💊', image: '/categories/medicaments.png?v=2' },
-  { name: 'Premiers soins', icon: '🩹', image: '/categories/premiers-soins.png?v=2' },
-  { name: 'Hygiène', icon: '🧴', image: '/categories/hygiene.png?v=2' },
-  { name: 'Bébé', icon: '👶', image: '/categories/bebe.png?v=2' },
-  { name: 'Vitamines', icon: '💪', image: '/categories/vitamines.png?v=2' },
-  { name: 'Parapharmacie', icon: '🧴', image: '/categories/parapharmacie.png?v=2' },
-];
+export const categories = catalogTree.map((c) => ({
+  name: c.name,
+  icon: c.icon,
+  image: `/categories/${c.photo}.png?v=2`,
+}));
 
 export const paymentMethods: PaymentMethod[] = [
   { id: 'mobicash', name: 'MobiCash', operator: 'Gabon Telecom', ussd: '*555#', color: '#E87722', background: '#FFF4E8' },
@@ -131,8 +133,10 @@ function toProduct(slug: string, items: AdminCatalogItem[], pharmacies: Map<stri
     dosage: first.dosage,
     form: first.form,
     category: first.category,
+    subcategory: first.subcategory,
+    regulatoryStatus: first.regulatoryStatus,
     description: first.description,
-    requiresPrescription: first.requiresPrescription,
+    requiresPrescription: first.requiresPrescription ?? needsPrescription(first.regulatoryStatus || 'otc'),
     imageKey: first.imageKey,
     imageSrc: productImageSrc(first.imageKey),
     offers,
@@ -198,14 +202,25 @@ export function productsForPharmacy(pharmacyId: string) {
   return getPublicProducts().filter((p) => p.offers.some((o) => o.pharmacy.id === resolved && o.stock > 0));
 }
 
-export function searchProducts(query: string, opts: { category?: string; prescription?: boolean } = {}) {
+export function searchProducts(
+  query: string,
+  opts: { category?: string; subcategory?: string; status?: RegulatoryStatus | 'rx-any' } = {},
+) {
   const list = getPublicProducts();
   const q = fold(query);
   return list.filter((p) => {
-    if (opts.category && p.category !== opts.category) return false;
-    if (opts.prescription && !p.requiresPrescription) return false;
+    if (opts.category && !sameCategory(p.category, opts.category)) return false;
+    if (opts.subcategory && p.subcategory !== opts.subcategory) return false;
+    if (opts.status === 'rx-any' && !p.requiresPrescription) return false;
+    if (opts.status && opts.status !== 'rx-any' && (p.regulatoryStatus || (p.requiresPrescription ? 'rx' : 'otc')) !== opts.status)
+      return false;
     if (!q) return true;
-    return fold(p.name).includes(q) || fold(p.genericName).includes(q) || fold(p.category).includes(q);
+    return (
+      fold(p.name).includes(q) ||
+      fold(p.genericName).includes(q) ||
+      fold(p.category).includes(q) ||
+      fold(p.subcategory || '').includes(q)
+    );
   });
 }
 

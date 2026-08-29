@@ -11,17 +11,20 @@ export function SearchForm({
   defaultValue = '',
   compact = false,
   category = '',
-  prescription = false,
+  subcategory = '',
+  rx = '',
 }: {
   defaultValue?: string;
   compact?: boolean;
   category?: string;
-  prescription?: boolean;
+  subcategory?: string;
+  rx?: string;
 }) {
   return (
     <form action="/produits" className={`relative ${compact ? '' : 'max-w-xl'}`}>
       {category ? <input type="hidden" name="cat" value={category} /> : null}
-      {prescription ? <input type="hidden" name="rx" value="1" /> : null}
+      {subcategory ? <input type="hidden" name="sub" value={subcategory} /> : null}
+      {rx ? <input type="hidden" name="rx" value={rx} /> : null}
       <span className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted">
         <SearchIcon />
       </span>

@@ -6,6 +6,7 @@ import { useCart } from '../../src/store/cart';
 import { colors } from '../../src/theme';
 import { useGeoCatalog } from '../../src/hooks/useGeoCatalog';
 import { formatKm } from '../../src/lib/geo';
+import { regulatoryLabel, regulatoryTone, resolveStatus } from '../../src/lib/taxonomy';
 
 export default function Product() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -34,14 +35,15 @@ export default function Product() {
         <View style={{ flex: 1 }}>
           <Text style={s.title}>{p.name}</Text>
           <Text style={s.meta}>
-            {p.genericName} · {p.form}
+            {p.category}
+            {p.subcategory ? ` · ${p.subcategory}` : ''} · {p.genericName} · {p.form}
           </Text>
         </View>
-        {p.requiresPrescription ? <Badge text="Ordonnance requise" tone="red" /> : <Badge text="Sans ordonnance" />}
+        <Badge text={regulatoryLabel(resolveStatus(p))} tone={regulatoryTone(resolveStatus(p))} />
       </View>
       {p.requiresPrescription ? (
         <Card style={s.alert}>
-          <Text style={s.alertTitle}>Médicament sur ordonnance</Text>
+          <Text style={s.alertTitle}>{resolveStatus(p) === 'controlled' ? 'Contrôle requis' : 'Médicament sur ordonnance'}</Text>
           <Text style={s.meta}>Le paiement restera bloqué jusqu'à la validation par la pharmacie.</Text>
         </Card>
       ) : null}

@@ -1,3 +1,5 @@
+import { needsPrescription, taxonomyFor } from './taxonomy';
+
 export type DocStatus = 'pending' | 'verified' | 'rejected';
 export type PharmacyStatus = 'pending' | 'verified' | 'rejected';
 export type CourierStatus = 'pending' | 'active' | 'suspended';
@@ -70,6 +72,8 @@ export type AdminCatalogItem = {
   dosage: string;
   form: string;
   category: string;
+  subcategory?: string;
+  regulatoryStatus?: 'otc' | 'rx' | 'controlled';
   description: string;
   requiresPrescription: boolean;
   status: CatalogStatus;
@@ -138,23 +142,28 @@ function centreCatalog(
   ][],
 ): AdminCatalogItem[] {
   return rows.map(
-    ([id, slug, name, genericName, dosage, form, category, description, requiresPrescription, status, price, stock, imageKey]) => ({
-      id,
-      slug,
-      pharmacyId: 'ph-centre',
-      pharmacyName: 'Pharmacie du Centre',
-      name,
-      genericName,
-      dosage,
-      form,
-      category,
-      description,
-      requiresPrescription,
-      status,
-      price,
-      stock,
-      imageKey,
-    }),
+    ([id, slug, name, genericName, dosage, form, category, description, requiresPrescription, status, price, stock, imageKey]) => {
+      const tax = taxonomyFor(slug, category, requiresPrescription);
+      return {
+        id,
+        slug,
+        pharmacyId: 'ph-centre',
+        pharmacyName: 'Pharmacie du Centre',
+        name,
+        genericName,
+        dosage,
+        form,
+        category: tax.category,
+        subcategory: tax.subcategory,
+        regulatoryStatus: tax.regulatoryStatus,
+        description,
+        requiresPrescription: needsPrescription(tax.regulatoryStatus),
+        status,
+        price,
+        stock,
+        imageKey,
+      };
+    },
   );
 }
 
@@ -257,6 +266,8 @@ let state: AdminState = {
     ['pc-serum', 'serum-physio', 'Sérum physiologique', 'NaCl 0,9 %', 'Unidose x 20', 'Unidoses', 'Bébé', 'Lavage du nez et des yeux.', false, 'published', 2100, 19, 'bandages'],
     ['pc-solaire', 'creme-solaire', 'Crème solaire SPF 50', 'Filtres UV', '50 ml', 'Tube', 'Parapharmacie', 'Protection solaire visage et corps.', false, 'published', 7800, 10, 'vitamin-c'],
     ['pc-baume', 'baume-levres', 'Baume à lèvres', 'Cire et beurre de karité', '1 stick', 'Stick', 'Parapharmacie', 'Protège et répare les lèvres sèches.', false, 'published', 900, 28, 'vitamin-c'],
+    ['pc-glyco', 'bandelettes-glycemie', 'Bandelettes glycémie', 'Bandelettes', 'Boîte de 50', 'Boîte', 'Diabète', 'Autosurveillance de la glycémie.', false, 'published', 8500, 9, 'bandages'],
+    ['pc-preserv', 'preservatifs', 'Préservatifs', 'Latex', 'Boîte de 12', 'Boîte', 'Santé sexuelle', 'Protection lors des rapports sexuels.', false, 'published', 2500, 20, 'bandages'],
   ]),
   orders: [
     {

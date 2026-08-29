@@ -7,6 +7,7 @@ import { ProductImage } from '../src/components/ProductImage';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/store/auth';
 import { usePharmacyCatalog } from '../src/store/catalog';
+import { regulatoryLabel, resolveStatus } from '../src/lib/taxonomy';
 
 export default function AdminCatalog() {
   const session = useAuth((s) => s.session);
@@ -17,7 +18,7 @@ export default function AdminCatalog() {
   return (
     <ScrollView contentContainerStyle={s.page}>
       <AdminBar title="Catalogue" />
-      <Text style={s.meta}>Les produits avec ordonnance restent en contrôle jusqu’à validation.</Text>
+      <Text style={s.meta}>Les produits sur ordonnance ou à contrôle requis restent en revue jusqu’à validation.</Text>
       {ordered.map((item) => (
         <Card key={item.id} style={{ marginTop: 12 }}>
           <View style={s.row}>
@@ -32,7 +33,7 @@ export default function AdminCatalog() {
               </View>
               <Text style={s.meta}>
                 {item.pharmacyName} · {item.category}
-                {item.requiresPrescription ? ' · Ordonnance' : ''}
+                {item.subcategory ? ` · ${item.subcategory}` : ''} · {regulatoryLabel(resolveStatus(item))}
               </Text>
               {item.status === 'review' ? (
                 <View style={{ marginTop: 10 }}>

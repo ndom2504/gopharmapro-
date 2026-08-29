@@ -1,12 +1,14 @@
-const photos: Record<string, number> = {
-  Médicaments: require('../../assets/categories/medicaments.png'),
-  Hygiène: require('../../assets/categories/hygiene.png'),
-  Bébé: require('../../assets/categories/bebe.png'),
-  'Premiers soins': require('../../assets/categories/premiers-soins.png'),
-  Vitamines: require('../../assets/categories/vitamines.png'),
-  Parapharmacie: require('../../assets/categories/parapharmacie.png'),
+import { categoryPhotoKey } from './taxonomy';
+
+const files: Record<string, number> = {
+  medicaments: require('../../assets/categories/medicaments.png'),
+  hygiene: require('../../assets/categories/hygiene.png'),
+  bebe: require('../../assets/categories/bebe.png'),
+  'premiers-soins': require('../../assets/categories/premiers-soins.png'),
+  vitamines: require('../../assets/categories/vitamines.png'),
+  parapharmacie: require('../../assets/categories/parapharmacie.png'),
 };
 
 export function categoryPhoto(name: string) {
-  return photos[name];
+  return files[categoryPhotoKey(name)];
 }

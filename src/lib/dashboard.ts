@@ -1,11 +1,6 @@
-export const categoryIcons: Record<string, string> = {
-  Médicaments: '💊',
-  'Premiers soins': '🩹',
-  Hygiène: '🧴',
-  Bébé: '👶',
-  Vitamines: '💪',
-  Parapharmacie: '🧴',
-};
+import { catalogTree } from './taxonomy';
+
+export const categoryIcons: Record<string, string> = Object.fromEntries(catalogTree.map((c) => [c.name, c.icon]));
 
 export const clientTimeline = [
   { status: 'paid', label: 'Commande passée' },

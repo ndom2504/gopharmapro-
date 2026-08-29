@@ -25,6 +25,8 @@ export type Product = {
   dosage: string;
   form: string;
   category: string;
+  subcategory?: string;
+  regulatoryStatus?: 'otc' | 'rx' | 'controlled';
   description: string;
   requiresPrescription: boolean;
   offers: Offer[];

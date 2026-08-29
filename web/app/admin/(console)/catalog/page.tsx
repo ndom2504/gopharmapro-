@@ -3,6 +3,7 @@ import { getAdminState } from '@/lib/adminData';
 import { formatFcfa } from '@/lib/catalog';
 import { productImageSrc } from '@/lib/photos';
 import { ProductPhoto } from '@/components/ProductPhoto';
+import { RegulatoryBadge } from '@/components/RegulatoryBadge';
 
 export const metadata = { title: 'Catalogue' };
 export const dynamic = 'force-dynamic';
@@ -15,8 +16,8 @@ export default function AdminCatalogPage() {
     <div>
       <h1 className="text-3xl font-extrabold text-ink">Catalogue</h1>
       <p className="mt-2 text-sm text-muted">
-        Publier un produit le rend visible sur le site. Les produits avec ordonnance restent en contrôle jusqu’à
-        validation.
+        Publier un produit le rend visible sur le site. Les produits sur ordonnance ou à contrôle requis restent en
+        revue jusqu’à validation.
       </p>
       <div className="mt-6 space-y-3">
         {items.map((item) => {
@@ -29,9 +30,12 @@ export default function AdminCatalogPage() {
                   <p className="font-extrabold text-ink">{item.name}</p>
                   <p className="mt-1 text-sm text-muted">
                     {item.pharmacyName} · {item.category}
-                    {item.requiresPrescription ? ' · Ordonnance' : ''} · {formatFcfa(item.price)} · {item.stock}{' '}
-                    en stock
+                    {item.subcategory ? ` · ${item.subcategory}` : ''} · {formatFcfa(item.price)} · {item.stock} en
+                    stock
                   </p>
+                  <div className="mt-2">
+                    <RegulatoryBadge status={item.regulatoryStatus} requiresPrescription={item.requiresPrescription} />
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">

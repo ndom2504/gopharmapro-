@@ -7,6 +7,7 @@ import { useShop } from '@/components/ShopProvider';
 import { isPharmacy, partnerCatalog } from '@/lib/accounts';
 import { formatFcfa } from '@/lib/catalog';
 import { productImageSrc } from '@/lib/photos';
+import { RegulatoryBadge } from '@/components/RegulatoryBadge';
 
 export default function PharmacyProductsPage() {
   const { session } = useShop();
@@ -16,7 +17,9 @@ export default function PharmacyProductsPage() {
       <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <h1 className="text-3xl font-extrabold text-ink">Produits</h1>
-        <p className="mt-2 text-sm text-muted">{catalog.length} produit(s) dans votre officine.</p>
+        <p className="mt-2 text-sm text-muted">
+          {catalog.length} produit(s). La catégorie commerciale et le statut réglementaire sont séparés.
+        </p>
         <div className="mt-6 space-y-3">
           {catalog.map((item) => (
             <div key={item.id} className="card flex min-w-0 items-center gap-3 p-3 sm:gap-4 sm:p-4">
@@ -24,8 +27,12 @@ export default function PharmacyProductsPage() {
               <div className="min-w-0 flex-1">
                 <p className="break-words font-extrabold text-ink">{item.name}</p>
                 <p className="text-sm text-muted">
-                  {item.category} · {formatFcfa(item.price)} · stock {item.stock}
+                  {item.category}
+                  {item.subcategory ? ` · ${item.subcategory}` : ''} · {formatFcfa(item.price)} · stock {item.stock}
                 </p>
+                <div className="mt-2">
+                  <RegulatoryBadge status={item.regulatoryStatus} />
+                </div>
               </div>
               <span className={`shrink-0 ${item.status === 'published' ? 'badge-green' : 'badge-orange'}`}>
                 {item.status === 'published' ? 'Publié' : 'En revue'}
