@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { credentialsOk, setAdminCookie } from '@/lib/adminAuth';
+import { loadRootEnv } from '@/lib/loadRootEnv';
 
 export async function POST(req: Request) {
+  loadRootEnv();
   const body = (await req.json().catch(() => ({}))) as { email?: string; password?: string };
   const email = String(body.email || '');
   const password = String(body.password || '');

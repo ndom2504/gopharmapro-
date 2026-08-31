@@ -1,11 +1,9 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import path from 'path';
-import { loadEnvConfig } from '@next/env';
+import { loadRootEnv } from './loadRootEnv';
 
-loadEnvConfig(process.cwd());
-loadEnvConfig(path.join(process.cwd(), '..'));
+loadRootEnv();
 
 export const ADMIN_COOKIE = 'gpp_admin';
 
@@ -14,7 +12,7 @@ function expectedEmail() {
 }
 
 function adminPassword() {
-  return process.env.ADMIN_PASSWORD || '';
+  return (process.env.ADMIN_PASSWORD || '').trim();
 }
 
 export function adminToken() {
@@ -29,16 +27,18 @@ function same(a: string, b: string) {
 }
 
 export function credentialsOk(email: string, password: string) {
+  loadRootEnv();
   const expected = expectedEmail();
   const secret = adminPassword();
   if (!expected || !secret) return false;
   const mail = email.trim().toLowerCase();
   if (!mail || !password) return false;
   if (!same(mail, expected)) return false;
-  return same(password, secret);
+  return same(password.trim(), secret);
 }
 
 export async function isAdminSession() {
+  loadRootEnv();
   const jar = await cookies();
   const value = jar.get(ADMIN_COOKIE)?.value || '';
   if (!value || !adminPassword()) return false;
