@@ -11,7 +11,9 @@ export default async function AdminConsoleLayout({ children }: { children: React
   if (!(await isAdminSession())) {
     return (
       <main className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center px-4 py-16">
-        <BrandLogo framed size="md" priority />
+        <div className="flex justify-center">
+          <BrandLogo stack size="lg" priority />
+        </div>
         <p className="mt-6 text-sm font-extrabold text-brand-blue">Console</p>
         <h1 className="mt-2 text-3xl font-extrabold text-ink">Accès réservé</h1>
         <p className="mt-2 text-sm leading-6 text-muted">Identifiez-vous pour continuer.</p>

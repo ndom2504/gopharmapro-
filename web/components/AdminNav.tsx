@@ -31,7 +31,7 @@ export function AdminNav() {
   return (
     <aside className="border-b border-border bg-white md:w-60 md:shrink-0 md:border-b-0 md:border-r">
       <div className="px-5 py-5">
-        <BrandLogo mark size="sm" framed />
+        <BrandLogo stack size="sm" />
         <p className="mt-3 text-xs font-extrabold tracking-wide text-brand-blue uppercase">Console</p>
       </div>
       <nav className="flex gap-2 overflow-x-auto px-4 pb-4 md:flex-col md:overflow-visible">

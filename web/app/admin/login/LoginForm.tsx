@@ -35,8 +35,10 @@ export function AdminLoginForm() {
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          type="email"
+          type="text"
           autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           className="mt-1 h-12 w-full rounded-2xl border border-border bg-white px-4 font-semibold text-ink outline-none focus:border-brand"
         />
       </label>

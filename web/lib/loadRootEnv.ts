@@ -1,8 +1,9 @@
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 
-function applyFile(file: string) {
-  if (!existsSync(file)) return;
+function parseEnvFile(file: string) {
+  const out: Record<string, string> = {};
+  if (!existsSync(file)) return out;
   for (const raw of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const line = raw.trim();
     if (!line || line.startsWith('#')) continue;
@@ -17,17 +18,37 @@ function applyFile(file: string) {
     ) {
       value = value.slice(1, -1);
     }
-    const current = process.env[key];
-    if (current == null || current === '') process.env[key] = value;
+    out[key] = value;
+  }
+  return out;
+}
+
+function envCandidates() {
+  const files: string[] = [];
+  let dir = process.cwd();
+  for (let i = 0; i < 6; i++) {
+    files.push(path.join(dir, '.env'));
+    files.push(path.join(dir, '.env.local'));
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return files;
+}
+
+/** Next ne charge que web/.env. Les secrets admin sont à la racine du repo. */
+export function loadRootEnv() {
+  const merged: Record<string, string> = {};
+  for (const file of envCandidates()) {
+    Object.assign(merged, parseEnvFile(file));
+  }
+  for (const key of ['ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DATABASE_URL', 'CATALOG_API_SECRET']) {
+    const value = merged[key];
+    if (value) process.env[key] = value;
   }
 }
 
-/** Next ne charge que web/.env. Les secrets admin restent souvent à la racine. */
-export function loadRootEnv() {
-  const webDir = process.cwd();
-  const rootDir = path.join(webDir, '..');
-  applyFile(path.join(webDir, '.env'));
-  applyFile(path.join(webDir, '.env.local'));
-  applyFile(path.join(rootDir, '.env'));
-  applyFile(path.join(rootDir, '.env.local'));
+export function adminConfigured() {
+  loadRootEnv();
+  return Boolean((process.env.ADMIN_EMAIL || '').trim() && (process.env.ADMIN_PASSWORD || '').trim());
 }

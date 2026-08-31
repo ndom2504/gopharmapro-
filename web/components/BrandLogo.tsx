@@ -10,34 +10,46 @@ const markSizes = {
   lg: 'h-24 w-24 rounded-full border border-border bg-white object-cover',
 };
 
+const stackSizes = {
+  sm: 'h-[4.5rem] w-[4.5rem] object-contain',
+  md: 'h-28 w-28 object-contain sm:h-32 sm:w-32',
+  lg: 'h-36 w-36 object-contain sm:h-44 sm:w-44',
+};
+
 export function BrandLogo({
   size = 'md',
   framed = false,
   mark = false,
+  stack = false,
   priority = false,
   className = '',
 }: {
   size?: keyof typeof sizes;
   mark?: boolean;
+  stack?: boolean;
   framed?: boolean;
   priority?: boolean;
   className?: string;
 }) {
+  const src = stack ? '/brand/wordmark.png?v=1' : mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=9';
+  const imgClass = stack
+    ? `${stackSizes[size]} ${className}`
+    : mark
+      ? `${markSizes[size]} ${className}`
+      : `${sizes[size]} object-contain object-left ${className}`;
   const img = (
-    <span className="relative inline-flex min-w-0 items-center">
+    <span className="relative inline-flex shrink-0 items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={mark ? '/brand/mark.png?v=6' : '/brand/logo.png?v=9'}
-        alt="Gopharmapro"
-        className={
-          mark ? `${markSizes[size]} ${className}` : `${sizes[size]} object-contain object-left ${className}`
-        }
+        src={src}
+        alt="Go Pharma Pro"
+        className={imgClass}
         {...(priority ? { fetchPriority: 'high' as const } : {})}
       />
     </span>
   );
-  if (framed) {
-    return <span className="inline-flex items-center overflow-hidden rounded-2xl bg-black px-2 py-1.5">{img}</span>;
+  if (framed && !stack) {
+    return <span className="inline-flex max-w-full items-center overflow-hidden rounded-2xl bg-black px-2 py-1.5">{img}</span>;
   }
   return img;
 }
