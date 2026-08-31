@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID: googleWebClientId,
   },
+  serverExternalPackages: ['@prisma/client', 'prisma'],
   turbopack: {
     root: path.join(__dirname),
   },

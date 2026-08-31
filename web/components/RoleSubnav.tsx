@@ -45,6 +45,7 @@ export const pharmacyNav = [
   { href: '/espace-pharmacie/identite', label: 'Identité' },
   { href: '/espace-pharmacie/commandes', label: 'Commandes' },
   { href: '/espace-pharmacie/produits', label: 'Produits' },
+  { href: '/espace-pharmacie/catalogue', label: 'Catalogue' },
   { href: '/espace-pharmacie/ordonnances', label: 'Ordonnances' },
   { href: '/espace-pharmacie/ventes', label: 'Ventes' },
   { href: '/espace-pharmacie/profil', label: 'Profil' },

@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductCountryStatus {
+  PENDING
+  ACTIVE
+  RESTRICTED
+  INACTIVE
+  UNKNOWN
+}
+
+model Country {
+  id               String           @id @default(cuid())
+  code             String           @unique
+  name             String
+  currency         String
+  currencySymbol   String
+  active           Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  categories       Category[]
+  pharmacies       Pharmacy[]
+  productCountries ProductCountry[]
+
+  @@index([code])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  countryId   String
+  country     Country   @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String
+  description String?
+  active      Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@unique([countryId, slug])
+  @@index([countryId])
+  @@index([slug])
+}
+
+model Product {
+  id                   String            @id @default(cuid())
+  categoryId           String
+  category             Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  name                 String
+  slug                 String            @unique
+  genericName          String?
+  brandName            String?
+  activeIngredient     String?
+  dosage               String?
+  dosageUnit           String?
+  pharmaceuticalForm   String?
+  packaging            String?
+  description          String?
+  requiresPrescription Boolean           @default(false)
+  imageUrl             String?
+  active               Boolean           @default(true)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  countryStatuses      ProductCountry[]
+  pharmacyOffers       PharmacyProduct[]
+
+  @@index([slug])
+  @@index([name])
+  @@index([genericName])
+  @@index([activeIngredient])
+  @@index([brandName])
+  @@index([active])
+  @@index([categoryId])
+}
+
+model ProductCountry {
+  id                   String                @id @default(cuid())
+  productId            String
+  product              Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  countryId            String
+  country              Country               @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  status               ProductCountryStatus  @default(UNKNOWN)
+  requiresPrescription Boolean?
+  regulatoryReference  String?
+  regulatoryNote       String?
+  verified             Boolean               @default(false)
+  verifiedAt           DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@unique([productId, countryId])
+  @@index([countryId])
+  @@index([status])
+  @@index([productId])
+}
+
+model Pharmacy {
+  id        String            @id @default(cuid())
+  accountId String?           @unique
+  name      String
+  email     String
+  phone     String?
+  address   String?
+  city      String?
+  countryId String
+  country   Country           @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  latitude  Float?
+  longitude Float?
+  active    Boolean           @default(true)
+  verified  Boolean           @default(false)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  offers    PharmacyProduct[]
+
+  @@index([countryId])
+  @@index([city])
+  @@index([latitude, longitude])
+  @@index([email])
+}
+
+model PharmacyProduct {
+  id                String    @id @default(cuid())
+  pharmacyId        String
+  pharmacy          Pharmacy  @relation(fields: [pharmacyId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  price             Decimal   @db.Decimal(12, 2)
+  currency          String
+  stockQuantity     Int
+  available         Boolean   @default(true)
+  deliveryAvailable Boolean   @default(false)
+  pickupAvailable   Boolean   @default(true)
+  internalReference String?
+  lastStockUpdate   DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([pharmacyId, productId])
+  @@index([productId])
+  @@index([pharmacyId])
+  @@index([available])
+}

@@ -10,6 +10,7 @@ const links = [
   { href: '/admin/clients', label: 'Clients' },
   { href: '/admin/couriers', label: 'Livreurs' },
   { href: '/admin/catalog', label: 'Produits' },
+  { href: '/admin/catalogue', label: 'Catalogue' },
   { href: '/admin/orders', label: 'Commandes' },
   { href: '/admin/payouts', label: 'Paiements' },
   { href: '/admin/verifications', label: 'Vérifications' },
