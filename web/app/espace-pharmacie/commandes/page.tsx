@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { RequireRole } from '@/components/RequireRole';
 import { RoleSubnav, pharmacyNav } from '@/components/RoleSubnav';
 import { useShop } from '@/components/ShopProvider';
@@ -22,6 +23,9 @@ export default function PharmacyOrdersPage() {
       <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <RoleSubnav items={pharmacyNav} />
         <h1 className="text-3xl font-extrabold text-ink">Commandes</h1>
+        <Link href="/dashboard/pharmacy/orders" className="btn-secondary mt-4 inline-flex">
+          Commandes catalogue (Neon)
+        </Link>
         <div className="mt-6 space-y-3">
           {jobs.map((o) => (
             <div key={o.id} className="card min-w-0 p-4 sm:p-5">

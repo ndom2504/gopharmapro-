@@ -50,7 +50,7 @@ export function loadRootEnv() {
       if (value) merged[key] = value;
     }
   }
-  for (const key of ['ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DATABASE_URL', 'CATALOG_API_SECRET', 'BLOB_READ_WRITE_TOKEN']) {
+  for (const key of ['ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DATABASE_URL', 'CATALOG_API_SECRET', 'BLOB_READ_WRITE_TOKEN', 'ORDER_DELIVERY_FEE']) {
     const value = merged[key];
     if (value) process.env[key] = value;
   }

@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useShop } from '@/components/ShopProvider';
 import { isClient } from '@/lib/accounts';
-import { addOrderDraftLine } from '@/lib/client/orderDraft';
 import { readRxFile } from '@/lib/prescriptions';
 import { CatalogProductImage } from '@/components/CatalogProductImage';
 
@@ -30,6 +29,7 @@ type OfferPayload = {
     phone: string | null;
   };
   offer: {
+    id: string;
     price: number;
     currency: string;
     stockQuantity: number;
@@ -87,24 +87,39 @@ export default function ClientOfferPage() {
     return true;
   };
 
-  const addToOrder = () => {
+  const addToOrder = async () => {
     if (!data || !ensureClient()) return;
-    if (data.product.requiresPrescription && rx?.status !== 'PRESCRIPTION_APPROVED') {
-      setError('Le paiement n’est possible qu’après validation de l’ordonnance par la pharmacie.');
-      return;
+    setBusy(true);
+    setError('');
+    try {
+      await fetch('/api/v1/client/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accountId: session && isClient(session) ? session.id : '',
+          country: session && 'country' in session ? session.country : 'GA',
+          city: session && isClient(session) ? session.city : undefined,
+          address: session && isClient(session) ? session.address : undefined,
+        }),
+      });
+      const res = await fetch('/api/v1/cart/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pharmacyProductId: data.offer.id, quantity: qty }),
+      });
+      const body = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(body.error || 'Ajout au panier impossible.');
+        return;
+      }
+      setMessage(
+        data.product.requiresPrescription
+          ? 'Ajouté au panier. Vous pourrez envoyer l’ordonnance après validation de la commande.'
+          : 'Ajouté au panier.',
+      );
+    } finally {
+      setBusy(false);
     }
-    addOrderDraftLine({
-      pharmacyId: data.pharmacy.id,
-      pharmacyName: data.pharmacy.name,
-      productId: data.product.id,
-      productName: data.product.name,
-      quantity: qty,
-      unitPrice: data.offer.price,
-      currency: data.offer.currency,
-      fulfillment,
-      deliveryAddress: fulfillment === 'delivery' && isClient(session) ? session.address || session.city : undefined,
-    });
-    setMessage('Ajouté à la commande. Le paiement sera proposé après cette étape.');
   };
 
   const sendRx = async () => {
@@ -238,9 +253,14 @@ export default function ClientOfferPage() {
 
         {error ? <p className="text-sm font-bold text-danger">{error}</p> : null}
         {message ? <p className="text-sm font-bold text-brand-dark">{message}</p> : null}
-        <button type="button" className="btn-primary w-full" onClick={addToOrder} disabled={Boolean(data.product.requiresPrescription && rx?.status !== 'PRESCRIPTION_APPROVED')}>
+        <button type="button" className="btn-primary w-full" onClick={addToOrder} disabled={busy}>
           Ajouter à la commande
         </button>
+        {message ? (
+          <Link href="/dashboard/client/cart" className="btn-secondary mt-2 inline-flex w-full justify-center">
+            Voir le panier
+          </Link>
+        ) : null}
       </section>
     </main>
   );

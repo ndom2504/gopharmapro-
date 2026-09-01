@@ -18,6 +18,7 @@ Dans `web/` (chargé aussi depuis le `.env` racine via `next.config.ts`) :
 DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 CATALOG_API_SECRET=  # optionnel, sinon ADMIN_PASSWORD sert à signer le cookie pharmacie
 BLOB_READ_WRITE_TOKEN=  # Vercel Blob — token lecture/écriture, jamais exposé au frontend
+ORDER_DELIVERY_FEE=0  # frais de livraison fixes (XAF), 0 par défaut — pas encore de calcul réel
 ```
 
 `BLOB_READ_WRITE_TOKEN` n’est **pas encore présent** dans les `.env` locaux. À ajouter dans `web/.env.local` et dans les variables Vercel (projet `web`). Sans ce token, l’upload d’image répond `503` ; la création de produit sans image reste possible.
@@ -182,6 +183,49 @@ Exemple statut pays :
 - `POST /api/v1/prescriptions` · `GET` · `POST .../submit` · `POST .../approve` · `POST .../reject`
 
 Recherche : pharmacies actives **et vérifiées**, offres disponibles avec stock, produit actif dans le pays. Distance Haversine si `latitude`/`longitude` (jamais stockés depuis le GPS).
+
+## Panier et commandes (étape 4)
+
+Le mock `/panier` (localStorage) reste en place. Le parcours catalogue Neon utilise un panier Prisma lié à `CustomerProfile`.
+
+Prix : toujours recalculés depuis `PharmacyProduct.price` côté serveur. Le frontend ne peut pas imposer un prix. Les `OrderItem` conservent un snapshot (nom, dosage, forme, prix).
+
+Le stock est **vérifié** à l’ajout et à la création de commande, mais **n’est pas décrémenté** tant que le paiement n’est pas confirmé.
+
+Une commande par pharmacie. Numéro unique `GP-2026-000001`.
+
+`PrescriptionStatus` existant (`PrescriptionRequest`) n’a pas été modifié. Les ordonnances de commande utilisent `OrderPrescriptionStatus` : `NOT_REQUIRED | PENDING | SUBMITTED | APPROVED | REJECTED`.
+
+### Panier (cookie `gpp_client`)
+
+- `GET /api/v1/cart`
+- `POST /api/v1/cart/items` `{ "pharmacyProductId", "quantity" }`
+- `PUT /api/v1/cart/items/[id]` `{ "quantity" }`
+- `DELETE /api/v1/cart/items/[id]`
+- `DELETE /api/v1/cart`
+
+Refus : offre absente, pharmacie inactive, produit inactif/indisponible, `Quantité disponible insuffisante.`
+
+### Commandes client
+
+- `POST /api/v1/orders` — crée une commande par pharmacie, vide le panier
+- `GET /api/v1/orders` — ses commandes (admin : toutes)
+- `GET /api/v1/orders/[id]`
+- `POST /api/v1/orders/[id]/cancel`
+- `POST /api/v1/orders/[id]/prescription` — `multipart` champ `file` (PDF/JPEG/PNG/WEBP, 5 Mo, cookie client, Vercel Blob)
+
+Si un article exige une ordonnance : `PENDING_PRESCRIPTION`. Sinon : `READY_FOR_PAYMENT` (« Votre commande est prête pour le paiement. »). Pas de Stripe / Airtel / Moov / GeniusPay à cette étape.
+
+### Commandes pharmacie (cookie `gpp_pharmacy`)
+
+- `GET /api/v1/pharmacy/orders`
+- `GET /api/v1/pharmacy/orders/[id]`
+- `POST /api/v1/pharmacy/orders/[id]/approve-prescription` → `READY_FOR_PAYMENT`
+- `POST /api/v1/pharmacy/orders/[id]/reject-prescription` `{ "note" }` obligatoire → `REJECTED`
+
+Admin : `GET /api/v1/admin/orders`.
+
+Pages : `/dashboard/client/cart`, `/dashboard/client/checkout`, `/dashboard/client/orders`, `/dashboard/pharmacy/orders`.
 
 ## Ordonnances
 

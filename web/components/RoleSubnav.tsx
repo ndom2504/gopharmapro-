@@ -43,7 +43,7 @@ export const courierNav = [
 export const pharmacyNav = [
   { href: '/espace-pharmacie', label: 'Dashboard' },
   { href: '/espace-pharmacie/identite', label: 'Identité' },
-  { href: '/espace-pharmacie/commandes', label: 'Commandes' },
+  { href: '/dashboard/pharmacy/orders', label: 'Commandes' },
   { href: '/espace-pharmacie/produits', label: 'Produits' },
   { href: '/dashboard/pharmacy/catalog', label: 'Catalogue' },
   { href: '/espace-pharmacie/ordonnances', label: 'Ordonnances' },

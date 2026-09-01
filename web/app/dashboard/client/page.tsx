@@ -123,8 +123,15 @@ export default function ClientDashboardPage() {
 
   return (
     <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-      <p className="text-sm font-extrabold text-brand">Recherche</p>
-      <h1 className="mt-1 text-3xl font-extrabold text-ink">Que recherchez-vous ?</h1>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-extrabold text-brand">Recherche</p>
+          <h1 className="mt-1 text-3xl font-extrabold text-ink">Que recherchez-vous ?</h1>
+        </div>
+        <Link href="/dashboard/client/cart" className="btn-secondary shrink-0">
+          🛒 Panier
+        </Link>
+      </div>
       <form
         className="mt-6 flex gap-2"
         onSubmit={(e) => {

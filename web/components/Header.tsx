@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BrandLogo } from '@/components/BrandLogo';
+import { ClientCartBadge } from '@/components/ClientCartBadge';
 import { useShop } from '@/components/ShopProvider';
 import { displayName, homeFor, isClient } from '@/lib/accounts';
 import { formatFcfa } from '@/lib/catalog';
@@ -11,14 +12,15 @@ import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 const clientLinks = [
   { href: '/', label: 'Accueil' },
   { href: '/dashboard/client', label: 'Rechercher' },
-  { href: '/commandes', label: 'Commandes' },
+  { href: '/dashboard/client/cart', label: 'Panier' },
+  { href: '/dashboard/client/orders', label: 'Commandes' },
   { href: '/compte', label: 'Profil' },
 ];
 
 const pharmacyLinks = [
   { href: '/espace-pharmacie', label: 'Dashboard' },
   { href: '/espace-pharmacie/identite', label: 'Identité' },
-  { href: '/espace-pharmacie/commandes', label: 'Commandes' },
+  { href: '/dashboard/pharmacy/orders', label: 'Commandes' },
   { href: '/espace-pharmacie/produits', label: 'Produits' },
   { href: '/dashboard/pharmacy/catalog', label: 'Catalogue' },
   { href: '/espace-pharmacie/ordonnances', label: 'Ordonnances' },
@@ -71,7 +73,9 @@ export function Header() {
           ))}
         </nav>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          {shopper ? (
+          {isClient(session) ? (
+            <ClientCartBadge />
+          ) : shopper ? (
             <Link
               href="/panier"
               aria-label={count ? `Panier, ${count} article(s), ${formatFcfa(subtotal)}` : 'Panier'}

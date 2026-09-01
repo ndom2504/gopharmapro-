@@ -31,15 +31,45 @@ export async function resolvePharmacy(pharmacyKey: string) {
   return row;
 }
 
+function parsePharmacyCookie(value: string) {
+  const dot = value.lastIndexOf('.');
+  if (dot < 1) return { id: null as string | null, token: value };
+  return { id: value.slice(0, dot), token: value.slice(dot + 1) };
+}
+
 export async function requirePharmacyMatch(pharmacyKey: string) {
   const pharmacy = await resolvePharmacy(pharmacyKey);
   if (await isAdminSession()) return pharmacy;
   const jar = await cookies();
   const value = jar.get(PHARMACY_COOKIE)?.value || '';
-  if (!value || !same(value, pharmacyToken(pharmacy.id))) {
+  const parsed = parsePharmacyCookie(value);
+  const tokenOk = parsed.token && same(parsed.token, pharmacyToken(pharmacy.id));
+  const legacyOk = Boolean(value) && same(value, pharmacyToken(pharmacy.id));
+  if (!tokenOk && !legacyOk) {
     throw new CatalogError(401, 'Pharmacie non authentifiée.');
   }
   return pharmacy;
+}
+
+export async function requirePharmacySession() {
+  const jar = await cookies();
+  const value = jar.get(PHARMACY_COOKIE)?.value || '';
+  const parsed = parsePharmacyCookie(value);
+  if (!parsed.id || !same(parsed.token, pharmacyToken(parsed.id))) {
+    throw new CatalogError(401, 'Pharmacie non authentifiée.');
+  }
+  return resolvePharmacy(parsed.id);
+}
+
+export async function resolveActingPharmacy(req?: Request, bodyPharmacyId?: string | null) {
+  const fromQuery = req ? new URL(req.url).searchParams.get('pharmacyId') : null;
+  const key = String(bodyPharmacyId || fromQuery || '').trim();
+  if (await isAdminSession()) {
+    if (!key) throw new CatalogError(400, 'pharmacyId requis.');
+    return resolvePharmacy(key);
+  }
+  if (key) return requirePharmacyMatch(key);
+  return requirePharmacySession();
 }
 
 export async function canAccessPharmacy(pharmacyKey: string) {
@@ -53,7 +83,7 @@ export async function canAccessPharmacy(pharmacyKey: string) {
 
 export async function setPharmacyCookie(pharmacyId: string) {
   const jar = await cookies();
-  jar.set(PHARMACY_COOKIE, pharmacyToken(pharmacyId), {
+  jar.set(PHARMACY_COOKIE, `${pharmacyId}.${pharmacyToken(pharmacyId)}`, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',

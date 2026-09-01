@@ -15,7 +15,8 @@
     "catalog:central": "tsx scripts/catalog-central-check.ts",
     "catalog:pharmacy": "tsx scripts/pharmacy-module-check.ts",
     "catalog:client": "tsx scripts/client-journey-check.ts",
-    "catalog:images": "tsx scripts/catalog-image-check.ts"
+    "catalog:images": "tsx scripts/catalog-image-check.ts",
+    "catalog:orders": "tsx scripts/orders-check.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
