@@ -1,12 +1,26 @@
-export type ProductCountryStatus = 'PENDING' | 'ACTIVE' | 'RESTRICTED' | 'INACTIVE' | 'UNKNOWN';
+export type ProductCountryStatus =
+  | 'PENDING'
+  | 'PENDING_REVIEW'
+  | 'ACTIVE'
+  | 'RESTRICTED'
+  | 'INACTIVE'
+  | 'UNKNOWN';
 
 export const productCountryStatuses: ProductCountryStatus[] = [
   'PENDING',
+  'PENDING_REVIEW',
   'ACTIVE',
   'RESTRICTED',
   'INACTIVE',
   'UNKNOWN',
 ];
+
+export function regulatoryLabel(status: string | null | undefined) {
+  if (status === 'ACTIVE') return 'Disponible (vérifié)';
+  if (status === 'RESTRICTED') return 'Restreint';
+  if (status === 'INACTIVE') return 'Inactif';
+  return 'À vérifier';
+}
 
 export type PublicCountry = {
   id: string;
@@ -26,7 +40,9 @@ export type PublicCategory = {
 
 export type RegulatoryPublic = {
   status: ProductCountryStatus;
+  label: string;
   requiresPrescription: boolean;
+  prescriptionRequired: boolean;
   verified: boolean;
   verifiedAt: string | null;
   regulatoryReference: string | null;
@@ -47,9 +63,13 @@ export type PublicProduct = {
   description: string | null;
   imageUrl: string | null;
   category: PublicCategory;
+  country: { id: string; code: string; name: string };
   countryCode: string;
+  active: boolean;
   requiresPrescription: boolean;
+  prescriptionRequired: boolean;
   regulatory: RegulatoryPublic;
+  regulatoryLabel: string;
   prescriptionHint: string | null;
 };
 

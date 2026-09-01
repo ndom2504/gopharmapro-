@@ -17,6 +17,7 @@ export async function POST(req: Request) {
         active: true,
         OR: [...(accountId ? [{ accountId }] : []), ...(email ? [{ email: { equals: email, mode: 'insensitive' as const } }] : [])],
       },
+      include: { country: true },
     });
     if (!pharmacy) throw new CatalogError(401, 'Pharmacie absente du catalogue central.');
     await setPharmacyCookie(pharmacy.id);
@@ -26,8 +27,16 @@ export async function POST(req: Request) {
         id: pharmacy.id,
         accountId: pharmacy.accountId,
         name: pharmacy.name,
+        legalName: pharmacy.legalName,
         city: pharmacy.city,
         countryId: pharmacy.countryId,
+        country: {
+          id: pharmacy.country.id,
+          code: pharmacy.country.code,
+          name: pharmacy.country.name,
+          currency: pharmacy.country.currency,
+          currencySymbol: pharmacy.country.currencySymbol,
+        },
       },
     });
   } catch (err) {

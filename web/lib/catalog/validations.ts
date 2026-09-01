@@ -31,10 +31,10 @@ export function parsePage(value: string | null) {
   return Math.min(Math.floor(n), 1000);
 }
 
-export function parseLimit(value: string | null, fallback = 20) {
+export function parseLimit(value: string | null, fallback = 20, max = 50) {
   const n = Number(value || fallback);
   if (!Number.isFinite(n) || n < 1) return fallback;
-  return Math.min(Math.floor(n), 50);
+  return Math.min(Math.floor(n), max);
 }
 
 export function parseBool(value: string | null) {
@@ -131,7 +131,10 @@ export function assertProductInput(body: Record<string, unknown>, partial = fals
     pharmaceuticalForm: body.pharmaceuticalForm == null ? undefined : String(body.pharmaceuticalForm).trim() || null,
     packaging: body.packaging == null ? undefined : String(body.packaging).trim() || null,
     description: body.description == null ? undefined : String(body.description).trim() || null,
-    requiresPrescription: body.requiresPrescription == null ? undefined : Boolean(body.requiresPrescription),
+    requiresPrescription:
+      body.requiresPrescription == null && body.prescriptionRequired == null
+        ? undefined
+        : Boolean(body.requiresPrescription ?? body.prescriptionRequired),
     imageUrl: body.imageUrl == null ? undefined : String(body.imageUrl).trim() || null,
     active: body.active == null ? undefined : Boolean(body.active),
   };

@@ -11,7 +11,9 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "catalog:check": "tsx scripts/catalog-check.ts"
+    "catalog:check": "tsx scripts/catalog-check.ts",
+    "catalog:central": "tsx scripts/catalog-central-check.ts",
+    "catalog:pharmacy": "tsx scripts/pharmacy-module-check.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

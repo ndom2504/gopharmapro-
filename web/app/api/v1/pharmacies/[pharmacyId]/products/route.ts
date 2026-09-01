@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { catalogErrorResponse, unauthorized } from '@/lib/catalog/http';
 import { requirePharmacyMatch } from '@/lib/catalog/pharmacyAuth';
+import { listPharmacyOffers, serializePharmacyOffer } from '@/lib/catalog/pharmacyQueries';
 import { addPharmacyOffer } from '@/lib/catalog/queries';
 import { CatalogError, assertOfferInput } from '@/lib/catalog/validations';
 import { isAdminSession } from '@/lib/adminAuth';
-import { catalogDb } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,27 +12,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ pharmac
   try {
     const { pharmacyId } = await params;
     const pharmacy = await requirePharmacyMatch(pharmacyId);
-    const offers = await catalogDb().pharmacyProduct.findMany({
-      where: { pharmacyId: pharmacy.id },
-      include: { product: { include: { category: true, countryStatuses: true } } },
-      orderBy: { updatedAt: 'desc' },
-    });
+    const offers = await listPharmacyOffers(pharmacy.id);
     return NextResponse.json({
       pharmacy: { id: pharmacy.id, name: pharmacy.name, accountId: pharmacy.accountId },
-      offers: offers.map((o) => ({
-        id: o.id,
-        productId: o.productId,
-        name: o.product.name,
-        category: o.product.category.name,
-        price: Number(o.price),
-        currency: o.currency,
-        stockQuantity: o.stockQuantity,
-        available: o.available,
-        deliveryAvailable: o.deliveryAvailable,
-        pickupAvailable: o.pickupAvailable,
-        internalReference: o.internalReference,
-        requiresPrescription: o.product.requiresPrescription,
-      })),
+      offers: offers.map(serializePharmacyOffer),
     });
   } catch (err) {
     if (err instanceof CatalogError && err.status === 401 && !(await isAdminSession())) return unauthorized();

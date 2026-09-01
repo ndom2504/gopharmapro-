@@ -42,6 +42,15 @@ export async function requirePharmacyMatch(pharmacyKey: string) {
   return pharmacy;
 }
 
+export async function canAccessPharmacy(pharmacyKey: string) {
+  try {
+    await requirePharmacyMatch(pharmacyKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function setPharmacyCookie(pharmacyId: string) {
   const jar = await cookies();
   jar.set(PHARMACY_COOKIE, pharmacyToken(pharmacyId), {

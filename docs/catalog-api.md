@@ -35,7 +35,7 @@ Sans `DATABASE_URL`, le site continue de fonctionner. Les routes `/api/v1/catalo
 - `Country` — code ISO (`GA`, `CM`, `BJ`), devise
 - `Category` — appartient à un pays (structure commerciale, pas une classification officielle)
 - `Product` — fiche catalogue (`requiresPrescription` administrable)
-- `ProductCountry` — `PENDING | ACTIVE | RESTRICTED | INACTIVE | UNKNOWN`, `verified`, référence réglementaire
+- `ProductCountry` — `PENDING | PENDING_REVIEW | ACTIVE | RESTRICTED | INACTIVE | UNKNOWN`, `active`, `verified`, référence réglementaire
 - `Pharmacy` — `accountId` relie le compte démo web (`ph-centre`)
 - `PharmacyProduct` — unique `(pharmacyId, productId)`
 
@@ -63,7 +63,19 @@ Un produit n’est jamais considéré autorisé dans un pays tant que `ProductCo
 
 ### GET `/api/v1/catalog/products?country=GA&search=paracetamol&page=1&limit=20`
 
-Paramètres : `country`, `category` (slug ou id), `search`, `page`, `limit`.
+Paramètres : `country`, `category` (slug ou id), `search`, `prescriptionRequired`, `active`, `page`, `limit`.
+
+La recherche Prisma porte sur `name`, `genericName` et `brandName`.
+
+### POST `/api/v1/catalog/products` (admin)
+
+Crée une fiche + `ProductCountry` pour le pays choisi. Statut initial : `PENDING_REVIEW` (« À vérifier »). Ne signifie pas que le produit est autorisé.
+
+### PUT `/api/v1/catalog/products/[id]` (admin)
+
+### DELETE `/api/v1/catalog/products/[id]` (admin)
+
+Désactivation logique (`active=false`). Aucune suppression physique.
 
 ### GET `/api/v1/catalog/products/search?q=paracetamol&country=GA`
 
@@ -97,6 +109,14 @@ Tri : disponibilité, puis distance, puis prix.
 
 ## Endpoints pharmacie
 
+### GET `/api/v1/pharmacies`
+
+### POST `/api/v1/pharmacies` (admin)
+
+### GET `/api/v1/pharmacies/[id]`
+
+Le catalogue d’offres n’est renvoyé qu’à la pharmacie propriétaire ou à un administrateur.
+
 ### POST `/api/v1/pharmacies/[pharmacyId]/products`
 
 ```json
@@ -104,6 +124,8 @@ Tri : disponibilité, puis distance, puis prix.
 ```
 
 Refusé : prix/stock négatifs, produit inactif, produit d’un autre pays, doublon.
+
+### PUT `/api/v1/pharmacies/[pharmacyId]/products/[productId]`
 
 ### PATCH `/api/v1/pharmacies/[pharmacyId]/products/[productId]`
 
@@ -143,4 +165,4 @@ Exemple statut pays :
 
 Ajouter un pays = une ligne `Country` + catégories. Pas de `if (country === "Gabon")` dans les règles générales.
 
-Le seed crée `GA`, `BJ`, `CM` (actifs) et les catégories / produits démo **uniquement pour le Gabon**, avec `ProductCountry.status = UNKNOWN` et `verified = false`.
+Le seed crée `GA`, `BJ`, `CM` (actifs), les catégories commerciales pour les trois pays, et les produits démo **uniquement pour le Gabon**, avec `ProductCountry.status = UNKNOWN` et `verified = false`.

@@ -27,6 +27,25 @@ const gabonCategories = [
   'Autres produits de santé',
 ];
 
+const catalogCategories = [
+  'Médicaments',
+  'Médicaments sur ordonnance',
+  'Antalgiques',
+  'Antibiotiques',
+  'Antipaludiques',
+  'Anti-inflammatoires',
+  'Gastro-entérologie',
+  'Dermatologie',
+  'Santé respiratoire',
+  'Vitamines et compléments',
+  'Santé maternelle',
+  'Santé infantile',
+  'Hygiène et soins',
+  'Dispositifs médicaux',
+  'Premiers soins',
+  'Produits de santé',
+];
+
 function slugify(input: string) {
   return input
     .normalize('NFD')
@@ -43,12 +62,12 @@ async function main() {
     create: { code: 'GA', name: 'Gabon', currency: 'XAF', currencySymbol: 'FCFA', active: true },
   });
 
-  await prisma.country.upsert({
+  const benin = await prisma.country.upsert({
     where: { code: 'BJ' },
     update: { name: 'Bénin', currency: 'XOF', currencySymbol: 'FCFA', active: true },
     create: { code: 'BJ', name: 'Bénin', currency: 'XOF', currencySymbol: 'FCFA', active: true },
   });
-  await prisma.country.upsert({
+  const cameroon = await prisma.country.upsert({
     where: { code: 'CM' },
     update: { name: 'Cameroun', currency: 'XAF', currencySymbol: 'FCFA', active: true },
     create: { code: 'CM', name: 'Cameroun', currency: 'XAF', currencySymbol: 'FCFA', active: true },
@@ -70,6 +89,26 @@ async function main() {
       },
     });
     categoryIds[name] = row.id;
+  }
+
+  const categoryNote =
+    'Structure commerciale du catalogue. Ce n’est pas une classification réglementaire officielle.';
+  for (const country of [gabon, benin, cameroon]) {
+    for (const [i, name] of catalogCategories.entries()) {
+      const slug = slugify(name);
+      await prisma.category.upsert({
+        where: { countryId_slug: { countryId: country.id, slug } },
+        update: { name, active: true },
+        create: {
+          countryId: country.id,
+          name,
+          slug,
+          description: categoryNote,
+          active: true,
+          sortOrder: country.code === 'GA' ? 40 + i : i + 1,
+        },
+      });
+    }
   }
 
   const demoProducts = [
@@ -206,17 +245,27 @@ async function main() {
         status: ProductCountryStatus.UNKNOWN,
         requiresPrescription: item.requiresPrescription,
         verified: false,
+        active: true,
         regulatoryNote: 'Statut non vérifié. À valider par un administrateur ou un professionnel autorisé.',
       },
     });
   }
 
-  await prisma.pharmacy.upsert({
+  const centre = await prisma.pharmacy.upsert({
     where: { accountId: 'ph-centre' },
-    update: { name: 'Pharmacie du Centre', email: 'centre@pharma.ga', city: 'Libreville', countryId: gabon.id, active: true, verified: true },
+    update: {
+      name: 'Pharmacie du Centre',
+      legalName: 'Pharmacie du Centre SARL',
+      email: 'centre@pharma.ga',
+      city: 'Libreville',
+      countryId: gabon.id,
+      active: true,
+      verified: true,
+    },
     create: {
       accountId: 'ph-centre',
       name: 'Pharmacie du Centre',
+      legalName: 'Pharmacie du Centre SARL',
       email: 'centre@pharma.ga',
       phone: '+241 77 11 22 33',
       address: 'Boulevard de l’Indépendance',
@@ -230,10 +279,19 @@ async function main() {
   });
   await prisma.pharmacy.upsert({
     where: { accountId: 'ph-palmiers' },
-    update: { name: 'Pharmacie des Palmiers', email: 'palmiers@pharma.ga', city: 'Libreville', countryId: gabon.id, active: true, verified: false },
+    update: {
+      name: 'Pharmacie des Palmiers',
+      legalName: 'Pharmacie des Palmiers',
+      email: 'palmiers@pharma.ga',
+      city: 'Libreville',
+      countryId: gabon.id,
+      active: true,
+      verified: false,
+    },
     create: {
       accountId: 'ph-palmiers',
       name: 'Pharmacie des Palmiers',
+      legalName: 'Pharmacie des Palmiers',
       email: 'palmiers@pharma.ga',
       phone: '+241 77 22 33 44',
       address: 'Route de la gare d’Owendo',
@@ -245,6 +303,24 @@ async function main() {
       verified: false,
     },
   });
+
+  const para = await prisma.product.findUnique({ where: { slug: 'paracetamol-500-mg-comprime' } });
+  if (para) {
+    await prisma.pharmacyProduct.upsert({
+      where: { pharmacyId_productId: { pharmacyId: centre.id, productId: para.id } },
+      update: {},
+      create: {
+        pharmacyId: centre.id,
+        productId: para.id,
+        price: 1500,
+        currency: 'XAF',
+        stockQuantity: 20,
+        available: true,
+        deliveryAvailable: true,
+        pickupAvailable: true,
+      },
+    });
+  }
 }
 
 main()

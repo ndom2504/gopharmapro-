@@ -9,6 +9,7 @@ datasource db {
 
 enum ProductCountryStatus {
   PENDING
+  PENDING_REVIEW
   ACTIVE
   RESTRICTED
   INACTIVE
@@ -86,12 +87,13 @@ model ProductCountry {
   product              Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
   countryId            String
   country              Country               @relation(fields: [countryId], references: [id], onDelete: Cascade)
-  status               ProductCountryStatus  @default(UNKNOWN)
+  status               ProductCountryStatus  @default(PENDING_REVIEW)
   requiresPrescription Boolean?
   regulatoryReference  String?
   regulatoryNote       String?
   verified             Boolean               @default(false)
   verifiedAt           DateTime?
+  active               Boolean               @default(true)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
@@ -105,6 +107,7 @@ model Pharmacy {
   id        String            @id @default(cuid())
   accountId String?           @unique
   name      String
+  legalName String?
   email     String
   phone     String?
   address   String?

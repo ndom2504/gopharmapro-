@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import { catalogDb } from '@/lib/prisma';
-import type { OfferInput, PublicProduct, RegulatoryPublic } from './types';
+import { regulatoryLabel, type OfferInput, type PublicProduct, type RegulatoryPublic } from './types';
 import { CatalogError, kmBetween, parseCountryCode, slugify } from './validations';
 
 const productInclude = {
@@ -18,9 +18,13 @@ function prescriptionHint(requires: boolean) {
 function regulatoryOf(product: ProductRow, countryCode: string): RegulatoryPublic {
   const row = product.countryStatuses.find((s) => s.country.code === countryCode);
   const requires = row?.requiresPrescription ?? product.requiresPrescription;
+  const status = row?.status || 'PENDING_REVIEW';
+  const label = regulatoryLabel(status);
   return {
-    status: row?.status || 'UNKNOWN',
+    status,
+    label,
     requiresPrescription: requires,
+    prescriptionRequired: requires,
     verified: row?.verified ?? false,
     verifiedAt: row?.verifiedAt ? row.verifiedAt.toISOString() : null,
     regulatoryReference: row?.regulatoryReference ?? null,
@@ -30,6 +34,9 @@ function regulatoryOf(product: ProductRow, countryCode: string): RegulatoryPubli
 
 export function serializeProduct(product: ProductRow, countryCode: string): PublicProduct {
   const regulatory = regulatoryOf(product, countryCode);
+  const country =
+    product.countryStatuses.find((s) => s.country.code === countryCode)?.country ||
+    product.countryStatuses[0]?.country;
   return {
     id: product.id,
     name: product.name,
@@ -50,9 +57,15 @@ export function serializeProduct(product: ProductRow, countryCode: string): Publ
       description: product.category.description,
       sortOrder: product.category.sortOrder,
     },
+    country: country
+      ? { id: country.id, code: country.code, name: country.name }
+      : { id: '', code: countryCode, name: countryCode },
     countryCode,
+    active: product.active,
     requiresPrescription: regulatory.requiresPrescription,
+    prescriptionRequired: regulatory.requiresPrescription,
     regulatory,
+    regulatoryLabel: regulatory.label,
     prescriptionHint: prescriptionHint(regulatory.requiresPrescription),
   };
 }
@@ -69,28 +82,37 @@ export async function requireCountry(code: string) {
   const parsed = parseCountryCode(code);
   if (!parsed) throw new CatalogError(400, 'Code pays invalide.');
   const country = await catalogDb().country.findUnique({ where: { code: parsed } });
-  if (!country || !country.active) throw new CatalogError(404, 'Pays introuvable.');
+  if (!country || !country.active) throw new CatalogError(400, 'Pays inexistant.');
   return country;
 }
 
-export async function listCategories(countryCode: string) {
+export async function listCategories(countryCode?: string | null) {
+  if (!countryCode) {
+    return catalogDb().category.findMany({
+      where: { active: true },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      select: { id: true, name: true, slug: true, description: true, sortOrder: true, countryId: true },
+    });
+  }
   const country = await requireCountry(countryCode);
   return catalogDb().category.findMany({
     where: { countryId: country.id, active: true },
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-    select: { id: true, name: true, slug: true, description: true, sortOrder: true },
+    select: { id: true, name: true, slug: true, description: true, sortOrder: true, countryId: true },
   });
 }
 
 function searchWhere(q: string): Prisma.ProductWhereInput {
   const term = q.trim();
   if (!term) return {};
+  const slug = slugify(term);
   return {
     OR: [
       { name: { contains: term, mode: 'insensitive' } },
       { genericName: { contains: term, mode: 'insensitive' } },
       { activeIngredient: { contains: term, mode: 'insensitive' } },
       { brandName: { contains: term, mode: 'insensitive' } },
+      ...(slug ? [{ slug: { contains: slug, mode: 'insensitive' as const } }] : []),
     ],
   };
 }
@@ -101,23 +123,39 @@ export async function listProducts(input: {
   search?: string | null;
   page: number;
   limit: number;
+  prescriptionRequired?: boolean;
+  active?: boolean;
+  includeInactive?: boolean;
 }) {
   const country = await requireCountry(input.country);
   const categoryFilter = input.category?.trim();
-  const where: Prisma.ProductWhereInput = {
-    active: true,
-    category: {
-      countryId: country.id,
-      active: true,
-      ...(categoryFilter
-        ? {
-            OR: [{ slug: categoryFilter }, { id: categoryFilter }],
-          }
-        : {}),
+  const and: Prisma.ProductWhereInput[] = [
+    {
+      countryStatuses: {
+        some: {
+          countryId: country.id,
+          ...(input.includeInactive ? {} : { active: true, status: { not: 'INACTIVE' } }),
+        },
+      },
     },
-    countryStatuses: { none: { countryId: country.id, status: 'INACTIVE' } },
-    ...searchWhere(input.search || ''),
-  };
+  ];
+  if (input.active === true) and.push({ active: true });
+  else if (input.active === false) and.push({ active: false });
+  else if (!input.includeInactive) and.push({ active: true });
+  if (categoryFilter) {
+    and.push({ category: { OR: [{ slug: categoryFilter }, { id: categoryFilter }] } });
+  }
+  if (input.prescriptionRequired != null) {
+    and.push({
+      OR: [
+        { requiresPrescription: input.prescriptionRequired },
+        { countryStatuses: { some: { countryId: country.id, requiresPrescription: input.prescriptionRequired } } },
+      ],
+    });
+  }
+  const search = searchWhere(input.search || '');
+  if (Object.keys(search).length) and.push(search);
+  const where: Prisma.ProductWhereInput = { AND: and };
   const skip = (input.page - 1) * input.limit;
   const [total, rows] = await catalogDb().$transaction([
     catalogDb().product.count({ where }),
@@ -142,7 +180,7 @@ export async function getProduct(idOrSlug: string, countryCode?: string | null) 
     where: { OR: [{ id: idOrSlug }, { slug: idOrSlug }] },
     include: productInclude,
   });
-  if (!row || !row.active) throw new CatalogError(404, 'Produit introuvable.');
+  if (!row) throw new CatalogError(404, 'Produit inexistant.');
   const requested = parseCountryCode(countryCode);
   const categoryCountry = await catalogDb().country.findUnique({ where: { id: row.category.countryId } });
   const code = requested || categoryCountry?.code;
@@ -258,8 +296,11 @@ export async function addPharmacyOffer(pharmacyId: string, input: OfferInput) {
   });
   if (!product) throw new CatalogError(404, 'Produit introuvable.');
   if (!product.active) throw new CatalogError(400, 'Ce produit n’est plus actif dans le catalogue.');
-  if (product.category.countryId !== pharmacy.countryId) {
-    throw new CatalogError(400, 'Ce produit n’appartient pas au catalogue du pays de la pharmacie.');
+  const countryStatus = await db.productCountry.findUnique({
+    where: { productId_countryId: { productId: product.id, countryId: pharmacy.countryId } },
+  });
+  if (!countryStatus || !countryStatus.active) {
+    throw new CatalogError(400, 'Ce produit n’est pas disponible pour le pays de la pharmacie.');
   }
   const existing = await db.pharmacyProduct.findUnique({
     where: { pharmacyId_productId: { pharmacyId, productId: product.id } },
@@ -389,12 +430,124 @@ export async function adminCreateProduct(input: {
     data: {
       productId: product.id,
       countryId: category.countryId,
-      status: 'UNKNOWN',
+      status: 'PENDING_REVIEW',
       requiresPrescription: input.requiresPrescription ?? false,
       verified: false,
+      active: true,
+      regulatoryNote: 'Statut réglementaire : à vérifier. La création n’autorise pas le produit.',
     },
   });
+  return db.product.findUniqueOrThrow({ where: { id: product.id }, include: productInclude });
+}
+
+export async function createCatalogProduct(input: {
+  name: string;
+  categoryId: string;
+  countryCode: string;
+  genericName?: string | null;
+  brandName?: string | null;
+  description?: string | null;
+  dosage?: string | null;
+  pharmaceuticalForm?: string | null;
+  requiresPrescription?: boolean;
+}) {
+  const db = catalogDb();
+  const country = await requireCountry(input.countryCode);
+  const category = await db.category.findUnique({ where: { id: input.categoryId } });
+  if (!category || !category.active) throw new CatalogError(400, 'Catégorie inexistante.');
+  if (category.countryId !== country.id) {
+    throw new CatalogError(400, 'Cette catégorie n’appartient pas au pays sélectionné.');
+  }
+  const existingInCountry = await db.product.findFirst({
+    where: {
+      name: { equals: input.name, mode: 'insensitive' },
+      countryStatuses: { some: { countryId: country.id } },
+    },
+  });
+  if (existingInCountry) throw new CatalogError(409, 'Ce produit existe déjà pour ce pays.');
+
+  const existingGlobal = await db.product.findFirst({
+    where: { name: { equals: input.name, mode: 'insensitive' } },
+    include: productInclude,
+  });
+  if (existingGlobal) {
+    await db.productCountry.create({
+      data: {
+        productId: existingGlobal.id,
+        countryId: country.id,
+        status: 'PENDING_REVIEW',
+        requiresPrescription: input.requiresPrescription ?? existingGlobal.requiresPrescription,
+        verified: false,
+        active: true,
+        regulatoryNote: 'Statut réglementaire : à vérifier. La création n’autorise pas le produit.',
+      },
+    });
+    return db.product.findUniqueOrThrow({ where: { id: existingGlobal.id }, include: productInclude });
+  }
+
+  const slug = slugify(`${input.name}-${input.dosage || ''}-${input.pharmaceuticalForm || ''}-${country.code}`);
+  return adminCreateProduct({
+    categoryId: category.id,
+    name: input.name,
+    slug,
+    genericName: input.genericName,
+    brandName: input.brandName,
+    description: input.description,
+    dosage: input.dosage,
+    pharmaceuticalForm: input.pharmaceuticalForm,
+    requiresPrescription: input.requiresPrescription,
+  });
+}
+
+export async function updateCatalogProduct(
+  id: string,
+  input: {
+    name?: string;
+    genericName?: string | null;
+    brandName?: string | null;
+    description?: string | null;
+    dosage?: string | null;
+    pharmaceuticalForm?: string | null;
+    categoryId?: string;
+    requiresPrescription?: boolean;
+    active?: boolean;
+    countryCode?: string;
+  },
+) {
+  const db = catalogDb();
+  const row = await db.product.findUnique({ where: { id }, include: { category: true } });
+  if (!row) throw new CatalogError(404, 'Produit inexistant.');
+  if (input.categoryId) {
+    const category = await db.category.findUnique({ where: { id: input.categoryId } });
+    if (!category) throw new CatalogError(400, 'Catégorie inexistante.');
+  }
+  const product = await db.product.update({
+    where: { id },
+    data: {
+      ...(input.name != null ? { name: input.name } : {}),
+      ...(input.genericName !== undefined ? { genericName: input.genericName } : {}),
+      ...(input.brandName !== undefined ? { brandName: input.brandName } : {}),
+      ...(input.description !== undefined ? { description: input.description } : {}),
+      ...(input.dosage !== undefined ? { dosage: input.dosage } : {}),
+      ...(input.pharmaceuticalForm !== undefined ? { pharmaceuticalForm: input.pharmaceuticalForm } : {}),
+      ...(input.categoryId ? { categoryId: input.categoryId } : {}),
+      ...(input.requiresPrescription !== undefined ? { requiresPrescription: input.requiresPrescription } : {}),
+      ...(input.active !== undefined ? { active: input.active } : {}),
+    },
+    include: productInclude,
+  });
+  const country = input.countryCode ? await requireCountry(input.countryCode) : null;
+  if (country && input.requiresPrescription !== undefined) {
+    await db.productCountry.updateMany({
+      where: { productId: id, countryId: country.id },
+      data: { requiresPrescription: input.requiresPrescription },
+    });
+  }
   return product;
+}
+
+export async function deactivateCatalogProduct(id: string) {
+  return updateCatalogProduct(id, { active: false });
 }
 
 export async function adminPatchProduct(id: string, data: Prisma.ProductUpdateInput) {
@@ -418,7 +571,13 @@ export async function adminUpsertProductCountry(input: {
   if (!product) throw new CatalogError(404, 'Produit introuvable.');
   const country = await db.country.findUnique({ where: { id: input.countryId } });
   if (!country) throw new CatalogError(400, 'countryId invalide.');
-  const status = (input.status || 'UNKNOWN') as 'PENDING' | 'ACTIVE' | 'RESTRICTED' | 'INACTIVE' | 'UNKNOWN';
+  const status = (input.status || 'PENDING_REVIEW') as
+    | 'PENDING'
+    | 'PENDING_REVIEW'
+    | 'ACTIVE'
+    | 'RESTRICTED'
+    | 'INACTIVE'
+    | 'UNKNOWN';
   const verified = Boolean(input.verified);
   return db.productCountry.upsert({
     where: { productId_countryId: { productId: product.id, countryId: country.id } },

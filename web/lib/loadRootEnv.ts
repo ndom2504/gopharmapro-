@@ -24,14 +24,19 @@ function parseEnvFile(file: string) {
 }
 
 function envCandidates() {
-  const files: string[] = [];
+  const roots = new Set<string>();
   let dir = process.cwd();
   for (let i = 0; i < 6; i++) {
-    files.push(path.join(dir, '.env'));
-    files.push(path.join(dir, '.env.local'));
+    roots.add(dir);
+    roots.add(path.join(dir, 'web'));
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;
+  }
+  const files: string[] = [];
+  for (const root of roots) {
+    files.push(path.join(root, '.env'));
+    files.push(path.join(root, '.env.local'));
   }
   return files;
 }
@@ -40,7 +45,10 @@ function envCandidates() {
 export function loadRootEnv() {
   const merged: Record<string, string> = {};
   for (const file of envCandidates()) {
-    Object.assign(merged, parseEnvFile(file));
+    const parsed = parseEnvFile(file);
+    for (const [key, value] of Object.entries(parsed)) {
+      if (value) merged[key] = value;
+    }
   }
   for (const key of ['ADMIN_EMAIL', 'ADMIN_PASSWORD', 'DATABASE_URL', 'CATALOG_API_SECRET']) {
     const value = merged[key];
