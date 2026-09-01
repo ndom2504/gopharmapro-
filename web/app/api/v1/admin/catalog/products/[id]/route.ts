@@ -26,6 +26,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ...(input.description !== undefined ? { description: input.description } : {}),
       ...(input.requiresPrescription !== undefined ? { requiresPrescription: input.requiresPrescription } : {}),
       ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
+      ...(input.imageAlt !== undefined ? { imageAlt: input.imageAlt } : {}),
       ...(input.active !== undefined ? { active: input.active } : {}),
     });
     return NextResponse.json({ ok: true, product });

@@ -10,7 +10,7 @@ import { cartCount, cartSubtotal } from '@/lib/cartMoney';
 
 const clientLinks = [
   { href: '/', label: 'Accueil' },
-  { href: '/produits', label: 'Rechercher' },
+  { href: '/dashboard/client', label: 'Rechercher' },
   { href: '/commandes', label: 'Commandes' },
   { href: '/compte', label: 'Profil' },
 ];

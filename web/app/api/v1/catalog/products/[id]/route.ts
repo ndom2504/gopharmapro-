@@ -35,6 +35,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       requiresPrescription: input.requiresPrescription,
       active: input.active,
       countryCode,
+      imageUrl: input.imageUrl,
+      imageAlt: input.imageAlt,
     });
     const country =
       countryCode?.toUpperCase() ||

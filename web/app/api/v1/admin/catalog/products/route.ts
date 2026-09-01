@@ -25,6 +25,7 @@ export async function POST(req: Request) {
       description: input.description,
       requiresPrescription: input.requiresPrescription,
       imageUrl: input.imageUrl,
+      imageAlt: input.imageAlt,
       active: input.active,
     });
     return NextResponse.json({ ok: true, product }, { status: 201 });

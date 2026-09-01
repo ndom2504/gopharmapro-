@@ -321,6 +321,64 @@ async function main() {
       },
     });
   }
+
+  const amoxCat = categoryIds['Antibiotiques'] || Object.values(categoryIds)[0];
+  if (amoxCat) {
+    const amox = await prisma.product.upsert({
+      where: { slug: 'amoxicilline-500-mg-gelule' },
+      update: { requiresPrescription: true, active: true },
+      create: {
+        slug: 'amoxicilline-500-mg-gelule',
+        name: 'Amoxicilline 500 mg gélule',
+        genericName: 'Amoxicilline',
+        dosage: '500',
+        dosageUnit: 'mg',
+        pharmaceuticalForm: 'Gélule',
+        categoryId: amoxCat,
+        requiresPrescription: true,
+        description: 'Antibiotique. Ordonnance requise. Aucun statut réglementaire n’est affirmé à la création.',
+        active: true,
+      },
+    });
+    await prisma.productCountry.upsert({
+      where: { productId_countryId: { productId: amox.id, countryId: gabon.id } },
+      update: { requiresPrescription: true, active: true },
+      create: {
+        productId: amox.id,
+        countryId: gabon.id,
+        status: ProductCountryStatus.PENDING_REVIEW,
+        requiresPrescription: true,
+        verified: false,
+        active: true,
+        regulatoryNote: 'Statut réglementaire : à vérifier.',
+      },
+    });
+    await prisma.pharmacyProduct.upsert({
+      where: { pharmacyId_productId: { pharmacyId: centre.id, productId: amox.id } },
+      update: {},
+      create: {
+        pharmacyId: centre.id,
+        productId: amox.id,
+        price: 4200,
+        currency: 'XAF',
+        stockQuantity: 8,
+        available: true,
+        deliveryAvailable: false,
+        pickupAvailable: true,
+      },
+    });
+  }
+
+  await prisma.customerProfile.upsert({
+    where: { accountId: 'c-awa' },
+    update: { city: 'Libreville', address: 'Centre-ville, Libreville' },
+    create: {
+      accountId: 'c-awa',
+      countryId: gabon.id,
+      city: 'Libreville',
+      address: 'Centre-ville, Libreville',
+    },
+  });
 }
 
 main()

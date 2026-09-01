@@ -28,6 +28,7 @@ model Country {
   categories       Category[]
   pharmacies       Pharmacy[]
   productCountries ProductCountry[]
+  customers        CustomerProfile[]
 
   @@index([code])
 }
@@ -66,11 +67,13 @@ model Product {
   description          String?
   requiresPrescription Boolean           @default(false)
   imageUrl             String?
+  imageAlt             String?
   active               Boolean           @default(true)
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   countryStatuses      ProductCountry[]
   pharmacyOffers       PharmacyProduct[]
+  prescriptionRequests PrescriptionRequest[]
 
   @@index([slug])
   @@index([name])
@@ -120,7 +123,8 @@ model Pharmacy {
   verified  Boolean           @default(false)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-  offers    PharmacyProduct[]
+  offers               PharmacyProduct[]
+  prescriptionRequests PrescriptionRequest[]
 
   @@index([countryId])
   @@index([city])
@@ -149,4 +153,51 @@ model PharmacyProduct {
   @@index([productId])
   @@index([pharmacyId])
   @@index([available])
+}
+
+enum PrescriptionStatus {
+  PENDING_PRESCRIPTION
+  PRESCRIPTION_SUBMITTED
+  PRESCRIPTION_APPROVED
+  PRESCRIPTION_REJECTED
+}
+
+model CustomerProfile {
+  id                   String                @id @default(cuid())
+  accountId            String                @unique
+  countryId            String
+  country              Country               @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  city                 String?
+  address              String?
+  latitude             Float?
+  longitude            Float?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  prescriptionRequests PrescriptionRequest[]
+
+  @@index([countryId])
+  @@index([city])
+}
+
+model PrescriptionRequest {
+  id           String             @id @default(cuid())
+  customerId   String
+  customer     CustomerProfile    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  pharmacyId   String
+  pharmacy     Pharmacy           @relation(fields: [pharmacyId], references: [id], onDelete: Restrict)
+  productId    String
+  product      Product            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity     Int                @default(1)
+  documentUrl  String?
+  status       PrescriptionStatus @default(PENDING_PRESCRIPTION)
+  note         String?
+  reviewedAt   DateTime?
+  reviewedBy   String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([customerId])
+  @@index([pharmacyId])
+  @@index([productId])
+  @@index([status])
 }

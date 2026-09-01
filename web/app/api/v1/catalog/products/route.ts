@@ -46,6 +46,8 @@ export async function POST(req: Request) {
       dosage: input.dosage,
       pharmaceuticalForm: input.pharmaceuticalForm,
       requiresPrescription: input.requiresPrescription,
+      imageUrl: input.imageUrl,
+      imageAlt: input.imageAlt || input.name,
     });
     return NextResponse.json(
       {

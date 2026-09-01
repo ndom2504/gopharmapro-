@@ -58,6 +58,8 @@ export function serializePharmacyOffer(offer: {
     dosageUnit: string | null;
     pharmaceuticalForm: string | null;
     requiresPrescription: boolean;
+    imageUrl?: string | null;
+    imageAlt?: string | null;
     category: { id: string; name: string };
   };
 }) {
@@ -66,6 +68,8 @@ export function serializePharmacyOffer(offer: {
     productId: offer.productId,
     name: offer.product.name,
     genericName: offer.product.genericName,
+    imageUrl: offer.product.imageUrl ?? null,
+    imageAlt: offer.product.imageAlt || offer.product.name,
     category: offer.product.category.name,
     categoryId: offer.product.category.id,
     dosage: offer.product.dosage,

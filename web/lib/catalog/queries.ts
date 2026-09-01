@@ -50,6 +50,7 @@ export function serializeProduct(product: ProductRow, countryCode: string): Publ
     packaging: product.packaging,
     description: product.description,
     imageUrl: product.imageUrl,
+    imageAlt: product.imageAlt,
     category: {
       id: product.category.id,
       name: product.category.name,
@@ -402,6 +403,7 @@ export async function adminCreateProduct(input: {
   description?: string | null;
   requiresPrescription?: boolean;
   imageUrl?: string | null;
+  imageAlt?: string | null;
   active?: boolean;
 }) {
   const db = catalogDb();
@@ -423,6 +425,7 @@ export async function adminCreateProduct(input: {
       description: input.description,
       requiresPrescription: input.requiresPrescription ?? false,
       imageUrl: input.imageUrl,
+      imageAlt: input.imageAlt || input.name,
       active: input.active ?? true,
     },
   });
@@ -450,6 +453,8 @@ export async function createCatalogProduct(input: {
   dosage?: string | null;
   pharmaceuticalForm?: string | null;
   requiresPrescription?: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 }) {
   const db = catalogDb();
   const country = await requireCountry(input.countryCode);
@@ -482,6 +487,12 @@ export async function createCatalogProduct(input: {
         regulatoryNote: 'Statut réglementaire : à vérifier. La création n’autorise pas le produit.',
       },
     });
+    if (input.imageUrl) {
+      await db.product.update({
+        where: { id: existingGlobal.id },
+        data: { imageUrl: input.imageUrl, imageAlt: input.imageAlt || existingGlobal.name },
+      });
+    }
     return db.product.findUniqueOrThrow({ where: { id: existingGlobal.id }, include: productInclude });
   }
 
@@ -496,6 +507,8 @@ export async function createCatalogProduct(input: {
     dosage: input.dosage,
     pharmaceuticalForm: input.pharmaceuticalForm,
     requiresPrescription: input.requiresPrescription,
+    imageUrl: input.imageUrl,
+    imageAlt: input.imageAlt || input.name,
   });
 }
 
@@ -512,6 +525,8 @@ export async function updateCatalogProduct(
     requiresPrescription?: boolean;
     active?: boolean;
     countryCode?: string;
+    imageUrl?: string | null;
+    imageAlt?: string | null;
   },
 ) {
   const db = catalogDb();
@@ -533,6 +548,8 @@ export async function updateCatalogProduct(
       ...(input.categoryId ? { categoryId: input.categoryId } : {}),
       ...(input.requiresPrescription !== undefined ? { requiresPrescription: input.requiresPrescription } : {}),
       ...(input.active !== undefined ? { active: input.active } : {}),
+      ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
+      ...(input.imageAlt !== undefined ? { imageAlt: input.imageAlt } : {}),
     },
     include: productInclude,
   });

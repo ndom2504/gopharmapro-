@@ -62,6 +62,7 @@ export type PublicProduct = {
   packaging: string | null;
   description: string | null;
   imageUrl: string | null;
+  imageAlt: string | null;
   category: PublicCategory;
   country: { id: string; code: string; name: string };
   countryCode: string;

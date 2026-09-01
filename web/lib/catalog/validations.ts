@@ -135,7 +135,8 @@ export function assertProductInput(body: Record<string, unknown>, partial = fals
       body.requiresPrescription == null && body.prescriptionRequired == null
         ? undefined
         : Boolean(body.requiresPrescription ?? body.prescriptionRequired),
-    imageUrl: body.imageUrl == null ? undefined : String(body.imageUrl).trim() || null,
+    imageUrl: body.imageUrl === undefined ? undefined : body.imageUrl == null ? null : String(body.imageUrl).trim() || null,
+    imageAlt: body.imageAlt === undefined ? undefined : body.imageAlt == null ? null : String(body.imageAlt).trim() || null,
     active: body.active == null ? undefined : Boolean(body.active),
   };
 }

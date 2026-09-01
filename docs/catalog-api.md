@@ -17,6 +17,22 @@ Dans `web/` (chargé aussi depuis le `.env` racine via `next.config.ts`) :
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 CATALOG_API_SECRET=  # optionnel, sinon ADMIN_PASSWORD sert à signer le cookie pharmacie
+BLOB_READ_WRITE_TOKEN=  # Vercel Blob — token lecture/écriture, jamais exposé au frontend
+```
+
+`BLOB_READ_WRITE_TOKEN` n’est **pas encore présent** dans les `.env` locaux. À ajouter dans `web/.env.local` et dans les variables Vercel (projet `web`). Sans ce token, l’upload d’image répond `503` ; la création de produit sans image reste possible.
+
+### POST `/api/v1/admin/catalog/products/upload-image` (admin)
+
+`multipart/form-data` champ `file`.
+
+- Formats : `image/jpeg`, `image/png`, `image/webp`
+- Taille max : 5 Mo
+- Cookie `gpp_admin` obligatoire
+- Stockage : Vercel Blob (public). Prisma ne conserve que `Product.imageUrl` (+ `imageAlt`)
+
+```json
+{ "ok": true, "url": "https://xxxxx.public.blob.vercel-storage.com/catalog/products/..." }
 ```
 
 Commandes (dossier `web/`) :
@@ -156,6 +172,16 @@ Exemple statut pays :
   "verified": false
 }
 ```
+
+## Parcours client
+
+- `GET /api/v1/client/products/search?country=GA&search=paracetamol`
+- `GET /api/v1/client/cities?country=GA`
+- `GET /api/v1/client/offers/[pharmacyId]/[productId]`
+- `POST /api/v1/client/session`
+- `POST /api/v1/prescriptions` · `GET` · `POST .../submit` · `POST .../approve` · `POST .../reject`
+
+Recherche : pharmacies actives **et vérifiées**, offres disponibles avec stock, produit actif dans le pays. Distance Haversine si `latitude`/`longitude` (jamais stockés depuis le GPS).
 
 ## Ordonnances
 

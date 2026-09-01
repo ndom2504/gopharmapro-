@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RoleSubnav, pharmacyNav } from '@/components/RoleSubnav';
 import { useShop } from '@/components/ShopProvider';
 import { isPharmacy } from '@/lib/accounts';
+import { CatalogProductImage } from '@/components/CatalogProductImage';
 
 type PharmacySession = {
   id: string;
@@ -27,6 +28,8 @@ type Offer = {
   deliveryAvailable: boolean;
   pickupAvailable: boolean;
   requiresPrescription: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 };
 
 type CatalogHit = {
@@ -39,6 +42,8 @@ type CatalogHit = {
   requiresPrescription: boolean;
   prescriptionRequired?: boolean;
   regulatoryLabel?: string;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 };
 
 export function PharmacyCatalog() {
@@ -225,7 +230,9 @@ export function PharmacyCatalog() {
           </div>
           <div className="space-y-3">
             {hits.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-border p-4">
+              <div key={p.id} className="flex items-start gap-3 rounded-2xl border border-border p-4">
+                <CatalogProductImage src={p.imageUrl} alt={p.imageAlt || p.name} size="thumb" />
+                <div className="min-w-0 flex-1">
                 <p className="font-extrabold text-ink">{p.name}</p>
                 <p className="text-sm text-muted">
                   {p.category.name}
@@ -247,8 +254,9 @@ export function PharmacyCatalog() {
                     setPickup(true);
                   }}
                 >
-                  Ajouter
+                  Ajouter à ma pharmacie
                 </button>
+                </div>
               </div>
             ))}
           </div>
@@ -309,8 +317,13 @@ export function PharmacyCatalog() {
             {offers.map((o) => (
               <tr key={o.id} className="border-t border-border align-top">
                 <td className="px-3 py-3">
-                  <p className="font-extrabold text-ink">{o.name}</p>
-                  {o.requiresPrescription ? <p className="text-xs font-bold text-brand-dark">Ordonnance possible</p> : null}
+                  <div className="flex items-start gap-2">
+                    <CatalogProductImage src={o.imageUrl} alt={o.imageAlt || o.name} size="thumb" />
+                    <div>
+                      <p className="font-extrabold text-ink">{o.name}</p>
+                      {o.requiresPrescription ? <p className="text-xs font-bold text-brand-dark">Ordonnance possible</p> : null}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-3 py-3 text-muted">{o.category}</td>
                 <td className="px-3 py-3 text-muted">{o.dosage || '—'}</td>

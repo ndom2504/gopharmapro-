@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CatalogProductImage } from '@/components/CatalogProductImage';
 
 type Country = { id: string; code: string; name: string };
 type Category = { id: string; name: string; slug: string };
@@ -20,6 +21,8 @@ type Product = {
   countryCode: string;
   regulatory: { status: string; label: string };
   regulatoryLabel: string;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
 };
 
 const FALLBACK_COUNTRIES: Country[] = [
@@ -45,6 +48,11 @@ export function CatalogueAdmin({ countries: initialCountries = [] }: { countries
   const [categoryId, setCategoryId] = useState('');
   const [rx, setRx] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [createFile, setCreateFile] = useState<File | null>(null);
+  const [createPreview, setCreatePreview] = useState('');
+  const [editFile, setEditFile] = useState<File | null>(null);
+  const [editPreview, setEditPreview] = useState('');
+  const [removeImage, setRemoveImage] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(q.trim()), 300);
@@ -115,47 +123,84 @@ export function CatalogueAdmin({ countries: initialCountries = [] }: { countries
     return false;
   };
 
+  const uploadImage = async (file: File) => {
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      throw new Error('Format d’image non accepté. Utilisez JPEG, PNG ou WEBP.');
+    }
+    if (file.size > 5 * 1024 * 1024) throw new Error('L’image dépasse 5 Mo.');
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/v1/admin/catalog/products/upload-image', { method: 'POST', body: fd });
+    const data = (await res.json()) as { url?: string; error?: string };
+    if (!res.ok || !data.url) throw new Error(data.error || 'Upload impossible.');
+    return data.url;
+  };
+
   const create = async () => {
-    const ok = await request(
-      '/api/v1/catalog/products',
-      'POST',
-      {
-        country,
-        name,
-        categoryId,
-        genericName: genericName || null,
-        dosage: dosage || null,
-        pharmaceuticalForm: form || null,
-        prescriptionRequired: rx,
-      },
-      'Statut réglementaire : À vérifier',
-    );
-    if (ok) {
-      setName('');
-      setGenericName('');
-      setDosage('');
-      setForm('');
-      setRx(false);
+    setBusy('…');
+    try {
+      const imageUrl = createFile ? await uploadImage(createFile) : undefined;
+      const ok = await request(
+        '/api/v1/catalog/products',
+        'POST',
+        {
+          country,
+          name,
+          categoryId,
+          genericName: genericName || null,
+          dosage: dosage || null,
+          pharmaceuticalForm: form || null,
+          prescriptionRequired: rx,
+          imageUrl: imageUrl || null,
+          imageAlt: name,
+        },
+        'Statut réglementaire : À vérifier',
+      );
+      if (ok) {
+        setName('');
+        setGenericName('');
+        setDosage('');
+        setForm('');
+        setRx(false);
+        setCreateFile(null);
+        setCreatePreview('');
+      }
+    } catch (err) {
+      setBusy(err instanceof Error ? err.message : 'Erreur');
     }
   };
 
   const saveEdit = async () => {
     if (!editing) return;
-    const ok = await request(
-      `/api/v1/catalog/products/${editing.id}`,
-      'PUT',
-      {
-        country,
-        name: editing.name,
-        genericName: editing.genericName,
-        dosage: editing.dosage,
-        pharmaceuticalForm: editing.pharmaceuticalForm,
-        categoryId: editing.category.id,
-        prescriptionRequired: editing.requiresPrescription,
-      },
-      'Produit mis à jour',
-    );
-    if (ok) setEditing(null);
+    setBusy('…');
+    try {
+      let imageUrl: string | null | undefined = undefined;
+      if (removeImage) imageUrl = null;
+      else if (editFile) imageUrl = await uploadImage(editFile);
+      const ok = await request(
+        `/api/v1/catalog/products/${editing.id}`,
+        'PUT',
+        {
+          country,
+          name: editing.name,
+          genericName: editing.genericName,
+          dosage: editing.dosage,
+          pharmaceuticalForm: editing.pharmaceuticalForm,
+          categoryId: editing.category.id,
+          prescriptionRequired: editing.requiresPrescription,
+          ...(imageUrl !== undefined ? { imageUrl, imageAlt: editing.name } : {}),
+        },
+        'Produit mis à jour',
+      );
+      if (ok) {
+        setEditing(null);
+        setEditFile(null);
+        setEditPreview('');
+        setRemoveImage(false);
+      }
+    } catch (err) {
+      setBusy(err instanceof Error ? err.message : 'Erreur');
+    }
   };
 
   return (
@@ -190,6 +235,43 @@ export function CatalogueAdmin({ countries: initialCountries = [] }: { countries
           <input className="h-12 rounded-2xl border border-border px-4 font-semibold" placeholder="Nom générique" value={genericName} onChange={(e) => setGenericName(e.target.value)} />
           <input className="h-12 rounded-2xl border border-border px-4 font-semibold" placeholder="Dosage" value={dosage} onChange={(e) => setDosage(e.target.value)} />
           <input className="h-12 rounded-2xl border border-border px-4 font-semibold sm:col-span-2" placeholder="Forme" value={form} onChange={(e) => setForm(e.target.value)} />
+        </div>
+        <div className="mt-4">
+          <p className="text-sm font-extrabold text-ink">Image du produit</p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            {createPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={createPreview} alt={name || 'Aperçu'} className="h-20 w-20 rounded-2xl bg-[#F3F7F4] object-contain p-1" />
+            ) : (
+              <CatalogProductImage alt={name || 'Produit'} size="thumb" />
+            )}
+            <label className="btn-secondary !h-10 cursor-pointer text-sm">
+              {createPreview ? 'Remplacer' : 'Choisir une image'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setCreateFile(file);
+                  setCreatePreview(URL.createObjectURL(file));
+                }}
+              />
+            </label>
+            {createPreview ? (
+              <button
+                type="button"
+                className="text-sm font-extrabold text-danger"
+                onClick={() => {
+                  setCreateFile(null);
+                  setCreatePreview('');
+                }}
+              >
+                Supprimer
+              </button>
+            ) : null}
+          </div>
         </div>
         <label className="mt-3 flex items-center gap-2 text-sm font-bold">
           <input type="checkbox" checked={rx} onChange={(e) => setRx(e.target.checked)} />
@@ -248,6 +330,45 @@ export function CatalogueAdmin({ countries: initialCountries = [] }: { countries
                   <input className="h-11 rounded-2xl border border-border px-3 font-semibold" placeholder="Nom générique" value={editing.genericName || ''} onChange={(e) => setEditing({ ...editing, genericName: e.target.value })} />
                   <input className="h-11 rounded-2xl border border-border px-3 font-semibold" placeholder="Dosage" value={editing.dosage || ''} onChange={(e) => setEditing({ ...editing, dosage: e.target.value })} />
                   <input className="h-11 rounded-2xl border border-border px-3 font-semibold sm:col-span-2" placeholder="Forme" value={editing.pharmaceuticalForm || ''} onChange={(e) => setEditing({ ...editing, pharmaceuticalForm: e.target.value })} />
+                  <div className="sm:col-span-2">
+                    <p className="text-sm font-extrabold">Image du produit</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-3">
+                      {removeImage ? (
+                        <CatalogProductImage alt={editing.name} size="thumb" />
+                      ) : editPreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={editPreview} alt={editing.name} className="h-20 w-20 rounded-2xl bg-[#F3F7F4] object-contain p-1" />
+                      ) : (
+                        <CatalogProductImage src={editing.imageUrl} alt={editing.imageAlt || editing.name} size="thumb" />
+                      )}
+                      <label className="btn-secondary !h-10 cursor-pointer text-sm">
+                        Remplacer
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setEditFile(file);
+                            setEditPreview(URL.createObjectURL(file));
+                            setRemoveImage(false);
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="text-sm font-extrabold text-danger"
+                        onClick={() => {
+                          setEditFile(null);
+                          setEditPreview('');
+                          setRemoveImage(true);
+                        }}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
                   <label className="flex items-center gap-2 text-sm font-bold">
                     <input type="checkbox" checked={editing.requiresPrescription} onChange={(e) => setEditing({ ...editing, requiresPrescription: e.target.checked })} />
                     Ordonnance possible
@@ -263,7 +384,9 @@ export function CatalogueAdmin({ countries: initialCountries = [] }: { countries
                 </div>
               ) : (
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
+                  <div className="flex min-w-0 items-start gap-3">
+                    <CatalogProductImage src={p.imageUrl} alt={p.imageAlt || p.name} size="thumb" />
+                    <div>
                     <p className="font-extrabold text-ink">{p.name}</p>
                     <p className="text-sm text-muted">
                       {p.genericName || '—'} · {p.category.name} · {p.dosage || '—'} · {p.pharmaceuticalForm || '—'}
@@ -273,9 +396,19 @@ export function CatalogueAdmin({ countries: initialCountries = [] }: { countries
                       réglementaire : {p.regulatoryLabel || p.regulatory?.label || 'À vérifier'} · Pays :{' '}
                       {p.country?.name || p.countryCode} · {p.active ? 'Actif' : 'Inactif'}
                     </p>
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" className="btn-secondary !h-10 text-sm" onClick={() => setEditing(p)}>
+                    <button
+                      type="button"
+                      className="btn-secondary !h-10 text-sm"
+                      onClick={() => {
+                        setEditing(p);
+                        setEditFile(null);
+                        setEditPreview('');
+                        setRemoveImage(false);
+                      }}
+                    >
                       Modifier
                     </button>
                     <button

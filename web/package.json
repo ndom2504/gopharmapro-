@@ -13,13 +13,16 @@
     "db:seed": "prisma db seed",
     "catalog:check": "tsx scripts/catalog-check.ts",
     "catalog:central": "tsx scripts/catalog-central-check.ts",
-    "catalog:pharmacy": "tsx scripts/pharmacy-module-check.ts"
+    "catalog:pharmacy": "tsx scripts/pharmacy-module-check.ts",
+    "catalog:client": "tsx scripts/client-journey-check.ts",
+    "catalog:images": "tsx scripts/catalog-image-check.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
+    "@vercel/blob": "^2.8.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
